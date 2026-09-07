@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: becas_postgres_local
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password_2026!
+      POSTGRES_DB: becas_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d becas_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: becas_mailpit_local
+    restart: always
+    ports:
+      - "1025:1025"   # Puerto SMTP
+      - "8025:8025"   # Interfaz Web UI (http://localhost:8025)
+
+volumes:
+  postgres_data:
