@@ -6,11 +6,11 @@
 ---
 
 ## 👥 Equipo del Proyecto (Sprint 1)
-* **Erick Chuquiej** — *Product Owner / Coordinador Funcional*
-* **Walter Celada** — *Arquitecto de Software / Backend Lead*
-* **Raúl Álvarez** — *Administrador de Base de Datos (DBA) / Backend Lead*
-* **Daniel Ericastilla** — *Ingeniero Frontend / UI-UX Lead*
-* **Javier Alvizures** — *Ingeniero de QA y DevOps Lead*
+* **Raúl Álvarez** 
+* **Erick Chuquiej** 
+* **Walter Celada**
+* **Daniel Ericastilla** 
+* **Javier Alvizures** 
 
 ---
 
