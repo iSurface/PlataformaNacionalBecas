@@ -37,3 +37,16 @@ override.tf.json
 # IDEs
 .vscode/
 .idea/
+
+# AWS Infrastructure & Deployment
+aws_infrastructure/
+
+# Jira integration scripts & CSV exports
+*jira*.py
+*jira*.csv
+
+# Sprints futuros fuera del alcance actual (Sprints 2-5)
+user stories and interviews/Sprint 2/
+user stories and interviews/Sprint 3/
+user stories and interviews/Sprint 4/
+user stories and interviews/Sprint 5/

@@ -125,11 +125,66 @@ def seed_initial_data():
             ("TALENTO_DEPORTIVO_ARTISTICO", "Beca por Talento Deportivo y Artístico", "Reconocimiento a atletas y artistas destacados"),
             ("INCLUSION_DISCAPACIDAD", "Beca de Inclusión para Personas con Discapacidad", "Apoyo adaptado para estudiantes con necesidades especiales")
         ]
+        tipos_map = {}
         for code, name, desc in tipos_beca_data:
             stype = db.query(ScholarshipType).filter(ScholarshipType.codigo == code).first()
             if not stype:
                 stype = ScholarshipType(codigo=code, nombre=name, descripcion=desc)
                 db.add(stype)
+                db.flush()
+            tipos_map[code] = stype
+
+        # 7. Convocatorias Iniciales del MINEDUC (Sprint 2 - HU-002, HU-004)
+        from app.infrastructure.models.scholarship import ScholarshipCall, CallRequirement
+        from datetime import datetime, timezone, timedelta
+
+        call_medio = db.query(ScholarshipCall).filter(ScholarshipCall.codigo == "BEC-2026-MEDIO-01").first()
+        if not call_medio:
+            lvl_div = db.query(EducationLevel).filter(EducationLevel.codigo == "DIVERSIFICADO").first()
+            now = datetime.now(timezone.utc)
+            call_medio = ScholarshipCall(
+                codigo="BEC-2026-MEDIO-01",
+                titulo="Beca Nacional al Mérito Académico - Nivel Diversificado 2026",
+                descripcion="Programa ministerial de estímulo económico mensual para estudiantes sobresalientes de ciclo diversificado en todo el territorio nacional.",
+                tipo_beca_id=tipos_map["EXCELENCIA_ACADEMICA"].id,
+                nivel_educativo_id=lvl_div.id if lvl_div else list(tipos_map.values())[0].id,
+                departamento_id=None, # Cobertura Nacional
+                cupos_disponibles=500,
+                presupuesto_total=4500000.00,
+                monto_individual=1000.00,
+                promedio_minimo_requerido=85.0,
+                fecha_inicio=now - timedelta(days=5),
+                fecha_cierre=now + timedelta(days=45),
+                estado="PUBLICADA",
+                bases_url="https://becas.mineduc.gob.gt/bases/bases_convocatoria_medio_2026.pdf",
+                cronograma_detalle={
+                    "apertura_solicitudes": (now - timedelta(days=5)).strftime("%Y-%m-%d"),
+                    "cierre_solicitudes": (now + timedelta(days=45)).strftime("%Y-%m-%d"),
+                    "periodo_evaluacion": (now + timedelta(days=50)).strftime("%Y-%m-%d"),
+                    "publicacion_resultados": (now + timedelta(days=65)).strftime("%Y-%m-%d")
+                },
+                creado_por_id=admin_user.id
+            )
+            db.add(call_medio)
+            db.flush()
+
+            # Requisitos oficiales
+            reqs = [
+                ("Certificado Oficial de Calificaciones del Ciclo Anterior", "Emitido por la dirección del centro educativo con sello oficial", True, "PDF", 5, 1),
+                ("Certificado de Nacimiento (RENAP) o Fotocopia de DPI", "Documento de identificación vigente y legible", True, "PDF", 5, 2),
+                ("Carta de Buena Conducta y Recomendación Docente", "Firmada por docente o director del establecimiento", False, "PDF", 3, 3)
+            ]
+            for nom, desc, oblig, tipo, peso, orden in reqs:
+                db.add(CallRequirement(
+                    convocatoria_id=call_medio.id,
+                    nombre=nom,
+                    descripcion=desc,
+                    es_obligatorio=oblig,
+                    tipo_documento=tipo,
+                    peso_maximo_mb=peso,
+                    orden=orden
+                ))
+            print(" -> Convocatoria Nivel Diversificado sembrada exitosamente")
 
         db.commit()
         print("¡Siembra de datos iniciales en PostgreSQL completada al 100%!")

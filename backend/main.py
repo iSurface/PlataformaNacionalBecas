@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router
 from app.infrastructure.models.user import Base
+from app.infrastructure.models import catalog, student_profile, scholarship
 from app.core.database import engine
 
 # Crear tablas si no existen (en caso de despliegue directo en nube)
@@ -14,7 +15,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    description="API RESTful de la Plataforma Nacional de Becas (MINEDUC Guatemala) - Sprint 1"
+    description="API RESTful de la Plataforma Nacional de Becas (MINEDUC Guatemala) - Sprints 1 & 2"
 )
 
 app.add_middleware(
