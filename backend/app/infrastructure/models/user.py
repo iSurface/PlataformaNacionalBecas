@@ -29,7 +29,8 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     cui = Column(String(13), unique=True, nullable=False, index=True)
     email = Column(String(120), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
+    google_id = Column(String(100), unique=True, nullable=True, index=True)
+    password_hash = Column(String(255), nullable=True)
     estado = Column(String(30), nullable=False, default="PENDIENTE_ACTIVACION", index=True)  # PENDIENTE_ACTIVACION, ACTIVO, BLOQUEADO_TEMPORAL, INACTIVO
     intentos_fallidos = Column(Integer, default=0, nullable=False)
     bloqueado_hasta = Column(DateTime(timezone=True), nullable=True)

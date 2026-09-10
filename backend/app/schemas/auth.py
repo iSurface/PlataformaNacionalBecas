@@ -59,3 +59,36 @@ class GenericResponse(BaseModel):
     success: bool
     message: str
     data: Optional[dict] = None
+
+# ==========================================
+# ESQUEMAS GOOGLE OAUTH 2.0 (HU-001)
+# ==========================================
+class GoogleLoginResponse(BaseModel):
+    authorization_url: str
+
+class GoogleCallbackResponse(BaseModel):
+    is_new_user: bool
+    message: str
+    # Si is_new_user == False, sesión iniciada de inmediato:
+    session: Optional[TokenResponse] = None
+    # Si is_new_user == True, debe completar CUI y parámetros obligatorios:
+    registration_token: Optional[str] = None
+    email: Optional[EmailStr] = None
+    primer_nombre: Optional[str] = None
+    primer_apellido: Optional[str] = None
+
+class GoogleCompleteRegistrationRequest(BaseModel):
+    registration_token: str = Field(..., description="Token seguro temporal firmado devuelto en el callback")
+    cui: str = Field(..., description="Código Único de Identificación (13 dígitos numéricos)")
+    primer_nombre: str = Field(..., min_length=2, max_length=60)
+    segundo_nombre: Optional[str] = Field(None, max_length=60)
+    primer_apellido: str = Field(..., min_length=2, max_length=60)
+    segundo_apellido: Optional[str] = Field(None, max_length=60)
+    telefono: Optional[str] = Field(None, max_length=20)
+
+    @field_validator("cui")
+    def validate_cui_field(cls, v: str) -> str:
+        v_clean = v.strip()
+        if not validate_cui(v_clean):
+            raise ValueError("El CUI ingresado no es válido (debe tener 13 dígitos y verificar algoritmo módulo 11).")
+        return v_clean

@@ -31,7 +31,15 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.on_event("startup")
 def startup_db_init():
-    """Inicializa esquemas y siembra datos iniciales automáticamente en PostgreSQL de AWS al arrancar"""
+    """Inicializa esquemas, aplica migraciones DDL y siembra datos iniciales automáticamente"""
+    try:
+        from sqlalchemy import text
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS google_id VARCHAR(100) UNIQUE;"))
+            conn.execute(text("ALTER TABLE usuarios ALTER COLUMN password_hash DROP NOT NULL;"))
+    except Exception as ex:
+        print(f"[STARTUP DDL MIGRATION] {ex}")
+
     try:
         from app.infrastructure.seeders import seed_initial_data
         seed_initial_data()

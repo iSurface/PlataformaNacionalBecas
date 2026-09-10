@@ -1,9 +1,16 @@
-# -*- coding: utf-8 -*-
+from typing import Optional
+from urllib.parse import urlencode
+import httpx
+import jwt
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.infrastructure.models.user import User, Person, Role, SecurityToken
-from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, ResetPasswordRequest
+from app.infrastructure.models.student_profile import StudentProfile
+from app.schemas.auth import (
+    RegisterRequest, LoginRequest, TokenResponse, ResetPasswordRequest,
+    GoogleLoginResponse, GoogleCallbackResponse, GoogleCompleteRegistrationRequest
+)
 from app.core.security import get_password_hash, verify_password, create_access_token, generate_random_token
 from app.services.email_service import EmailService
 from app.core.config import settings
@@ -293,3 +300,265 @@ class AuthService:
             "success": True,
             "message": "Contraseña restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña."
         }
+
+    # ==========================================================
+    # GOOGLE OAUTH 2.0 (HU-001)
+    # ==========================================================
+    @staticmethod
+    def get_google_auth_url(redirect_uri: Optional[str] = None) -> str:
+        """Genera la URL de autorización para el flujo Google OAuth 2.0."""
+        if not settings.GOOGLE_CLIENT_ID:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Google OAuth no está configurado en el servidor (falta GOOGLE_CLIENT_ID)."
+            )
+        target_redirect = redirect_uri or settings.GOOGLE_REDIRECT_URI
+        params = {
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "redirect_uri": target_redirect,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "access_type": "offline",
+            "prompt": "select_account"
+        }
+        return f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+
+    @staticmethod
+    def handle_google_callback(db: Session, code: str, redirect_uri: Optional[str] = None) -> GoogleCallbackResponse:
+        """
+        HU-001: Procesa el código devuelto por Google.
+        - Si el usuario ya existe: Inicia sesión directamente y emite el JWT de sesión.
+        - Si es nuevo: Retorna registration_token y datos para que complete CUI y parámetros obligatorios.
+        """
+        if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Credenciales de Google OAuth no configuradas en el servidor."
+            )
+
+        target_redirect = redirect_uri or settings.GOOGLE_REDIRECT_URI
+
+        # 1. Intercambiar code por tokens de Google
+        token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": target_redirect,
+            "grant_type": "authorization_code"
+        }
+
+        try:
+            with httpx.Client(timeout=12.0) as client:
+                token_resp = client.post(token_url, data=token_data)
+                if token_resp.status_code != 200:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Error validando código con Google: {token_resp.text}"
+                    )
+                tokens = token_resp.json()
+                google_access_token = tokens.get("access_token")
+
+                # 2. Consultar perfil en Google UserInfo
+                userinfo_resp = client.get(
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    headers={"Authorization": f"Bearer {google_access_token}"}
+                )
+                if userinfo_resp.status_code != 200:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="No se pudo obtener la información del perfil desde Google."
+                    )
+                google_user = userinfo_resp.json()
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Fallo de conexión con servidores de Google: {str(e)}"
+            )
+
+        google_id = google_user.get("id")
+        email = google_user.get("email")
+        given_name = google_user.get("given_name") or google_user.get("name", "Usuario")
+        family_name = google_user.get("family_name") or ""
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La cuenta de Google no proporcionó una dirección de correo electrónico válida."
+            )
+
+        # 3. Buscar si el usuario ya existe en el sistema
+        existing_user = db.query(User).filter(
+            (User.google_id == google_id) | (User.email == email)
+        ).first()
+
+        if existing_user:
+            # Enlazar google_id si aún no estaba asociado
+            if not existing_user.google_id:
+                existing_user.google_id = google_id
+            if existing_user.estado == "PENDIENTE_ACTIVACION":
+                existing_user.estado = "ACTIVO"
+
+            existing_user.ultimo_acceso = datetime.now(timezone.utc)
+            existing_user.intentos_fallidos = 0
+            db.commit()
+
+            # Emitir sesión JWT oficial
+            persona = existing_user.persona
+            roles_list = [r.codigo for r in existing_user.roles if r.es_activo]
+            token_payload = {
+                "sub": str(existing_user.id),
+                "cui": existing_user.cui,
+                "email": existing_user.email,
+                "roles": roles_list
+            }
+            access_token = create_access_token(
+                token_payload,
+                expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            )
+
+            session = TokenResponse(
+                access_token=access_token,
+                token_type="bearer",
+                expires_in_seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                user_id=existing_user.id,
+                cui=existing_user.cui,
+                email=existing_user.email,
+                nombre_completo=persona.nombre_completo if persona else existing_user.email,
+                roles=roles_list
+            )
+
+            return GoogleCallbackResponse(
+                is_new_user=False,
+                message="Sesión iniciada exitosamente con Google.",
+                session=session
+            )
+
+        # 4. Es un nuevo postulante: Generar token seguro temporal para completar registro
+        now = datetime.now(timezone.utc)
+        reg_payload = {
+            "sub": "google_registration",
+            "google_id": str(google_id),
+            "email": email,
+            "given_name": given_name,
+            "family_name": family_name,
+            "exp": int((now + timedelta(minutes=15)).timestamp())
+        }
+        reg_token = jwt.encode(reg_payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+
+        return GoogleCallbackResponse(
+            is_new_user=True,
+            message="Autenticación con Google exitosa. Por favor completa tu CUI y datos obligatorios para finalizar tu registro.",
+            registration_token=reg_token,
+            email=email,
+            primer_nombre=given_name,
+            primer_apellido=family_name
+        )
+
+    @staticmethod
+    def complete_google_registration(db: Session, req: GoogleCompleteRegistrationRequest) -> TokenResponse:
+        """
+        HU-001: Completa el registro de un postulante autenticado con Google
+        guardando su CUI obligatorio y datos personales verificados.
+        """
+        # 1. Decodificar y validar el registration_token
+        try:
+            payload = jwt.decode(
+                req.registration_token,
+                settings.JWT_SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM]
+            )
+            if payload.get("sub") != "google_registration":
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token de registro no válido.")
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El token de registro ha expirado (vigencia de 15 minutos). Vuelve a iniciar sesión con Google."
+            )
+        except jwt.PyJWTError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token de registro alterado o inválido.")
+
+        google_id = payload.get("google_id")
+        email = payload.get("email")
+
+        if not google_id or not email:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Información de Google incompleta en el token.")
+
+        # 2. Validar que CUI o Email no existan previamente
+        existing_cui = db.query(User).filter(User.cui == req.cui).first()
+        if existing_cui:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="El CUI ingresado ya se encuentra registrado en el sistema."
+            )
+
+        existing_email = db.query(User).filter(User.email == email).first()
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="El correo electrónico de Google ya está vinculado a otra cuenta."
+            )
+
+        # 3. Obtener rol POSTULANTE por defecto
+        postulante_role = db.query(Role).filter(Role.codigo == "POSTULANTE").first()
+        if not postulante_role:
+            postulante_role = Role(
+                codigo="POSTULANTE",
+                nombre="Postulante / Aspirante a Beca",
+                descripcion="Usuario ciudadano con capacidad para postular a convocatorias"
+            )
+            db.add(postulante_role)
+            db.flush()
+
+        # 4. Crear Usuario y Persona
+        new_user = User(
+            cui=req.cui,
+            email=email,
+            google_id=google_id,
+            password_hash=None, # Autenticación federada vía Google
+            estado="ACTIVO",    # Correo previamente verificado por Google
+            roles=[postulante_role]
+        )
+        db.add(new_user)
+        db.flush()
+
+        new_person = Person(
+            usuario_id=new_user.id,
+            primer_nombre=req.primer_nombre,
+            segundo_nombre=req.segundo_nombre,
+            primer_apellido=req.primer_apellido,
+            segundo_apellido=req.segundo_apellido,
+            telefono=req.telefono
+        )
+        db.add(new_person)
+
+        # 5. Inicializar ficha socioeconómica (StudentProfile)
+        student_profile = StudentProfile(usuario_id=new_user.id)
+        db.add(student_profile)
+
+        db.commit()
+        db.refresh(new_user)
+
+        # 6. Emitir JWT de sesión activa
+        roles_list = [r.codigo for r in new_user.roles if r.es_activo]
+        token_payload = {
+            "sub": str(new_user.id),
+            "cui": new_user.cui,
+            "email": new_user.email,
+            "roles": roles_list
+        }
+        access_token = create_access_token(
+            token_payload,
+            expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in_seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            user_id=new_user.id,
+            cui=new_user.cui,
+            email=new_user.email,
+            nombre_completo=new_person.nombre_completo,
+            roles=roles_list
+        )

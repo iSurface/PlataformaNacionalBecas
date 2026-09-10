@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: str = "no-reply@becas.mineduc.gob.gt"
     EMAILS_FROM_NAME: str = "Sistema Nacional de Becas MINEDUC"
 
+    # Google OAuth 2.0 (HU-001)
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
+
     class Config:
         case_sensitive = True
         env_file = ".env"
