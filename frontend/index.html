@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MINEDUC Becas - Inicio de Sesión y Registro</title>
+  <style>
+    :root {
+      --bg-space: #0b132b;
+      --bg-card: rgba(20, 32, 65, 0.85);
+      --bg-input: #101c3d;
+      --border-color: #273e74;
+      --accent-blue: #1d72fe;
+      --accent-hover: #155bd5;
+      --accent-orange: #ff7b54;
+      --text-main: #ffffff;
+      --text-muted: #8ca2d1;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    /* Fondo espacial con estrellas y órbitas */
+    .space-background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(circle at 80% 20%, #172a5a 0%, #0b132b 65%, #050a17 100%);
+      pointer-events: none;
+    }
+
+    .orbit-line {
+      position: absolute;
+      border: 1px dashed rgba(65, 90, 150, 0.25);
+      border-radius: 50%;
+    }
+    .orbit-1 {
+      width: 700px;
+      height: 700px;
+      top: -150px;
+      left: -150px;
+      transform: rotate(25deg);
+    }
+    .orbit-2 {
+      width: 900px;
+      height: 900px;
+      bottom: -200px;
+      right: -200px;
+      transform: rotate(-15deg);
+    }
+
+    /* Estrellas parpadeantes */
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Selector de Servidor API */
+    .api-selector-bar {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      z-index: 50;
+      background: rgba(16, 28, 61, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      backdrop-filter: blur(8px);
+    }
+    .api-selector-bar select {
+      background: #0b132b;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Contenedor Principal */
+    .main-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1080px;
+      background: var(--bg-card);
+      border: 1px solid rgba(140, 162, 209, 0.15);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(29, 114, 254, 0.15);
+      backdrop-filter: blur(20px);
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      overflow: hidden;
+      min-height: 640px;
+    }
+
+    /* Columna Izquierda: Ilustración Astronauta */
+    .art-column {
+      background: linear-gradient(145deg, rgba(16, 28, 61, 0.7) 0%, rgba(11, 19, 43, 0.95) 100%);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-right: 1px solid rgba(140, 162, 209, 0.1);
+    }
+
+    .planet-asteroid {
+      position: absolute;
+      top: 50px;
+      right: 60px;
+      width: 58px;
+      height: 58px;
+      background: radial-gradient(circle at 35% 35%, #ff9e7d, #ff5722 65%, #c43200 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 25px rgba(255, 87, 34, 0.4), inset -6px -6px 12px rgba(0,0,0,0.5);
+      animation: floatPlanet 6s ease-in-out infinite alternate;
+    }
+    .crater {
+      position: absolute;
+      background: rgba(140, 30, 0, 0.45);
+      border-radius: 50%;
+      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.6);
+    }
+    .crater-1 { width: 14px; height: 14px; top: 12px; left: 16px; }
+    .crater-2 { width: 10px; height: 10px; bottom: 12px; right: 14px; }
+    .crater-3 { width: 8px; height: 8px; top: 28px; right: 26px; }
+
+    @keyframes floatPlanet {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-12px) rotate(15deg); }
+    }
+
+    /* Gato Astronauta SVG Animado */
+    .astronaut-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: floatCat 5s ease-in-out infinite alternate;
+    }
+    @keyframes floatCat {
+      0% { transform: translateY(0px) rotate(-2deg); }
+      100% { transform: translateY(-16px) rotate(3deg); }
+    }
+
+    .orbital-ring {
+      position: absolute;
+      width: 270px;
+      height: 270px;
+      border: 14px solid rgba(29, 114, 254, 0.35);
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: 0 0 35px rgba(29, 114, 254, 0.3);
+    }
+
+    .hero-badge {
+      margin-top: 25px;
+      text-align: center;
+      z-index: 5;
+    }
+    .hero-badge h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .hero-badge p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    /* Columna Derecha: Formularios */
+    .form-column {
+      padding: 45px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(13, 22, 48, 0.4);
+    }
+
+    /* Selector de Pestañas: Login vs Registro */
+    .tabs-header {
+      display: flex;
+      background: var(--bg-input);
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .tab-btn.active {
+      background: var(--accent-blue);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(29, 114, 254, 0.35);
+    }
+
+    /* Botón Google OAuth */
+    .btn-google {
+      width: 100%;
+      padding: 12px 16px;
+      background: #ffffff;
+      color: #1f2937;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-google:hover {
+      background: #f3f4f6;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+    .btn-google svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Divisor */
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    .divider span {
+      padding: 0 12px;
+    }
+
+    /* Campos de Entrada */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .form-group .label-req {
+      color: var(--accent-orange);
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(29, 114, 254, 0.2);
+    }
+    .input-field::placeholder {
+      color: rgba(140, 162, 209, 0.4);
+    }
+    .input-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Botón Primario */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(29, 114, 254, 0.4);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-submit:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Mensajes de Alerta */
+    .alert-box {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      line-height: 1.4;
+    }
+    .alert-box.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--error);
+      color: #fca5a5;
+    }
+    .alert-box.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success);
+      color: #86efac;
+    }
+    .alert-box.info {
+      display: block;
+      background: rgba(29, 114, 254, 0.15);
+      border: 1px solid var(--accent-blue);
+      color: #93c5fd;
+    }
+
+    /* Vista de Sesión Activa (JWT) */
+    .session-card {
+      display: none;
+      background: rgba(16, 28, 61, 0.9);
+      border: 1px solid var(--success);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: left;
+    }
+    .session-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .token-box {
+      background: #0b132b;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #a5b4fc;
+      max-height: 90px;
+      overflow-y: auto;
+      word-break: break-all;
+      margin-top: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+      }
+      .art-column {
+        display: none;
+      }
+      .form-column {
+        padding: 35px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fondo Espacial -->
+  <div class="space-background">
+    <div class="orbit-line orbit-1"></div>
+    <div class="orbit-line orbit-2"></div>
+    <!-- Estrellas fijas -->
+    <div class="star" style="top: 15%; left: 20%; width: 3px; height: 3px; animation-delay: 0.2s;"></div>
+    <div class="star" style="top: 35%; left: 10%; width: 4px; height: 4px; animation-delay: 1.5s;"></div>
+    <div class="star" style="top: 25%; left: 45%; width: 2px; height: 2px; animation-delay: 0.8s;"></div>
+    <div class="star" style="top: 75%; left: 15%; width: 3px; height: 3px; animation-delay: 2.1s;"></div>
+    <div class="star" style="top: 85%; left: 40%; width: 4px; height: 4px; animation-delay: 0.5s;"></div>
+    <div class="star" style="top: 65%; left: 85%; width: 3px; height: 3px; animation-delay: 1.8s;"></div>
+    <div class="star" style="top: 18%; left: 75%; width: 2px; height: 2px; animation-delay: 1.1s;"></div>
+  </div>
+
+  <!-- Selector de Entorno API (Producción AWS vs Local) -->
+  <div class="api-selector-bar">
+    <div class="status-dot"></div>
+    <span>Conectado a:</span>
+    <select id="apiBaseSelect" onchange="changeApiBase()">
+      <option value="http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com" selected>AWS Cloud (Producción ALB)</option>
+      <option value="http://localhost:8000">Local (localhost:8000)</option>
+    </select>
+  </div>
+
+  <div class="main-container">
+
+    <!-- COLUMNA IZQUIERDA: GATO ASTRONAUTA 3D ESPACIAL -->
+    <div class="art-column">
+      <div class="planet-asteroid">
+        <div class="crater crater-1"></div>
+        <div class="crater crater-2"></div>
+        <div class="crater crater-3"></div>
+      </div>
+
+      <div class="astronaut-wrapper">
+        <div class="orbital-ring"></div>
+        <!-- Ilustración SVG del Gato Astronauta Espacial -->
+        <svg viewBox="0 0 340 340" width="280" height="280" style="z-index: 2;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="helmetGlass" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+              <stop offset="35%" stop-color="#7dd3fc" stop-opacity="0.35"/>
+              <stop offset="70%" stop-color="#0284c7" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#0f172a" stop-opacity="0.75"/>
+            </radialGradient>
+            <radialGradient id="catFur" cx="35%" cy="35%" r="60%">
+              <stop offset="0%" stop-color="#fed7aa"/>
+              <stop offset="50%" stop-color="#fba86b"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </radialGradient>
+            <linearGradient id="suitGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="60%" stop-color="#e2e8f0"/>
+              <stop offset="100%" stop-color="#94a3b8"/>
+            </linearGradient>
+            <linearGradient id="collarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38bdf8"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+
+          <!-- Mochila / Tanque de Oxígeno -->
+          <rect x="55" y="140" width="60" height="110" rx="25" fill="#38bdf8" opacity="0.85" filter="url(#glow)"/>
+          <rect x="65" y="145" width="40" height="100" rx="18" fill="#0284c7"/>
+
+          <!-- Cuerpo Traje Espacial -->
+          <ellipse cx="170" cy="245" rx="85" ry="75" fill="url(#suitGrad)" />
+          <path d="M120 280 C150 300, 200 295, 235 270 C220 295, 170 310, 120 280 Z" fill="#64748b" opacity="0.4"/>
+
+          <!-- Brazo y Guante Izquierdo extendido -->
+          <path d="M220 220 C250 215, 275 225, 290 240 C280 260, 255 255, 225 245 Z" fill="url(#suitGrad)"/>
+          <circle cx="285" cy="240" r="18" fill="#38bdf8" />
+          <circle cx="285" cy="240" r="13" fill="#ffffff" />
+
+          <!-- Cuello del Casco -->
+          <ellipse cx="170" cy="180" rx="72" ry="24" fill="url(#collarGrad)" filter="url(#glow)"/>
+          <ellipse cx="170" cy="178" rx="66" ry="18" fill="#0284c7" />
+
+          <!-- Cabeza del Gato -->
+          <g id="catHead">
+            <polygon points="125,100 100,55 140,75" fill="#fba86b" />
+            <polygon points="123,95 107,65 135,78" fill="#fda4af" />
+            <polygon points="215,100 240,55 200,75" fill="#fba86b" />
+            <polygon points="217,95 233,65 205,78" fill="#fda4af" />
+
+            <ellipse cx="170" cy="120" rx="55" ry="50" fill="url(#catFur)"/>
+            <ellipse cx="150" cy="115" rx="6" ry="8" fill="#1e293b"/>
+            <circle cx="148" cy="112" r="2.5" fill="#ffffff"/>
+            <ellipse cx="190" cy="115" rx="6" ry="8" fill="#1e293b"/>
+            <circle cx="188" cy="112" r="2.5" fill="#ffffff"/>
+
+            <ellipse cx="170" cy="132" rx="22" ry="14" fill="#ffffff"/>
+            <polygon points="170,126 166,122 174,122" fill="#fb7185"/>
+            <path d="M145 130 L125 128 M145 134 L123 136 M195 130 L215 128 M195 134 L217 136" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+          </g>
+
+          <!-- Casco de Cristal con Reflejo -->
+          <circle cx="170" cy="125" r="76" fill="url(#helmetGlass)" stroke="#38bdf8" stroke-width="4" opacity="0.95"/>
+          <path d="M125 80 C145 65, 175 65, 195 75 C190 82, 165 72, 130 88 Z" fill="#ffffff" opacity="0.65"/>
+          <ellipse cx="130" cy="98" rx="8" ry="16" fill="#ffffff" opacity="0.4" transform="rotate(-25 130 98)"/>
+        </svg>
+      </div>
+
+      <div class="hero-badge">
+        <h2>Plataforma Nacional de Becas</h2>
+        <p>Ministerio de Educación de Guatemala<br>Identidad, Convocatorias y Gestión Digital</p>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: FORMULARIO INTERACTIVO -->
+    <div class="form-column">
+
+      <!-- Pestañas -->
+      <div class="tabs-header" id="tabsHeader">
+        <button class="tab-btn active" id="tabLoginBtn" onclick="showTab('login')">Iniciar Sesión</button>
+        <button class="tab-btn" id="tabRegisterBtn" onclick="showTab('register')">Crear Cuenta</button>
+      </div>
+
+      <!-- Alerta dinámica -->
+      <div id="alertBox" class="alert-box"></div>
+
+      <!-- VISTA 1: INICIO DE SESIÓN -->
+      <div id="viewLogin">
+        <button type="button" class="btn-google" onclick="initiateGoogleLogin()">
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Continuar con Google
+        </button>
+
+        <div class="divider"><span>o con tu correo / CUI</span></div>
+
+        <form id="formLogin" onsubmit="handleEmailLogin(event)">
+          <div class="form-group">
+            <label>Correo Electrónico o CUI</label>
+            <input type="text" id="loginUsername" class="input-field" placeholder="ejemplo@mineduc.gob.gt o 1000000090101" required>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between;">
+              <label>Contraseña</label>
+              <a href="javascript:void(0)" onclick="showAlert('Para recuperar contraseña use /auth/forgot-password en Swagger UI', 'info')" style="color: var(--accent-blue); font-size: 11px; text-decoration: none;">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="input-wrapper">
+              <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <button type="submit" id="btnLoginSubmit" class="btn-submit">
+            Iniciar Sesión
+          </button>
+        </form>
+
+        <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 18px;">
+          Si tienes problemas para acceder, contacta al administrador del sistema MINEDUC.
+        </p>
+      </div>
+
+      <!-- VISTA 2: REGISTRO CON CORREO -->
+      <div id="viewRegister" style="display: none;">
+        <button type="button" class="btn-google" onclick="initiateGoogleLogin()">
+          <svg viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Registrarme con Google
+        </button>
+
+        <div class="divider"><span>o completa todos tus datos</span></div>
+
+        <form id="formRegister" onsubmit="handleEmailRegister(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Primer Nombre <span class="label-req">*</span></label>
+              <input type="text" id="regPrimerNombre" class="input-field" placeholder="Juan" required>
+            </div>
+            <div class="form-group">
+              <label>Segundo Nombre</label>
+              <input type="text" id="regSegundoNombre" class="input-field" placeholder="Carlos">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Primer Apellido <span class="label-req">*</span></label>
+              <input type="text" id="regPrimerApellido" class="input-field" placeholder="Pérez" required>
+            </div>
+            <div class="form-group">
+              <label>Segundo Apellido</label>
+              <input type="text" id="regSegundoApellido" class="input-field" placeholder="Gómez">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>CUI (13 dígitos numéricos) <span class="label-req">*</span></label>
+            <input type="text" id="regCui" class="input-field" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+            <p class="input-hint">El CUI será verificado automáticamente con algoritmo Módulo 11.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Teléfono <span class="label-req">*</span></label>
+              <input type="tel" id="regTelefono" class="input-field" placeholder="55551234" required>
+            </div>
+            <div class="form-group">
+              <label>Fecha de Nacimiento</label>
+              <input type="date" id="regFechaNacimiento" class="input-field">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Correo Electrónico <span class="label-req">*</span></label>
+            <input type="email" id="regEmail" class="input-field" placeholder="juan.perez@estudiante.edu.gt" required>
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña <span class="label-req">*</span></label>
+            <input type="password" id="regPassword" class="input-field" placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, #$@)" required>
+            <p class="input-hint">Debe incluir mayúscula, minúscula, número y símbolo especial.</p>
+          </div>
+
+          <button type="submit" id="btnRegisterSubmit" class="btn-submit">
+            Registrar Cuenta
+          </button>
+        </form>
+      </div>
+
+      <!-- VISTA 3: COMPLETAR REGISTRO GOOGLE (CUI OBLIGATORIO) -->
+      <div id="viewGoogleComplete" style="display: none;">
+        <div style="background: rgba(29, 114, 254, 0.15); border: 1px solid var(--accent-blue); padding: 14px; border-radius: 12px; margin-bottom: 20px;">
+          <h4 style="color: #93c5fd; font-size: 14px; margin-bottom: 4px;">🎉 ¡Casi listo!</h4>
+          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+            Te has autenticado correctamente con Google. Para darte de alta en el MINEDUC, ingresa tu CUI obligatorio y datos complementarios.
+          </p>
+        </div>
+
+        <form id="formGoogleComplete" onsubmit="handleGoogleComplete(event)">
+          <input type="hidden" id="googleRegToken">
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Primer Nombre</label>
+              <input type="text" id="googlePrimerNombre" class="input-field" required>
+            </div>
+            <div class="form-group">
+              <label>Primer Apellido</label>
+              <input type="text" id="googlePrimerApellido" class="input-field" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Correo de Google (Verificado)</label>
+            <input type="email" id="googleEmail" class="input-field" readonly style="opacity: 0.7; cursor: not-allowed;">
+          </div>
+
+          <div class="form-group">
+            <label>CUI (13 dígitos numéricos) <span class="label-req">*</span></label>
+            <input type="text" id="googleCui" class="input-field" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+            <p class="input-hint">El CUI es obligatorio para vincular tu expediente de beca.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Teléfono <span class="label-req">*</span></label>
+              <input type="tel" id="googleTelefono" class="input-field" placeholder="55551234" required>
+            </div>
+            <div class="form-group">
+              <label>Fecha de Nacimiento</label>
+              <input type="date" id="googleFechaNacimiento" class="input-field">
+            </div>
+          </div>
+
+          <button type="submit" id="btnGoogleCompleteSubmit" class="btn-submit">
+            Activar Cuenta y Entrar
+          </button>
+        </form>
+      </div>
+
+      <!-- VISTA 4: SESIÓN INICIADA (JWT ACTIVO) -->
+      <div id="viewSessionActive" class="session-card">
+        <div class="session-badge">
+          <span>●</span> Sesión Oficial Activa
+        </div>
+        <h3 id="sessionUserName" style="font-size: 18px; margin-bottom: 4px;">Bienvenido</h3>
+        <p id="sessionUserEmail" style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;"></p>
+        
+        <div style="font-size: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
+          <div><strong>CUI:</strong> <span id="sessionUserCui" style="color: #93c5fd;"></span></div>
+          <div><strong>Roles:</strong> <span id="sessionUserRoles" style="color: #86efac;"></span></div>
+        </div>
+
+        <label style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Access Token JWT:</label>
+        <div id="sessionToken" class="token-box"></div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <a id="btnSwaggerLink" href="http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com/docs" target="_blank" class="btn-submit" style="text-decoration: none; font-size: 13px; flex: 1;">
+            Abrir Swagger UI
+          </a>
+          <button type="button" onclick="logoutSession()" class="btn-submit" style="background: #334155; font-size: 13px; flex: 1;">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let API_BASE = document.getElementById("apiBaseSelect").value;
+
+    function changeApiBase() {
+      API_BASE = document.getElementById("apiBaseSelect").value;
+      document.getElementById("btnSwaggerLink").href = API_BASE + "/docs";
+      showAlert("Entorno cambiado a: " + API_BASE, "info");
+    }
+
+    function showAlert(msg, type = "error") {
+      const box = document.getElementById("alertBox");
+      box.textContent = msg;
+      box.className = "alert-box " + type;
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideAlert() {
+      const box = document.getElementById("alertBox");
+      box.className = "alert-box";
+      box.textContent = "";
+    }
+
+    function showTab(tab) {
+      hideAlert();
+      document.getElementById("viewSessionActive").style.display = "none";
+      document.getElementById("viewGoogleComplete").style.display = "none";
+      document.getElementById("tabsHeader").style.display = "flex";
+
+      if (tab === 'login') {
+        document.getElementById("tabLoginBtn").className = "tab-btn active";
+        document.getElementById("tabRegisterBtn").className = "tab-btn";
+        document.getElementById("viewLogin").style.display = "block";
+        document.getElementById("viewRegister").style.display = "none";
+      } else {
+        document.getElementById("tabLoginBtn").className = "tab-btn";
+        document.getElementById("tabRegisterBtn").className = "tab-btn active";
+        document.getElementById("viewLogin").style.display = "none";
+        document.getElementById("viewRegister").style.display = "block";
+      }
+    }
+
+    function validateCuiAlgorithm(cui) {
+      if (!cui || cui.length !== 13 || !/^\d+$/.test(cui)) return false;
+      const depto = parseInt(cui.substring(9, 11), 10);
+      if (depto < 1 || depto > 22) return false;
+
+      const correlativo = cui.substring(0, 8).split('').map(Number);
+      const verificador = parseInt(cui[8], 10);
+
+      const total = correlativo.reduce((acc, digit, idx) => acc + (digit * (idx + 2)), 0);
+      const residuo = total % 11;
+      let digitoCalculado = 11 - residuo;
+      if (digitoCalculado >= 10) digitoCalculado = 0;
+
+      return verificador === digitoCalculado;
+    }
+
+    function validateCuiInput(input) {
+      const val = input.value.trim();
+      if (val.length === 13) {
+        if (validateCuiAlgorithm(val)) {
+          input.style.borderColor = "var(--success)";
+        } else {
+          input.style.borderColor = "var(--error)";
+        }
+      } else {
+        input.style.borderColor = "var(--border-color)";
+      }
+    }
+
+    function initiateGoogleLogin() {
+      hideAlert();
+      window.location.href = `${API_BASE}/api/v1/auth/google/login`;
+    }
+
+    async function handleEmailLogin(e) {
+      e.preventDefault();
+      hideAlert();
+      const btn = document.getElementById("btnLoginSubmit");
+      btn.disabled = true;
+      btn.textContent = "Verificando...";
+
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Error al iniciar sesión.");
+        }
+
+        renderSession(data);
+      } catch (err) {
+        showAlert(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Iniciar Sesión";
+      }
+    }
+
+    async function handleEmailRegister(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const cui = document.getElementById("regCui").value.trim();
+      if (!validateCuiAlgorithm(cui)) {
+        showAlert("El CUI ingresado no es válido según el algoritmo del RENAP (Módulo 11). Ejemplo válido: 1000000090101", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btnRegisterSubmit");
+      btn.disabled = true;
+      btn.textContent = "Creando cuenta...";
+
+      const payload = {
+        cui: cui,
+        primer_nombre: document.getElementById("regPrimerNombre").value.trim(),
+        segundo_nombre: document.getElementById("regSegundoNombre").value.trim() || null,
+        primer_apellido: document.getElementById("regPrimerApellido").value.trim(),
+        segundo_apellido: document.getElementById("regSegundoApellido").value.trim() || null,
+        telefono: document.getElementById("regTelefono").value.trim() || null,
+        email: document.getElementById("regEmail").value.trim(),
+        password: document.getElementById("regPassword").value
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || (data.message || "Error al registrar cuenta."));
+        }
+
+        showAlert("¡Registro completado! " + data.message + (data.data?.activation_url ? ` (Token de prueba generado: ${data.data.activation_token})` : ""), "success");
+        setTimeout(() => showTab('login'), 3500);
+      } catch (err) {
+        showAlert(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Registrar Cuenta";
+      }
+    }
+
+    async function handleGoogleComplete(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const cui = document.getElementById("googleCui").value.trim();
+      if (!validateCuiAlgorithm(cui)) {
+        showAlert("El CUI ingresado no es válido según el algoritmo del RENAP (Módulo 11). Ejemplo válido: 1000000090101", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btnGoogleCompleteSubmit");
+      btn.disabled = true;
+      btn.textContent = "Activando cuenta...";
+
+      const payload = {
+        registration_token: document.getElementById("googleRegToken").value,
+        cui: cui,
+        primer_nombre: document.getElementById("googlePrimerNombre").value.trim(),
+        segundo_nombre: null,
+        primer_apellido: document.getElementById("googlePrimerApellido").value.trim(),
+        segundo_apellido: null,
+        telefono: document.getElementById("googleTelefono").value.trim() || null
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/google/complete-registration`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Error al completar el registro con Google.");
+        }
+
+        renderSession(data);
+      } catch (err) {
+        showAlert(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Activar Cuenta y Entrar";
+      }
+    }
+
+    function renderSession(data) {
+      document.getElementById("viewLogin").style.display = "none";
+      document.getElementById("viewRegister").style.display = "none";
+      document.getElementById("viewGoogleComplete").style.display = "none";
+      document.getElementById("tabsHeader").style.display = "none";
+      hideAlert();
+
+      document.getElementById("viewSessionActive").style.display = "block";
+      document.getElementById("sessionUserName").textContent = "¡Bienvenido, " + (data.nombre_completo || "Usuario") + "!";
+      document.getElementById("sessionUserEmail").textContent = data.email || "";
+      document.getElementById("sessionUserCui").textContent = data.cui || "Pendiente";
+      document.getElementById("sessionUserRoles").textContent = (data.roles || []).join(", ");
+      document.getElementById("sessionToken").textContent = data.access_token || "";
+
+      sessionStorage.setItem("access_token", data.access_token);
+    }
+
+    function logoutSession() {
+      sessionStorage.removeItem("access_token");
+      showTab('login');
+      showAlert("Sesión cerrada.", "info");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      
+      if (params.get("registration_token")) {
+        document.getElementById("tabsHeader").style.display = "none";
+        document.getElementById("viewLogin").style.display = "none";
+        document.getElementById("viewRegister").style.display = "none";
+        document.getElementById("viewGoogleComplete").style.display = "block";
+
+        document.getElementById("googleRegToken").value = params.get("registration_token");
+        document.getElementById("googleEmail").value = params.get("email") || "";
+        document.getElementById("googlePrimerNombre").value = params.get("primer_nombre") || "";
+        document.getElementById("googlePrimerApellido").value = params.get("primer_apellido") || "";
+        
+        showAlert("Autenticación con Google completada. Por favor ingresa tu CUI obligatorio para activar tu cuenta.", "info");
+      }
+    });
+  </script>
+</body>
+</html>

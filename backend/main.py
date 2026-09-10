@@ -46,6 +46,16 @@ def startup_db_init():
     except Exception as ex:
         print(f"[STARTUP DB INIT] {ex}")
 
+@app.get("/", summary="Página de Pruebas Frontend", tags=["Frontend"])
+def serve_frontend_page():
+    """Sirve la interfaz de usuario web interactiva para pruebas de inicio de sesión y registro"""
+    import os
+    from fastapi.responses import FileResponse
+    static_file = os.path.join(os.path.dirname(__file__), "app", "static", "index.html")
+    if os.path.exists(static_file):
+        return FileResponse(static_file, media_type="text/html")
+    return {"message": "Plataforma Nacional de Becas API - Visite /docs para Swagger UI"}
+
 @app.get("/health", tags=["Salud del Sistema"])
 def health_check():
     """Endpoint de verificación de estado y salud de la API"""
