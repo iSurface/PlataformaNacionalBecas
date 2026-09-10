@@ -406,14 +406,9 @@ class AuthService:
             # Emitir sesión JWT oficial
             persona = existing_user.persona
             roles_list = [r.codigo for r in existing_user.roles if r.es_activo]
-            token_payload = {
-                "sub": str(existing_user.id),
-                "cui": existing_user.cui,
-                "email": existing_user.email,
-                "roles": roles_list
-            }
             access_token = create_access_token(
-                token_payload,
+                subject=str(existing_user.id),
+                roles=roles_list,
                 expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
             )
 
@@ -541,14 +536,9 @@ class AuthService:
 
         # 6. Emitir JWT de sesión activa
         roles_list = [r.codigo for r in new_user.roles if r.es_activo]
-        token_payload = {
-            "sub": str(new_user.id),
-            "cui": new_user.cui,
-            "email": new_user.email,
-            "roles": roles_list
-        }
         access_token = create_access_token(
-            token_payload,
+            subject=str(new_user.id),
+            roles=roles_list,
             expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         )
 

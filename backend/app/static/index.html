@@ -994,7 +994,17 @@
     window.addEventListener("DOMContentLoaded", () => {
       const params = new URLSearchParams(window.location.search);
       
-      if (params.get("registration_token")) {
+      if (params.get("access_token")) {
+        renderSession({
+          access_token: params.get("access_token"),
+          email: params.get("email") || "",
+          cui: params.get("cui") || "Registrado",
+          nombre_completo: params.get("nombre") || "Usuario Google",
+          roles: ["POSTULANTE"]
+        });
+        showAlert("¡Sesión iniciada con Google exitosamente!", "success");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (params.get("registration_token")) {
         document.getElementById("tabsHeader").style.display = "none";
         document.getElementById("viewLogin").style.display = "none";
         document.getElementById("viewRegister").style.display = "none";
@@ -1006,6 +1016,7 @@
         document.getElementById("googlePrimerApellido").value = params.get("primer_apellido") || "";
         
         showAlert("Autenticación con Google completada. Por favor ingresa tu CUI obligatorio para activar tu cuenta.", "info");
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     });
   </script>

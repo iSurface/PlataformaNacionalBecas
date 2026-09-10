@@ -1,4 +1,5 @@
 from typing import Optional
+from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -87,24 +88,46 @@ def google_login(
         return RedirectResponse(url=auth_url)
     return GoogleLoginResponse(authorization_url=auth_url)
 
-@router.get("/google/callback", response_model=GoogleCallbackResponse, summary="HU-001: Callback de Google OAuth 2.0")
+@router.get("/google/callback", summary="HU-001: Callback de Google OAuth 2.0")
 def google_callback(
     code: str = Query(..., description="Código de autorización retornado por Google"),
     error: Optional[str] = Query(None, description="Error reportado por Google si el usuario cancela"),
     redirect_uri: Optional[str] = Query(None, description="URI de redireccionamiento utilizada al iniciar el flujo"),
+    format: Optional[str] = Query(None, description="Si es 'json' retorna JSON; si no se especifica redirige al frontend"),
     db: Session = Depends(get_db)
 ):
     """
     Recibe el código retornado por Google.
-    - Si el usuario ya existe en el sistema: Retorna la sesión activa con JWT (is_new_user=False).
-    - Si es un nuevo postulante: Retorna los datos precargados y un registration_token temporal para completar el CUI obligatorio (is_new_user=True).
+    - Si el usuario ya existe en el sistema: Inicia sesión con JWT.
+    - Si es un nuevo postulante: Retorna los datos precargados y un registration_token temporal para completar el CUI obligatorio.
     """
     if error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Autenticación con Google cancelada o fallida: {error}"
         )
-    return AuthService.handle_google_callback(db=db, code=code, redirect_uri=redirect_uri)
+    result = AuthService.handle_google_callback(db=db, code=code, redirect_uri=redirect_uri)
+
+    if format == "json":
+        return result
+
+    # Redirección automática al frontend interactivo
+    if result.is_new_user:
+        params = urlencode({
+            "registration_token": result.registration_token,
+            "email": result.email or "",
+            "primer_nombre": result.primer_nombre or "",
+            "primer_apellido": result.primer_apellido or ""
+        })
+        return RedirectResponse(url=f"/?{params}")
+    else:
+        params = urlencode({
+            "access_token": result.session.access_token,
+            "email": result.session.email or "",
+            "cui": result.session.cui or "",
+            "nombre": result.session.nombre_completo or ""
+        })
+        return RedirectResponse(url=f"/?{params}")
 
 @router.post("/google/complete-registration", response_model=TokenResponse, status_code=status.HTTP_201_CREATED, summary="HU-001: Completar Registro Google con CUI Obligatorio")
 def google_complete_registration(
