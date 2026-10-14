@@ -13,8 +13,9 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Re-export Base from user model to share metadata across all domain models
-from app.infrastructure.models.user import Base
+# Declarative Base única compartida por todos los modelos de dominio
+from sqlalchemy.orm import declarative_base
+Base = declarative_base()
 
 def get_db():
     """Generador de sesiones de base de datos para inyección de dependencias en FastAPI"""

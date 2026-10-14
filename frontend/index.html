@@ -3,816 +3,1941 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MINEDUC Becas - Inicio de Sesión y Registro</title>
+  <title>Plataforma Nacional de Becas | Ministerio de Educación - Gobierno de Guatemala</title>
+  
+  <!-- Tipografía institucional moderna y legible -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Iconografía Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
+    /* ==========================================================================
+       VARIABLES Y TEMA INSTITUCIONAL - ESTILO EDULEARN GUBERNAMENTAL
+       ========================================================================== */
     :root {
-      --bg-space: #0b132b;
-      --bg-card: rgba(20, 32, 65, 0.85);
-      --bg-input: #101c3d;
-      --border-color: #273e74;
-      --accent-blue: #1d72fe;
-      --accent-hover: #155bd5;
-      --accent-orange: #ff7b54;
-      --text-main: #ffffff;
-      --text-muted: #8ca2d1;
-      --success: #10b981;
-      --error: #ef4444;
-      --warning: #f59e0b;
+      /* Colores Institucionales */
+      --primary-navy: #0e2b4c;       /* Azul marino profundo soberano */
+      --primary-dark: #07192d;       /* Azul noche para contrastes */
+      --primary-light: #164070;      /* Azul institucional secundario */
+      --accent-gold: #e89b02;        /* Dorado/ámbar característico de EduLearn */
+      --accent-gold-hover: #cf8700;  /* Dorado hover */
+      --guate-cyan: #1994d8;         /* Azul cian de la bandera de Guatemala */
+      --guate-cyan-light: #e0f2fe;   /* Azul hielo sutil */
+      
+      /* Neutros y Fondos */
+      --bg-body: #f8fafc;            /* Fondo limpio y descansado */
+      --bg-surface: #ffffff;         /* Superficie de tarjetas */
+      --bg-alt: #f1f5f9;             /* Gris claro institucional */
+      --border-color: #e2e8f0;       /* Bordes sutiles */
+      --border-focus: #1994d8;
+      
+      /* Tipografía y Textos */
+      --text-heading: #0f172a;       /* Gris casi negro para títulos */
+      --text-body: #334155;          /* Gris legible estándar */
+      --text-muted: #64748b;         /* Texto secundario */
+      --text-white: #ffffff;
+      
+      /* Estados */
+      --success: #15803d;
+      --success-bg: #dcfce7;
+      --warning: #b45309;
+      --warning-bg: #fef3c7;
+      --error: #b91c1c;
+      --error-bg: #fee2e2;
+      --info: #0369a1;
+      --info-bg: #e0f2fe;
+
+      /* Sombras y Elevaciones */
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+      --shadow-xl: 0 20px 30px -10px rgba(15, 23, 42, 0.15);
+      
+      /* Transiciones y Bordes */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --transition: all 0.25s ease-in-out;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background-color: var(--bg-space);
-      color: var(--text-main);
-      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-body);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-heading);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* 1. TOP BAR UTILITARIO */
+    .top-bar {
+      background-color: var(--primary-dark);
+      color: #94a3b8;
+      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 2px solid var(--accent-gold);
+    }
+
+    .top-bar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .gov-identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .gov-flag {
+      width: 18px;
+      height: 12px;
+      background: linear-gradient(90deg, #4997d0 33%, #ffffff 33%, #ffffff 66%, #4997d0 66%);
+      border-radius: 2px;
+      display: inline-block;
+      box-shadow: 0 0 2px rgba(0,0,0,0.4);
+    }
+
+    .top-contact-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .top-contact-info a {
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .top-contact-info a:hover {
+      color: var(--accent-gold);
+    }
+
+    /* 2. MAIN HEADER */
+    .main-header {
+      background-color: var(--bg-surface);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: var(--transition);
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-emblem {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary-navy), var(--primary-light));
+      border: 2px solid var(--accent-gold);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow-x: hidden;
-      padding: 20px;
+      color: white;
+      font-size: 22px;
+      box-shadow: var(--shadow-sm);
     }
 
-    /* Fondo espacial con estrellas y órbitas */
-    .space-background {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background: radial-gradient(circle at 80% 20%, #172a5a 0%, #0b132b 65%, #050a17 100%);
+    .logo-text h2 {
+      font-size: 19px;
+      color: var(--primary-navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    .logo-text span {
+      font-size: 11px;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      display: block;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-item a {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-heading);
+      padding: 6px 0;
+      position: relative;
+    }
+
+    .nav-item a:hover,
+    .nav-item.active a {
+      color: var(--guate-cyan);
+    }
+
+    .nav-item a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: var(--accent-gold);
+      transition: var(--transition);
+    }
+
+    .nav-item a:hover::after,
+    .nav-item.active a::after {
+      width: 100%;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border-color: var(--border-color);
+      color: var(--primary-navy);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--bg-alt);
+      border-color: var(--primary-navy);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-navy);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      box-shadow: 0 4px 12px rgba(14, 43, 76, 0.25);
+    }
+
+    .btn-gold {
+      background-color: var(--accent-gold);
+      color: white;
+    }
+
+    .btn-gold:hover {
+      background-color: var(--accent-gold-hover);
+      box-shadow: 0 4px 14px rgba(232, 155, 2, 0.35);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--primary-navy);
+      cursor: pointer;
+    }
+
+    .user-auth-panel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      background-color: var(--bg-alt);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      background-color: var(--primary-navy);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* 3. HERO SECTION */
+    .hero-section {
+      background: linear-gradient(135deg, #07192d 0%, #0e2b4c 60%, #164070 100%);
+      color: white;
+      padding: 70px 0 90px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(25, 148, 216, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
       pointer-events: none;
     }
 
-    .orbit-line {
-      position: absolute;
-      border: 1px dashed rgba(65, 90, 150, 0.25);
-      border-radius: 50%;
-    }
-    .orbit-1 {
-      width: 700px;
-      height: 700px;
-      top: -150px;
-      left: -150px;
-      transform: rotate(25deg);
-    }
-    .orbit-2 {
-      width: 900px;
-      height: 900px;
-      bottom: -200px;
-      right: -200px;
-      transform: rotate(-15deg);
-    }
-
-    /* Estrellas parpadeantes */
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: twinkle 3s infinite alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* Selector de Servidor API */
-    .api-selector-bar {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      z-index: 50;
-      background: rgba(16, 28, 61, 0.8);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 6px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      backdrop-filter: blur(8px);
-    }
-    .api-selector-bar select {
-      background: #0b132b;
-      color: #fff;
-      border: 1px solid var(--border-color);
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      outline: none;
-      cursor: pointer;
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-    }
-
-    /* Contenedor Principal */
-    .main-container {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 1080px;
-      background: var(--bg-card);
-      border: 1px solid rgba(140, 162, 209, 0.15);
-      border-radius: 28px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(29, 114, 254, 0.15);
-      backdrop-filter: blur(20px);
+    .hero-grid {
       display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      overflow: hidden;
-      min-height: 640px;
-    }
-
-    /* Columna Izquierda: Ilustración Astronauta */
-    .art-column {
-      background: linear-gradient(145deg, rgba(16, 28, 61, 0.7) 0%, rgba(11, 19, 43, 0.95) 100%);
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 48px;
       align-items: center;
-      justify-content: center;
       position: relative;
-      border-right: 1px solid rgba(140, 162, 209, 0.1);
-    }
-
-    .planet-asteroid {
-      position: absolute;
-      top: 50px;
-      right: 60px;
-      width: 58px;
-      height: 58px;
-      background: radial-gradient(circle at 35% 35%, #ff9e7d, #ff5722 65%, #c43200 100%);
-      border-radius: 50%;
-      box-shadow: 0 0 25px rgba(255, 87, 34, 0.4), inset -6px -6px 12px rgba(0,0,0,0.5);
-      animation: floatPlanet 6s ease-in-out infinite alternate;
-    }
-    .crater {
-      position: absolute;
-      background: rgba(140, 30, 0, 0.45);
-      border-radius: 50%;
-      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.6);
-    }
-    .crater-1 { width: 14px; height: 14px; top: 12px; left: 16px; }
-    .crater-2 { width: 10px; height: 10px; bottom: 12px; right: 14px; }
-    .crater-3 { width: 8px; height: 8px; top: 28px; right: 26px; }
-
-    @keyframes floatPlanet {
-      0% { transform: translateY(0px) rotate(0deg); }
-      100% { transform: translateY(-12px) rotate(15deg); }
-    }
-
-    /* Gato Astronauta SVG Animado */
-    .astronaut-wrapper {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: floatCat 5s ease-in-out infinite alternate;
-    }
-    @keyframes floatCat {
-      0% { transform: translateY(0px) rotate(-2deg); }
-      100% { transform: translateY(-16px) rotate(3deg); }
-    }
-
-    .orbital-ring {
-      position: absolute;
-      width: 270px;
-      height: 270px;
-      border: 14px solid rgba(29, 114, 254, 0.35);
-      border-radius: 50%;
-      z-index: 1;
-      box-shadow: 0 0 35px rgba(29, 114, 254, 0.3);
+      z-index: 2;
     }
 
     .hero-badge {
-      margin-top: 25px;
-      text-align: center;
-      z-index: 5;
-    }
-    .hero-badge h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.5px;
-    }
-    .hero-badge p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      line-height: 1.4;
-    }
-
-    /* Columna Derecha: Formularios */
-    .form-column {
-      padding: 45px 50px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: rgba(13, 22, 48, 0.4);
-    }
-
-    /* Selector de Pestañas: Login vs Registro */
-    .tabs-header {
-      display: flex;
-      background: var(--bg-input);
-      padding: 4px;
-      border-radius: 14px;
-      margin-bottom: 25px;
-      border: 1px solid var(--border-color);
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-    .tab-btn.active {
-      background: var(--accent-blue);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(29, 114, 254, 0.35);
-    }
-
-    /* Botón Google OAuth */
-    .btn-google {
-      width: 100%;
-      padding: 12px 16px;
-      background: #ffffff;
-      color: #1f2937;
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-    .btn-google:hover {
-      background: #f3f4f6;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-    }
-    .btn-google svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Divisor */
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 20px 0;
-      color: var(--text-muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border-color);
-    }
-    .divider span {
-      padding: 0 12px;
-    }
-
-    /* Campos de Entrada */
-    .form-group {
-      margin-bottom: 16px;
-    }
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      letter-spacing: 0.3px;
-    }
-    .form-group .label-req {
-      color: var(--accent-orange);
-    }
-    .input-wrapper {
-      position: relative;
-    }
-    .input-field {
-      width: 100%;
-      padding: 12px 14px;
-      background: var(--bg-input);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      color: #fff;
-      font-size: 14px;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    .input-field:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 3px rgba(29, 114, 254, 0.2);
-    }
-    .input-field::placeholder {
-      color: rgba(140, 162, 209, 0.4);
-    }
-    .input-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* Botón Primario */
-    .btn-submit {
-      width: 100%;
-      padding: 13px;
-      background: var(--accent-blue);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(29, 114, 254, 0.4);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .btn-submit:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-    }
-    .btn-submit:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Mensajes de Alerta */
-    .alert-box {
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-      line-height: 1.4;
-    }
-    .alert-box.error {
-      display: block;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--error);
-      color: #fca5a5;
-    }
-    .alert-box.success {
-      display: block;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid var(--success);
-      color: #86efac;
-    }
-    .alert-box.info {
-      display: block;
-      background: rgba(29, 114, 254, 0.15);
-      border: 1px solid var(--accent-blue);
-      color: #93c5fd;
-    }
-
-    /* Vista de Sesión Activa (JWT) */
-    .session-card {
-      display: none;
-      background: rgba(16, 28, 61, 0.9);
-      border: 1px solid var(--success);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: left;
-    }
-    .session-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-      padding: 4px 10px;
-      border-radius: 20px;
+      gap: 8px;
+      background-color: rgba(232, 155, 2, 0.18);
+      border: 1px solid var(--accent-gold);
+      color: #fef08a;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
       font-size: 12px;
       font-weight: 700;
-      margin-bottom: 14px;
-    }
-    .token-box {
-      background: #0b132b;
-      padding: 10px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 11px;
-      color: #a5b4fc;
-      max-height: 90px;
-      overflow-y: auto;
-      word-break: break-all;
-      margin-top: 10px;
-      border: 1px solid var(--border-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
     }
 
-    /* Responsive */
-    @media (max-width: 860px) {
-      .main-container {
-        grid-template-columns: 1fr;
-        max-width: 480px;
-      }
-      .art-column {
-        display: none;
-      }
-      .form-column {
-        padding: 35px 25px;
-      }
+    .hero-title {
+      font-size: 42px;
+      color: white;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+
+    .hero-title span {
+      color: var(--accent-gold);
+      position: relative;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: #cbd5e1;
+      margin-bottom: 32px;
+      max-width: 580px;
+      line-height: 1.6;
+    }
+
+    .hero-search-box {
+      background-color: white;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: var(--shadow-xl);
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .search-input-group {
+      position: relative;
+    }
+
+    .search-input-group i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .search-select, .search-input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--text-heading);
+      background-color: var(--bg-alt);
+      outline: none;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .search-select:focus, .search-input:focus {
+      border-color: var(--guate-cyan);
+      background-color: white;
+    }
+
+    .hero-image-wrapper {
+      position: relative;
+    }
+
+    .hero-main-img {
+      width: 100%;
+      height: 440px;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      border: 4px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .floating-badge {
+      position: absolute;
+      background-color: white;
+      color: var(--text-heading);
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 3;
+      border-left: 4px solid var(--accent-gold);
+    }
+
+    .floating-badge-top {
+      top: -20px;
+      left: -20px;
+    }
+
+    .floating-badge-bottom {
+      bottom: -20px;
+      right: -20px;
+      border-left-color: var(--guate-cyan);
+    }
+
+    .badge-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .badge-icon-gold {
+      background-color: #fef3c7;
+      color: var(--accent-gold);
+    }
+
+    .badge-icon-cyan {
+      background-color: var(--guate-cyan-light);
+      color: var(--guate-cyan);
+    }
+
+    .badge-text h4 {
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .badge-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 4. FEATURES */
+    .features-section {
+      padding: 60px 0;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-alt);
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      background-color: white;
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-navy);
+      font-size: 20px;
+      box-shadow: var(--shadow-sm);
+      flex-shrink: 0;
+    }
+
+    .feature-card:hover .feature-icon-box {
+      background-color: var(--accent-gold);
+      color: white;
+    }
+
+    .feature-info h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .feature-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* 5. CALLS */
+    .calls-section {
+      padding: 80px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 50px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      color: var(--guate-cyan);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 32px;
+      color: var(--primary-navy);
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 9px 20px;
+      border-radius: var(--radius-full);
+      background-color: white;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-heading);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background-color: var(--primary-navy);
+      color: white;
+      border-color: var(--primary-navy);
+    }
+
+    .calls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .call-card {
+      background-color: white;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .call-card:hover {
+      box-shadow: var(--shadow-xl);
+      transform: translateY(-5px);
+      border-color: var(--guate-cyan);
+    }
+
+    .call-card-thumb {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .call-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .call-card:hover .call-card-img {
+      transform: scale(1.06);
+    }
+
+    .call-badge-type {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background-color: var(--primary-navy);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+
+    .call-badge-status {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background-color: var(--success);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .call-card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .call-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .call-code {
+      font-weight: 700;
+      color: var(--guate-cyan);
+    }
+
+    .call-title {
+      font-size: 18px;
+      color: var(--primary-navy);
+      margin-bottom: 12px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .call-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+      background-color: var(--bg-alt);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+    }
+
+    .call-stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .call-stat-item i {
+      color: var(--accent-gold);
+    }
+
+    .call-card-footer {
+      margin-top: auto;
+      display: flex;
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .call-card-footer .btn {
+      flex: 1;
+      font-size: 13px;
+      padding: 9px 12px;
+    }
+
+    /* 6. STEPS */
+    .steps-section {
+      background-color: var(--bg-surface);
+      padding: 80px 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+    }
+
+    .step-box {
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: var(--radius-md);
+      background-color: var(--bg-alt);
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .step-box:hover {
+      background-color: white;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-navy), var(--primary-light));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      border: 3px solid var(--accent-gold);
+    }
+
+    .step-box h3 {
+      font-size: 17px;
+      margin-bottom: 10px;
+      color: var(--primary-navy);
+    }
+
+    .step-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* 7. INCLUSION */
+    .inclusion-section {
+      padding: 80px 0;
+      background: linear-gradient(to right, #ffffff, #f8fafc);
+    }
+
+    .inclusion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: center;
+    }
+
+    .inclusion-gallery {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .inclusion-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+    }
+
+    .inclusion-content h2 {
+      font-size: 32px;
+      color: var(--primary-navy);
+      margin-bottom: 18px;
+    }
+
+    .inclusion-content p {
+      font-size: 15px;
+      color: var(--text-body);
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .stats-counter-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding-top: 24px;
+      border-top: 2px dashed var(--border-color);
+    }
+
+    .counter-item h3 {
+      font-size: 32px;
+      color: var(--accent-gold);
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .counter-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0;
+    }
+
+    /* 8. TESTIMONIALS */
+    .testimonials-section {
+      padding: 80px 0;
+      background-color: var(--bg-alt);
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background-color: white;
+      padding: 30px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quote-icon {
+      color: var(--accent-gold);
+      font-size: 26px;
+      margin-bottom: 14px;
+    }
+
+    .testimonial-text {
+      font-size: 14px;
+      color: var(--text-body);
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-style: italic;
+      flex-grow: 1;
+    }
+
+    .student-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+    }
+
+    .student-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .student-info h4 {
+      font-size: 14px;
+      color: var(--primary-navy);
+      margin-bottom: 2px;
+    }
+
+    .student-info span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 9. FOOTER */
+    .main-footer {
+      background-color: var(--primary-dark);
+      color: #94a3b8;
+      padding: 60px 0 24px;
+      border-top: 4px solid var(--accent-gold);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-col h4 {
+      color: white;
+      font-size: 16px;
+      margin-bottom: 18px;
+      position: relative;
+      padding-bottom: 8px;
+    }
+
+    .footer-col h4::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 32px;
+      height: 2px;
+      background-color: var(--accent-gold);
+    }
+
+    .footer-col p {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-gold);
+      transform: translateX(4px);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* 10. MODALES */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: white;
+      width: 100%;
+      max-width: 520px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-card-large {
+      max-width: 780px;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      background-color: var(--primary-navy);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h3 {
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-close-modal {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-close-modal:hover {
+      color: white;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-heading);
+      margin-bottom: 6px;
+    }
+
+    .input-control {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--text-heading);
+      background-color: var(--bg-alt);
+      outline: none;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .input-control:focus {
+      border-color: var(--guate-cyan);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(25, 148, 216, 0.15);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .btn-google-login {
+      width: 100%;
+      padding: 11px;
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .btn-google-login:hover {
+      background-color: var(--bg-alt);
+      border-color: #cbd5e1;
+    }
+
+    .divider-text {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+
+    .divider-text::before, .divider-text::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .divider-text span {
+      padding: 0 10px;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-xl);
+      border-left: 5px solid var(--primary-navy);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 300px;
+      max-width: 420px;
+      font-size: 14px;
+      animation: toastSlideIn 0.3s ease;
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--error); }
+    .toast.info { border-left-color: var(--guate-cyan); }
+
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-image-wrapper { max-width: 500px; margin: 0 auto; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .calls-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .top-contact-info { display: none; }
+      .nav-menu { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero-title { font-size: 32px; }
+      .hero-search-box { grid-template-columns: 1fr; }
+      .calls-grid { grid-template-columns: 1fr; }
+      .inclusion-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .form-grid-2 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Fondo Espacial -->
-  <div class="space-background">
-    <div class="orbit-line orbit-1"></div>
-    <div class="orbit-line orbit-2"></div>
-    <!-- Estrellas fijas -->
-    <div class="star" style="top: 15%; left: 20%; width: 3px; height: 3px; animation-delay: 0.2s;"></div>
-    <div class="star" style="top: 35%; left: 10%; width: 4px; height: 4px; animation-delay: 1.5s;"></div>
-    <div class="star" style="top: 25%; left: 45%; width: 2px; height: 2px; animation-delay: 0.8s;"></div>
-    <div class="star" style="top: 75%; left: 15%; width: 3px; height: 3px; animation-delay: 2.1s;"></div>
-    <div class="star" style="top: 85%; left: 40%; width: 4px; height: 4px; animation-delay: 0.5s;"></div>
-    <div class="star" style="top: 65%; left: 85%; width: 3px; height: 3px; animation-delay: 1.8s;"></div>
-    <div class="star" style="top: 18%; left: 75%; width: 2px; height: 2px; animation-delay: 1.1s;"></div>
-  </div>
-
-  <!-- Selector de Entorno API (Producción AWS vs Local) -->
-  <div class="api-selector-bar">
-    <div class="status-dot"></div>
-    <span>Conectado a:</span>
-    <select id="apiBaseSelect" onchange="changeApiBase()">
-      <option value="http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com" selected>AWS Cloud (Producción ALB)</option>
-      <option value="http://localhost:8000">Local (localhost:8000)</option>
-    </select>
-  </div>
-
-  <div class="main-container">
-
-    <!-- COLUMNA IZQUIERDA: GATO ASTRONAUTA 3D ESPACIAL -->
-    <div class="art-column">
-      <div class="planet-asteroid">
-        <div class="crater crater-1"></div>
-        <div class="crater crater-2"></div>
-        <div class="crater crater-3"></div>
+  <!-- 1. TOP BAR UTILITARIO -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div class="gov-identity">
+        <span class="gov-flag"></span>
+        <span>Gobierno de Guatemala • Ministerio de Educación (MINEDUC)</span>
       </div>
-
-      <div class="astronaut-wrapper">
-        <div class="orbital-ring"></div>
-        <!-- Ilustración SVG del Gato Astronauta Espacial -->
-        <svg viewBox="0 0 340 340" width="280" height="280" style="z-index: 2;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="helmetGlass" cx="40%" cy="35%" r="65%">
-              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
-              <stop offset="35%" stop-color="#7dd3fc" stop-opacity="0.35"/>
-              <stop offset="70%" stop-color="#0284c7" stop-opacity="0.4"/>
-              <stop offset="100%" stop-color="#0f172a" stop-opacity="0.75"/>
-            </radialGradient>
-            <radialGradient id="catFur" cx="35%" cy="35%" r="60%">
-              <stop offset="0%" stop-color="#fed7aa"/>
-              <stop offset="50%" stop-color="#fba86b"/>
-              <stop offset="100%" stop-color="#ea580c"/>
-            </radialGradient>
-            <linearGradient id="suitGrad" x1="20%" y1="10%" x2="80%" y2="90%">
-              <stop offset="0%" stop-color="#ffffff"/>
-              <stop offset="60%" stop-color="#e2e8f0"/>
-              <stop offset="100%" stop-color="#94a3b8"/>
-            </linearGradient>
-            <linearGradient id="collarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#38bdf8"/>
-              <stop offset="100%" stop-color="#0284c7"/>
-            </linearGradient>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="6" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-            </filter>
-          </defs>
-
-          <!-- Mochila / Tanque de Oxígeno -->
-          <rect x="55" y="140" width="60" height="110" rx="25" fill="#38bdf8" opacity="0.85" filter="url(#glow)"/>
-          <rect x="65" y="145" width="40" height="100" rx="18" fill="#0284c7"/>
-
-          <!-- Cuerpo Traje Espacial -->
-          <ellipse cx="170" cy="245" rx="85" ry="75" fill="url(#suitGrad)" />
-          <path d="M120 280 C150 300, 200 295, 235 270 C220 295, 170 310, 120 280 Z" fill="#64748b" opacity="0.4"/>
-
-          <!-- Brazo y Guante Izquierdo extendido -->
-          <path d="M220 220 C250 215, 275 225, 290 240 C280 260, 255 255, 225 245 Z" fill="url(#suitGrad)"/>
-          <circle cx="285" cy="240" r="18" fill="#38bdf8" />
-          <circle cx="285" cy="240" r="13" fill="#ffffff" />
-
-          <!-- Cuello del Casco -->
-          <ellipse cx="170" cy="180" rx="72" ry="24" fill="url(#collarGrad)" filter="url(#glow)"/>
-          <ellipse cx="170" cy="178" rx="66" ry="18" fill="#0284c7" />
-
-          <!-- Cabeza del Gato -->
-          <g id="catHead">
-            <polygon points="125,100 100,55 140,75" fill="#fba86b" />
-            <polygon points="123,95 107,65 135,78" fill="#fda4af" />
-            <polygon points="215,100 240,55 200,75" fill="#fba86b" />
-            <polygon points="217,95 233,65 205,78" fill="#fda4af" />
-
-            <ellipse cx="170" cy="120" rx="55" ry="50" fill="url(#catFur)"/>
-            <ellipse cx="150" cy="115" rx="6" ry="8" fill="#1e293b"/>
-            <circle cx="148" cy="112" r="2.5" fill="#ffffff"/>
-            <ellipse cx="190" cy="115" rx="6" ry="8" fill="#1e293b"/>
-            <circle cx="188" cy="112" r="2.5" fill="#ffffff"/>
-
-            <ellipse cx="170" cy="132" rx="22" ry="14" fill="#ffffff"/>
-            <polygon points="170,126 166,122 174,122" fill="#fb7185"/>
-            <path d="M145 130 L125 128 M145 134 L123 136 M195 130 L215 128 M195 134 L217 136" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
-          </g>
-
-          <!-- Casco de Cristal con Reflejo -->
-          <circle cx="170" cy="125" r="76" fill="url(#helmetGlass)" stroke="#38bdf8" stroke-width="4" opacity="0.95"/>
-          <path d="M125 80 C145 65, 175 65, 195 75 C190 82, 165 72, 130 88 Z" fill="#ffffff" opacity="0.65"/>
-          <ellipse cx="130" cy="98" rx="8" ry="16" fill="#ffffff" opacity="0.4" transform="rotate(-25 130 98)"/>
-        </svg>
-      </div>
-
-      <div class="hero-badge">
-        <h2>Plataforma Nacional de Becas</h2>
-        <p>Ministerio de Educación de Guatemala<br>Identidad, Convocatorias y Gestión Digital</p>
+      <div class="top-contact-info">
+        <a href="tel:24119595"><i class="fa-solid fa-phone"></i> PBX: (+502) 2411-9595</a>
+        <a href="mailto:becas@mineduc.gob.gt"><i class="fa-solid fa-envelope"></i> becas@mineduc.gob.gt</a>
+        <span><i class="fa-regular fa-clock"></i> Lunes a Viernes 08:00 - 16:30</span>
+        <a href="/docs" target="_blank" style="color: var(--accent-gold); font-weight: 700;">
+          <i class="fa-solid fa-code"></i> API Swagger
+        </a>
       </div>
     </div>
+  </div>
 
-    <!-- COLUMNA DERECHA: FORMULARIO INTERACTIVO -->
-    <div class="form-column">
+  <!-- 2. NAVBAR PRINCIPAL -->
+  <header class="main-header">
+    <div class="container navbar">
+      <a href="#" class="brand-logo">
+        <div class="logo-emblem">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="logo-text">
+          <h2>MINEDUC BECAS</h2>
+          <span>Plataforma Nacional de Becas</span>
+        </div>
+      </a>
 
-      <!-- Pestañas -->
-      <div class="tabs-header" id="tabsHeader">
-        <button class="tab-btn active" id="tabLoginBtn" onclick="showTab('login')">Iniciar Sesión</button>
-        <button class="tab-btn" id="tabRegisterBtn" onclick="showTab('register')">Crear Cuenta</button>
+      <ul class="nav-menu">
+        <li class="nav-item active"><a href="#inicio">Inicio</a></li>
+        <li class="nav-item"><a href="#convocatorias">Convocatorias</a></li>
+        <li class="nav-item"><a href="#como-funciona">¿Cómo Funciona?</a></li>
+        <li class="nav-item"><a href="#inclusion">Inclusión y Equidad</a></li>
+        <li class="nav-item"><a href="#testimonios">Testimonios</a></li>
+        <li class="nav-item"><a href="#contacto">Contacto</a></li>
+      </ul>
+
+      <div class="header-actions" id="headerAuthActions">
+        <button class="btn btn-outline" onclick="openModal('modalLogin')">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+        </button>
+        <button class="btn btn-gold" onclick="openModal('modalRegister')">
+          <i class="fa-solid fa-user-plus"></i> Registrarme
+        </button>
       </div>
 
-      <!-- Alerta dinámica -->
-      <div id="alertBox" class="alert-box"></div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
 
-      <!-- VISTA 1: INICIO DE SESIÓN -->
-      <div id="viewLogin">
-        <button type="button" class="btn-google" onclick="initiateGoogleLogin()">
-          <svg viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          Continuar con Google
-        </button>
+  <!-- 3. HERO SECTION -->
+  <section class="hero-section" id="inicio">
+    <div class="container hero-grid">
+      <div class="hero-text-content">
+        <div class="hero-badge">
+          <i class="fa-solid fa-award"></i> Convocatorias Oficiales 2026 Abiertas
+        </div>
+        <h1 class="hero-title">
+          Educación y Oportunidades sin Límites para la <span>Juventud de Guatemala</span>
+        </h1>
+        <p class="hero-subtitle">
+          El Ministerio de Educación te brinda acceso gratuito, transparente y directo a becas de estudio en los niveles Básico, Diversificado y Superior en los 22 departamentos del país.
+        </p>
 
-        <div class="divider"><span>o con tu correo / CUI</span></div>
-
-        <form id="formLogin" onsubmit="handleEmailLogin(event)">
-          <div class="form-group">
-            <label>Correo Electrónico o CUI</label>
-            <input type="text" id="loginUsername" class="input-field" placeholder="ejemplo@mineduc.gob.gt o 1000000090101" required>
+        <div class="hero-search-box">
+          <div class="search-input-group">
+            <i class="fa-solid fa-layer-group"></i>
+            <select class="search-select" id="heroFilterLevel">
+              <option value="">Todos los Niveles Educativos</option>
+              <option value="DIVERSIFICADO">Ciclo Diversificado</option>
+              <option value="BASICO">Ciclo Básico</option>
+              <option value="LICENCIATURA">Nivel Superior (Licenciatura)</option>
+            </select>
           </div>
-
-          <div class="form-group">
-            <div style="display: flex; justify-content: space-between;">
-              <label>Contraseña</label>
-              <a href="javascript:void(0)" onclick="showAlert('Para recuperar contraseña use /auth/forgot-password en Swagger UI', 'info')" style="color: var(--accent-blue); font-size: 11px; text-decoration: none;">¿Olvidaste tu contraseña?</a>
-            </div>
-            <div class="input-wrapper">
-              <input type="password" id="loginPassword" class="input-field" placeholder="••••••••" required>
-            </div>
+          <div class="search-input-group">
+            <i class="fa-solid fa-location-dot"></i>
+            <select class="search-select" id="heroFilterDepto">
+              <option value="">Todo el País (Cobertura Nacional)</option>
+              <option value="01">Guatemala</option>
+              <option value="09">Quetzaltenango</option>
+              <option value="16">Alta Verapaz</option>
+              <option value="13">Huehuetenango</option>
+            </select>
           </div>
-
-          <button type="submit" id="btnLoginSubmit" class="btn-submit">
-            Iniciar Sesión
+          <button class="btn btn-gold" onclick="scrollToCallsAndFilter()">
+            <i class="fa-solid fa-magnifying-glass"></i> Buscar
           </button>
-        </form>
+        </div>
 
-        <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 18px;">
-          Si tienes problemas para acceder, contacta al administrador del sistema MINEDUC.
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <a href="#convocatorias" class="btn btn-gold">
+            <i class="fa-solid fa-book-open"></i> Explorar Convocatorias
+          </a>
+          <button class="btn btn-outline" style="border-color: rgba(255,255,255,0.4); color: white;" onclick="openModal('modalRegister')">
+            <i class="fa-solid fa-id-card"></i> Inscribirme con CUI
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-image-wrapper">
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80" 
+             alt="Jóvenes estudiantes de diversas etnias en Guatemala estudiando juntos" 
+             class="hero-main-img">
+
+        <div class="floating-badge floating-badge-top">
+          <div class="badge-icon badge-icon-gold">
+            <i class="fa-solid fa-landmark"></i>
+          </div>
+          <div class="badge-text">
+            <h4>Fondos Garantizados</h4>
+            <p>100% Presupuesto del Estado</p>
+          </div>
+        </div>
+
+        <div class="floating-badge floating-badge-bottom">
+          <div class="badge-icon badge-icon-cyan">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <div class="badge-text">
+            <h4>Cobertura Nacional</h4>
+            <p>22 Departamentos y 340 Municipios</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PILARES -->
+  <section class="features-section">
+    <div class="container features-grid">
+      <div class="feature-card">
+        <div class="feature-icon-box">
+          <i class="fa-solid fa-laptop-code"></i>
+        </div>
+        <div class="feature-info">
+          <h3>100% Digital y Ágil</h3>
+          <p>Postula desde tu teléfono o computadora sin viajar a la capital.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">
+          <i class="fa-solid fa-hand-holding-heart"></i>
+        </div>
+        <div class="feature-info">
+          <h3>Inclusión y Equidad</h3>
+          <p>Prioridad para comunidades mayas, xincas, garífunas y áreas rurales.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="feature-info">
+          <h3>Cero Intermediarios</h3>
+          <p>Proceso transparente con validación biométrica RENAP de tu CUI.</p>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">
+          <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <div class="feature-info">
+          <h3>Evaluación Rúbrica</h3>
+          <p>Calificación técnica colegiada por comités académicos oficiales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CONVOCATORIAS VIGENTES -->
+  <section class="calls-section" id="convocatorias">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Oportunidades de Estudio</span>
+        <h2 class="section-title">Convocatorias Oficiales de Becas</h2>
+        <p class="section-desc">
+          Conoce los programas vigentes de estímulo económico mensual otorgados por el Ministerio de Educación.
         </p>
       </div>
 
-      <!-- VISTA 2: REGISTRO CON CORREO -->
-      <div id="viewRegister" style="display: none;">
-        <button type="button" class="btn-google" onclick="initiateGoogleLogin()">
-          <svg viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          Registrarme con Google
+      <div class="filter-tabs">
+        <button class="filter-btn active" onclick="filterCallsByTab('ALL')">Todas las Convocatorias</button>
+        <button class="filter-btn" onclick="filterCallsByTab('EXCELENCIA')">Excelencia Académica</button>
+        <button class="filter-btn" onclick="filterCallsByTab('ESCASOS')">Apoyo Socioeconómico</button>
+        <button class="filter-btn" onclick="filterCallsByTab('DIVERSIFICADO')">Ciclo Diversificado</button>
+      </div>
+
+      <div class="calls-grid" id="callsGridContainer">
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+          <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy); margin-bottom: 12px;"></i>
+          <p>Cargando convocatorias oficiales desde el servidor de AWS...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. CÓMO FUNCIONA -->
+  <section class="steps-section" id="como-funciona">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Guía de Postulación</span>
+        <h2 class="section-title">¿Cómo Postular a una Beca Nacional?</h2>
+        <p class="section-desc">
+          Un proceso claro en 4 pasos, diseñado para garantizar igualdad de oportunidades y máxima transparencia.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-box">
+          <div class="step-number">1</div>
+          <h3>Crea tu Cuenta</h3>
+          <p>Regístrate ingresando tu CUI verificado por RENAP o inicia sesión con tu cuenta de Google.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">2</div>
+          <h3>Llena tu Perfil</h3>
+          <p>Completa tu ficha socioeconómica y académica con tus datos de residencia y calificaciones.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">3</div>
+          <h3>Adjunta tus Bases</h3>
+          <p>Sube tus constancias y documentos probatorios en formato PDF seguro con validación criptográfica.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">4</div>
+          <h3>Recibe tu Expediente</h3>
+          <p>Obtén tu número oficial de expediente inmutable y da seguimiento en tiempo real al dictamen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. INCLUSIÓN Y DIVERSIDAD -->
+  <section class="inclusion-section" id="inclusion">
+    <div class="container inclusion-grid">
+      <div class="inclusion-gallery">
+        <img src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80" 
+             alt="Estudiante mujer sonriendo con cuaderno en Guatemala" 
+             class="inclusion-img">
+        <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?auto=format&fit=crop&w=800&q=80" 
+             alt="Joven estudiante indígena con mochila sonriendo" 
+             class="inclusion-img">
+        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80" 
+             alt="Aula con estudiantes diversos colaborando" 
+             class="inclusion-img">
+        <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80" 
+             alt="Estudiante universitaria graduada sonriendo" 
+             class="inclusion-img">
+      </div>
+
+      <div class="inclusion-content">
+        <span class="section-tag">Diversidad y Soberanía Nacional</span>
+        <h2>Una Beca para Cada Rincón de Guatemala</h2>
+        <p>
+          Reconocemos y celebramos la riqueza multicultural de nuestra nación. Las becas del Ministerio de Educación priorizan la equidad de género, pueblos originarios (Maya, Xinca y Garífuna), estudiantes con discapacidad y comunidades rurales tradicionalmente desatendidas.
+        </p>
+
+        <div class="stats-counter-strip">
+          <div class="counter-item">
+            <h3>22</h3>
+            <p>Departamentos</p>
+          </div>
+          <div class="counter-item">
+            <h3>340</h3>
+            <p>Municipios</p>
+          </div>
+          <div class="counter-item">
+            <h3>100%</h3>
+            <p>Auditoría Social</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. TESTIMONIOS -->
+  <section class="testimonials-section" id="testimonios">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Impacto Real</span>
+        <h2 class="section-title">Voces de Nuestra Juventud Becaria</h2>
+        <p class="section-desc">Historias de superación académica de jóvenes guatemaltecos que transforman su futuro.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <p class="testimonial-text">
+            "Gracias a la beca del MINEDUC pude graduarme de Perito Contador sin ser una carga económica para mis padres en Cantel. La plataforma me permitió subir mis papeles sin viajar a la capital."
+          </p>
+          <div class="student-profile">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="student-avatar" alt="Ana Lucía Morales">
+            <div class="student-info">
+              <h4>Ana Lucía Morales C.</h4>
+              <span>Quetzaltenango • Nivel Diversificado</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <p class="testimonial-text">
+            "El proceso con mi CUI fue transparente. Mi promedio de 88 puntos me permitió acceder a la beca de excelencia académica y continuar mis estudios en Cobán."
+          </p>
+          <div class="student-profile">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" class="student-avatar" alt="Carlos Pop Xol">
+            <div class="student-info">
+              <h4>Carlos Pop Xol</h4>
+              <span>Alta Verapaz • Nivel Básico</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <i class="fa-solid fa-quote-left quote-icon"></i>
+          <p class="testimonial-text">
+            "Pude iniciar sesión directamente con mi cuenta de Google y completar mi ficha socioeconómica en minutos. Es una plataforma moderna y digna de nuestro país."
+          </p>
+          <div class="student-profile">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" class="student-avatar" alt="Miriam Chocoj">
+            <div class="student-info">
+              <h4>Miriam Chocoj</h4>
+              <span>Chimaltenango • Nivel Diversificado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FOOTER -->
+  <footer class="main-footer" id="contacto">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <div class="brand-logo" style="margin-bottom: 16px;">
+          <div class="logo-emblem" style="width: 40px; height: 40px; font-size: 18px;">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="logo-text">
+            <h2 style="color: white; font-size: 17px;">MINEDUC BECAS</h2>
+            <span style="color: var(--accent-gold);">Gobierno de Guatemala</span>
+          </div>
+        </div>
+        <p>
+          Sistema Oficial de la Dirección de Becas Nacionales del Ministerio de Educación, encargado de la administración, postulación y adjudicación de becas del Estado.
+        </p>
+        <p style="font-size: 12px; color: #cbd5e1;">
+          <i class="fa-solid fa-location-dot"></i> 6a. Calle 1-36, Zona 10, Ciudad de Guatemala.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul class="footer-links">
+          <li><a href="#inicio"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
+          <li><a href="#convocatorias"><i class="fa-solid fa-angle-right"></i> Convocatorias Vigentes</a></li>
+          <li><a href="#como-funciona"><i class="fa-solid fa-angle-right"></i> Pasos para Postular</a></li>
+          <li><a href="#inclusion"><i class="fa-solid fa-angle-right"></i> Política de Inclusión</a></li>
+          <li><a href="/docs" target="_blank"><i class="fa-solid fa-angle-right"></i> Documentación OpenAPI</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Transparencia</h4>
+        <ul class="footer-links">
+          <li><a href="javascript:void(0)"><i class="fa-solid fa-angle-right"></i> Ley de Acceso a la Información (Dec. 57-2008)</a></li>
+          <li><a href="javascript:void(0)"><i class="fa-solid fa-angle-right"></i> Criterios de Selección y Rúbricas</a></li>
+          <li><a href="javascript:void(0)"><i class="fa-solid fa-angle-right"></i> Padrón Oficial de Beneficiarios</a></li>
+          <li><a href="javascript:void(0)"><i class="fa-solid fa-angle-right"></i> Denuncias Ciudadanas</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Canales de Atención</h4>
+        <p>¿Tienes dudas con tu registro o postulación?</p>
+        <p style="color: white; font-weight: 700; font-size: 16px;">
+          <i class="fa-solid fa-phone" style="color: var(--accent-gold);"></i> 1503 / 2411-9595
+        </p>
+        <p>Lunes a viernes de 8:00 a 16:30 horas.</p>
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <a href="#" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      <div>© 2026 Ministerio de Educación de Guatemala. Todos los derechos reservados.</div>
+      <div>Plataforma Segura • Cifrado AES-256 • Conexión Nube AWS</div>
+    </div>
+  </footer>
+
+  <!-- MODALES -->
+  <!-- 1. LOGIN -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalLogin')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <button type="button" class="btn-google-login" onclick="initiateGoogleLogin()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
+          Continuar con cuenta de Google
         </button>
 
-        <div class="divider"><span>o completa todos tus datos</span></div>
+        <div class="divider-text"><span>o ingresa con tus credenciales</span></div>
 
-        <form id="formRegister" onsubmit="handleEmailRegister(event)">
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Primer Nombre <span class="label-req">*</span></label>
-              <input type="text" id="regPrimerNombre" class="input-field" placeholder="Juan" required>
-            </div>
-            <div class="form-group">
-              <label>Segundo Nombre</label>
-              <input type="text" id="regSegundoNombre" class="input-field" placeholder="Carlos">
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Primer Apellido <span class="label-req">*</span></label>
-              <input type="text" id="regPrimerApellido" class="input-field" placeholder="Pérez" required>
-            </div>
-            <div class="form-group">
-              <label>Segundo Apellido</label>
-              <input type="text" id="regSegundoApellido" class="input-field" placeholder="Gómez">
-            </div>
+        <form id="formLoginModal" onsubmit="handleModalLogin(event)">
+          <div class="form-group">
+            <label>Correo Electrónico o CUI *</label>
+            <input type="text" id="loginUsername" class="input-control" placeholder="ejemplo@mineduc.gob.gt o 1000000010101" required>
           </div>
 
           <div class="form-group">
-            <label>CUI (13 dígitos numéricos) <span class="label-req">*</span></label>
-            <input type="text" id="regCui" class="input-field" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
-            <p class="input-hint">El CUI será verificado automáticamente con algoritmo Módulo 11.</p>
-          </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Teléfono <span class="label-req">*</span></label>
-              <input type="tel" id="regTelefono" class="input-field" placeholder="55551234" required>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <label style="margin-bottom: 0;">Contraseña *</label>
+              <a href="javascript:void(0)" onclick="showToast('Usa /api/v1/auth/forgot-password para recuperación', 'info')" style="color: var(--guate-cyan); font-size: 12px; font-weight: 600;">¿Olvidaste tu contraseña?</a>
             </div>
-            <div class="form-group">
-              <label>Fecha de Nacimiento</label>
-              <input type="date" id="regFechaNacimiento" class="input-field">
-            </div>
+            <input type="password" id="loginPassword" class="input-control" placeholder="••••••••" required>
           </div>
 
-          <div class="form-group">
-            <label>Correo Electrónico <span class="label-req">*</span></label>
-            <input type="email" id="regEmail" class="input-field" placeholder="juan.perez@estudiante.edu.gt" required>
-          </div>
-
-          <div class="form-group">
-            <label>Contraseña <span class="label-req">*</span></label>
-            <input type="password" id="regPassword" class="input-field" placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, #$@)" required>
-            <p class="input-hint">Debe incluir mayúscula, minúscula, número y símbolo especial.</p>
-          </div>
-
-          <button type="submit" id="btnRegisterSubmit" class="btn-submit">
-            Registrar Cuenta
+          <button type="submit" id="btnLoginModalSubmit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            Ingresar a la Plataforma
           </button>
         </form>
+
+        <p style="text-align: center; font-size: 13px; margin-top: 18px; color: var(--text-muted);">
+          ¿Aún no tienes cuenta? 
+          <a href="javascript:void(0)" onclick="closeModal('modalLogin'); openModal('modalRegister');" style="color: var(--primary-navy); font-weight: 700;">Regístrate aquí</a>
+        </p>
       </div>
-
-      <!-- VISTA 3: COMPLETAR REGISTRO GOOGLE (CUI OBLIGATORIO) -->
-      <div id="viewGoogleComplete" style="display: none;">
-        <div style="background: rgba(29, 114, 254, 0.15); border: 1px solid var(--accent-blue); padding: 14px; border-radius: 12px; margin-bottom: 20px;">
-          <h4 style="color: #93c5fd; font-size: 14px; margin-bottom: 4px;">🎉 ¡Casi listo!</h4>
-          <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
-            Te has autenticado correctamente con Google. Para darte de alta en el MINEDUC, ingresa tu CUI obligatorio y datos complementarios.
-          </p>
-        </div>
-
-        <form id="formGoogleComplete" onsubmit="handleGoogleComplete(event)">
-          <input type="hidden" id="googleRegToken">
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Primer Nombre</label>
-              <input type="text" id="googlePrimerNombre" class="input-field" required>
-            </div>
-            <div class="form-group">
-              <label>Primer Apellido</label>
-              <input type="text" id="googlePrimerApellido" class="input-field" required>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Correo de Google (Verificado)</label>
-            <input type="email" id="googleEmail" class="input-field" readonly style="opacity: 0.7; cursor: not-allowed;">
-          </div>
-
-          <div class="form-group">
-            <label>CUI (13 dígitos numéricos) <span class="label-req">*</span></label>
-            <input type="text" id="googleCui" class="input-field" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
-            <p class="input-hint">El CUI es obligatorio para vincular tu expediente de beca.</p>
-          </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Teléfono <span class="label-req">*</span></label>
-              <input type="tel" id="googleTelefono" class="input-field" placeholder="55551234" required>
-            </div>
-            <div class="form-group">
-              <label>Fecha de Nacimiento</label>
-              <input type="date" id="googleFechaNacimiento" class="input-field">
-            </div>
-          </div>
-
-          <button type="submit" id="btnGoogleCompleteSubmit" class="btn-submit">
-            Activar Cuenta y Entrar
-          </button>
-        </form>
-      </div>
-
-      <!-- VISTA 4: SESIÓN INICIADA (JWT ACTIVO) -->
-      <div id="viewSessionActive" class="session-card">
-        <div class="session-badge">
-          <span>●</span> Sesión Oficial Activa
-        </div>
-        <h3 id="sessionUserName" style="font-size: 18px; margin-bottom: 4px;">Bienvenido</h3>
-        <p id="sessionUserEmail" style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;"></p>
-        
-        <div style="font-size: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
-          <div><strong>CUI:</strong> <span id="sessionUserCui" style="color: #93c5fd;"></span></div>
-          <div><strong>Roles:</strong> <span id="sessionUserRoles" style="color: #86efac;"></span></div>
-        </div>
-
-        <label style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Access Token JWT:</label>
-        <div id="sessionToken" class="token-box"></div>
-
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <a id="btnSwaggerLink" href="http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com/docs" target="_blank" class="btn-submit" style="text-decoration: none; font-size: 13px; flex: 1;">
-            Abrir Swagger UI
-          </a>
-          <button type="button" onclick="logoutSession()" class="btn-submit" style="background: #334155; font-size: 13px; flex: 1;">
-            Cerrar Sesión
-          </button>
-        </div>
-      </div>
-
     </div>
   </div>
 
+  <!-- 2. REGISTER -->
+  <div class="modal-overlay" id="modalRegister">
+    <div class="modal-card modal-card-large">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-plus"></i> Registro de Postulante a Becas</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalRegister')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <button type="button" class="btn-google-login" onclick="initiateGoogleLogin()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="Google">
+          Registrarme rápidamente con Google
+        </button>
+
+        <div class="divider-text"><span>o completa el formulario oficial</span></div>
+
+        <form id="formRegisterModal" onsubmit="handleModalRegister(event)">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Primer Nombre *</label>
+              <input type="text" id="regPrimerNombre" class="input-control" placeholder="Ej. Juan" required>
+            </div>
+            <div class="form-group">
+              <label>Segundo Nombre</label>
+              <input type="text" id="regSegundoNombre" class="input-control" placeholder="Ej. Carlos">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Primer Apellido *</label>
+              <input type="text" id="regPrimerApellido" class="input-control" placeholder="Ej. Pérez" required>
+            </div>
+            <div class="form-group">
+              <label>Segundo Apellido</label>
+              <input type="text" id="regSegundoApellido" class="input-control" placeholder="Ej. Gómez">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>CUI (DPI de 13 dígitos numéricos) *</label>
+            <input type="text" id="regCui" class="input-control" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+            <p class="form-hint" id="cuiValidationHint">
+              <i class="fa-solid fa-shield-halved"></i> Será validado automáticamente mediante el algoritmo Módulo 11 de RENAP.
+            </p>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Teléfono de Contacto *</label>
+              <input type="tel" id="regTelefono" class="input-control" placeholder="55551234" required>
+            </div>
+            <div class="form-group">
+              <label>Correo Electrónico *</label>
+              <input type="email" id="regEmail" class="input-control" placeholder="estudiante@ejemplo.edu.gt" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña Segura *</label>
+            <input type="password" id="regPassword" class="input-control" placeholder="Mínimo 8 caracteres (A-Z, a-z, 0-9, #$@)" required>
+            <p class="form-hint">Debe incluir al menos una letra mayúscula, un número y un carácter especial.</p>
+          </div>
+
+          <button type="submit" id="btnRegisterModalSubmit" class="btn btn-gold" style="width: 100%; padding: 12px;">
+            Crear mi Cuenta de Postulante
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. GOOGLE COMPLETE -->
+  <div class="modal-overlay" id="modalGoogleComplete">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-check"></i> Activar Cuenta con Google</h3>
+      </div>
+      <div class="modal-body">
+        <div style="background-color: var(--info-bg); border-left: 4px solid var(--guate-cyan); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px;">
+          <strong>¡Autenticación con Google Exitosa!</strong><br>
+          Para finalizar tu alta en el MINEDUC y vincular tu expediente, ingresa tu CUI obligatorio y datos de contacto.
+        </div>
+
+        <form onsubmit="handleGoogleCompleteModal(event)">
+          <input type="hidden" id="googleRegToken">
+
+          <div class="form-group">
+            <label>Correo de Google (Verificado)</label>
+            <input type="email" id="googleEmail" class="input-control" readonly style="opacity: 0.8; cursor: not-allowed;">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Primer Nombre</label>
+              <input type="text" id="googlePrimerNombre" class="input-control" required>
+            </div>
+            <div class="form-group">
+              <label>Primer Apellido</label>
+              <input type="text" id="googlePrimerApellido" class="input-control" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>CUI (DPI de 13 dígitos) *</label>
+            <input type="text" id="googleCui" class="input-control" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="tel" id="googleTelefono" class="input-control" placeholder="55551234" required>
+          </div>
+
+          <button type="submit" id="btnGoogleCompleteSubmit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            Activar Cuenta y Acceder
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. STUDENT PROFILE -->
+  <div class="modal-overlay" id="modalStudentProfile">
+    <div class="modal-card modal-card-large">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-address-card"></i> Mi Ficha Socioeconómica y Académica</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalStudentProfile')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background-color: var(--guate-cyan-light); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; color: var(--primary-navy);">
+          <i class="fa-solid fa-circle-info"></i> Esta información es confidencial y requerida para postular a convocatorias oficiales (Sprint 2 - HU-001).
+        </div>
+
+        <form id="formStudentProfile" onsubmit="handleSaveProfile(event)">
+          <h4 style="margin-bottom: 14px; color: var(--primary-navy); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+            1. Datos de Residencia y Socioeconómicos
+          </h4>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Departamento de Residencia</label>
+              <select id="profileDeptoSelect" class="input-control" onchange="loadMunicipalitiesForProfile(this.value)">
+                <option value="">Selecciona departamento...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Municipio de Residencia</label>
+              <select id="profileMuniSelect" class="input-control">
+                <option value="">Selecciona municipio...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Dirección de Residencia</label>
+            <input type="text" id="profileDireccion" class="input-control" placeholder="Calle, avenida, aldea o cantón">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Tipo de Vivienda</label>
+              <select id="profileTipoVivienda" class="input-control">
+                <option value="PROPIA">Propia</option>
+                <option value="ALQUILADA">Alquilada</option>
+                <option value="PRESTADA">Prestada / Familiar</option>
+                <option value="ASENTAMIENTO">Comunidad / Asentamiento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ingreso Familiar Mensual (Q)</label>
+              <input type="number" id="profileIngresoFamiliar" class="input-control" step="0.01" placeholder="Ej. 2500.00">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Número de Dependientes del Hogar</label>
+              <input type="number" id="profileDependientes" class="input-control" min="1" max="20" value="1">
+            </div>
+            <div class="form-group">
+              <label>¿Tienes empleo actualmente?</label>
+              <select id="profileTieneEmpleo" class="input-control">
+                <option value="false">No (Dedicación exclusiva a estudios)</option>
+                <option value="true">Sí (Empleado / Trabajador independiente)</option>
+              </select>
+            </div>
+          </div>
+
+          <h4 style="margin: 24px 0 14px; color: var(--primary-navy); border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+            2. Datos Académicos
+          </h4>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Nivel Educativo Actual</label>
+              <select id="profileNivelSelect" class="input-control">
+                <option value="">Selecciona nivel...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Promedio General del Ciclo Anterior (pts)</label>
+              <input type="number" id="profilePromedio" class="input-control" step="0.1" min="0" max="100" placeholder="Ej. 85.5" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Centro Educativo de Origen</label>
+              <input type="text" id="profileInstitucion" class="input-control" placeholder="Ej. Instituto Nacional Central para Varones">
+            </div>
+            <div class="form-group">
+              <label>Carrera o Grado Cursado</label>
+              <input type="text" id="profileCarrera" class="input-control" placeholder="Ej. Bachillerato en Ciencias y Letras">
+            </div>
+          </div>
+
+          <button type="submit" id="btnSaveProfile" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Ficha del Estudiante
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CALL DETAIL -->
+  <div class="modal-overlay" id="modalCallDetail">
+    <div class="modal-card modal-card-large">
+      <div class="modal-header">
+        <h3 id="callDetailTitle"><i class="fa-solid fa-file-contract"></i> Ficha Técnica de Convocatoria</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalCallDetail')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="callDetailContent">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy);"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JAVASCRIPT -->
   <script>
-    let API_BASE = document.getElementById("apiBaseSelect").value;
+    const API_BASE = window.location.origin;
 
-    function changeApiBase() {
-      API_BASE = document.getElementById("apiBaseSelect").value;
-      document.getElementById("btnSwaggerLink").href = API_BASE + "/docs";
-      showAlert("Entorno cambiado a: " + API_BASE, "info");
-    }
+    let gCatalogs = {
+      departments: [],
+      educationLevels: [],
+      scholarshipTypes: []
+    };
 
-    function showAlert(msg, type = "error") {
-      const box = document.getElementById("alertBox");
-      box.textContent = msg;
-      box.className = "alert-box " + type;
-      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function hideAlert() {
-      const box = document.getElementById("alertBox");
-      box.className = "alert-box";
-      box.textContent = "";
-    }
-
-    function showTab(tab) {
-      hideAlert();
-      document.getElementById("viewSessionActive").style.display = "none";
-      document.getElementById("viewGoogleComplete").style.display = "none";
-      document.getElementById("tabsHeader").style.display = "flex";
-
-      if (tab === 'login') {
-        document.getElementById("tabLoginBtn").className = "tab-btn active";
-        document.getElementById("tabRegisterBtn").className = "tab-btn";
-        document.getElementById("viewLogin").style.display = "block";
-        document.getElementById("viewRegister").style.display = "none";
-      } else {
-        document.getElementById("tabLoginBtn").className = "tab-btn";
-        document.getElementById("tabRegisterBtn").className = "tab-btn active";
-        document.getElementById("viewLogin").style.display = "none";
-        document.getElementById("viewRegister").style.display = "block";
-      }
-    }
+    let gPublicCalls = [];
 
     function validateCuiAlgorithm(cui) {
       if (!cui || cui.length !== 13 || !/^\d+$/.test(cui)) return false;
+
       const depto = parseInt(cui.substring(9, 11), 10);
       if (depto < 1 || depto > 22) return false;
 
@@ -829,28 +1954,324 @@
 
     function validateCuiInput(input) {
       const val = input.value.trim();
+      const hint = document.getElementById("cuiValidationHint");
       if (val.length === 13) {
         if (validateCuiAlgorithm(val)) {
           input.style.borderColor = "var(--success)";
+          if (hint) hint.innerHTML = `<span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> CUI Válido según algoritmo RENAP (Módulo 11)</span>`;
         } else {
           input.style.borderColor = "var(--error)";
+          if (hint) hint.innerHTML = `<span style="color: var(--error); font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> CUI Inválido: Dígito verificador incorrecto. Ej: 1000000090101</span>`;
         }
       } else {
         input.style.borderColor = "var(--border-color)";
+        if (hint) hint.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Será validado automáticamente mediante el algoritmo Módulo 11 de RENAP.`;
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal(overlay.id);
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+      }
+    });
+
+    function toggleMobileMenu() {
+      const menu = document.querySelector('.nav-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+      if (menu.style.display === 'flex') {
+        menu.style.flexDirection = 'column';
+        menu.style.position = 'absolute';
+        menu.style.top = '100%';
+        menu.style.left = '0';
+        menu.style.right = '0';
+        menu.style.backgroundColor = 'white';
+        menu.style.padding = '20px';
+        menu.style.boxShadow = 'var(--shadow-lg)';
+      }
+    }
+
+    function showToast(msg, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      
+      let icon = "fa-circle-info";
+      if (type === "success") icon = "fa-circle-check";
+      if (type === "error") icon = "fa-triangle-exclamation";
+
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(50px)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+
+    async function loadCatalogs() {
+      try {
+        const [resDeptos, resNiveles, resTipos] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/catalogs/departments`),
+          fetch(`${API_BASE}/api/v1/catalogs/education-levels`),
+          fetch(`${API_BASE}/api/v1/catalogs/scholarship-types`)
+        ]);
+
+        if (resDeptos.ok) gCatalogs.departments = await resDeptos.json();
+        if (resNiveles.ok) gCatalogs.educationLevels = await resNiveles.json();
+        if (resTipos.ok) gCatalogs.scholarshipTypes = await resTipos.json();
+
+        const deptoSelect = document.getElementById("profileDeptoSelect");
+        if (deptoSelect) {
+          deptoSelect.innerHTML = '<option value="">Selecciona departamento...</option>' + 
+            gCatalogs.departments.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
+        }
+
+        const nivelSelect = document.getElementById("profileNivelSelect");
+        if (nivelSelect) {
+          nivelSelect.innerHTML = '<option value="">Selecciona nivel...</option>' + 
+            gCatalogs.educationLevels.map(n => `<option value="${n.id}">${n.nombre}</option>`).join('');
+        }
+      } catch (err) {
+        console.warn("Aviso al cargar catálogos:", err);
+      }
+    }
+
+    async function loadMunicipalitiesForProfile(deptoId) {
+      const muniSelect = document.getElementById("profileMuniSelect");
+      if (!deptoId) {
+        muniSelect.innerHTML = '<option value="">Selecciona municipio...</option>';
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/catalogs/municipalities?department_id=${deptoId}`);
+        if (res.ok) {
+          const munis = await res.json();
+          muniSelect.innerHTML = '<option value="">Selecciona municipio...</option>' + 
+            munis.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('');
+        }
+      } catch (err) {
+        console.error("Error al cargar municipios:", err);
+      }
+    }
+
+    async function loadScholarshipCalls() {
+      const container = document.getElementById("callsGridContainer");
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls?page_size=12`);
+        if (!res.ok) throw new Error("Error al obtener convocatorias.");
+
+        const data = await res.json();
+        gPublicCalls = data.items || [];
+
+        renderCallsGrid(gPublicCalls);
+      } catch (err) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: white; border-radius: 12px; border: 1px solid var(--border-color);">
+            <i class="fa-solid fa-triangle-exclamation fa-2x" style="color: var(--warning); margin-bottom: 12px;"></i>
+            <h4 style="color: var(--primary-navy); margin-bottom: 6px;">No se pudieron conectar las convocatorias</h4>
+            <p style="color: var(--text-muted); font-size: 14px;">${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderCallsGrid(calls) {
+      const container = document.getElementById("callsGridContainer");
+      if (!calls || calls.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: white; border-radius: var(--radius-md);">
+            <i class="fa-solid fa-folder-open fa-2x" style="color: var(--text-muted); margin-bottom: 10px;"></i>
+            <h4 style="color: var(--primary-navy);">No hay convocatorias que coincidan con el filtro</h4>
+            <p style="color: var(--text-muted); font-size: 14px;">Prueba seleccionando otro nivel educativo o departamento.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sampleImages = [
+        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&q=80"
+      ];
+
+      container.innerHTML = calls.map((call, idx) => {
+        const thumbImg = sampleImages[idx % sampleImages.length];
+        const montoFormateado = call.monto_individual ? `Q ${call.monto_individual.toLocaleString('es-GT', {minimumFractionDigits: 2})}` : 'Subvención Total';
+        
+        return `
+          <div class="call-card">
+            <div class="call-card-thumb">
+              <img src="${thumbImg}" alt="${call.titulo}" class="call-card-img">
+              <span class="call-badge-type">${call.tipo_beca || 'Convocatoria Oficial'}</span>
+              <span class="call-badge-status"><i class="fa-solid fa-clock"></i> Cierra en ${call.dias_restantes || 30} días</span>
+            </div>
+            <div class="call-card-body">
+              <div class="call-meta-bar">
+                <span class="call-code">${call.codigo}</span>
+                <span><i class="fa-solid fa-location-dot"></i> ${call.departamento_cobertura || 'Cobertura Nacional'}</span>
+              </div>
+              <h3 class="call-title">${call.titulo}</h3>
+              
+              <div class="call-stats-grid">
+                <div class="call-stat-item">
+                  <i class="fa-solid fa-money-bill-wave"></i>
+                  <div>
+                    <span style="display:block; font-size:10px; color:var(--text-muted); font-weight:700;">ESTIPENDIO</span>
+                    <strong>${montoFormateado}</strong>
+                  </div>
+                </div>
+                <div class="call-stat-item">
+                  <i class="fa-solid fa-users"></i>
+                  <div>
+                    <span style="display:block; font-size:10px; color:var(--text-muted); font-weight:700;">CUPOS</span>
+                    <strong>${call.cupos_disponibles} Estudiantes</strong>
+                  </div>
+                </div>
+                <div class="call-stat-item">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <div>
+                    <span style="display:block; font-size:10px; color:var(--text-muted); font-weight:700;">PROM. MÍNIMO</span>
+                    <strong>${call.promedio_minimo_requerido || 75} pts</strong>
+                  </div>
+                </div>
+                <div class="call-stat-item">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                  <div>
+                    <span style="display:block; font-size:10px; color:var(--text-muted); font-weight:700;">NIVEL</span>
+                    <strong style="font-size:11px;">${call.nivel_educativo || 'Diversificado'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="call-card-footer">
+                <button class="btn btn-outline" onclick="openCallDetail('${call.id}')">
+                  <i class="fa-solid fa-eye"></i> Ver Bases
+                </button>
+                <button class="btn btn-gold" onclick="handleApplyDirect('${call.id}')">
+                  <i class="fa-solid fa-paper-plane"></i> Postularme
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterCallsByTab(filterKey) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (filterKey === 'ALL') {
+        renderCallsGrid(gPublicCalls);
+      } else if (filterKey === 'EXCELENCIA') {
+        renderCallsGrid(gPublicCalls.filter(c => (c.tipo_beca || '').toLowerCase().includes('excelencia')));
+      } else if (filterKey === 'ESCASOS') {
+        renderCallsGrid(gPublicCalls.filter(c => (c.tipo_beca || '').toLowerCase().includes('escasos') || (c.tipo_beca || '').toLowerCase().includes('socioecon')));
+      } else if (filterKey === 'DIVERSIFICADO') {
+        renderCallsGrid(gPublicCalls.filter(c => (c.nivel_educativo || '').toLowerCase().includes('diversificado')));
+      }
+    }
+
+    function scrollToCallsAndFilter() {
+      document.getElementById('convocatorias').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function openCallDetail(callId) {
+      openModal('modalCallDetail');
+      const content = document.getElementById("callDetailContent");
+      content.innerHTML = `<div style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy);"></i></div>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls/${callId}`);
+        if (!res.ok) throw new Error("No se pudo cargar la convocatoria");
+        const call = await res.json();
+
+        document.getElementById("callDetailTitle").innerHTML = `<i class="fa-solid fa-file-contract"></i> ${call.codigo} - ${call.titulo}`;
+
+        content.innerHTML = `
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 15px; color: var(--text-body); line-height: 1.6; margin-bottom: 16px;">
+              ${call.descripcion}
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <span class="call-badge-type" style="position:static;">${call.tipo_beca_nombre}</span>
+              <span class="call-badge-status" style="position:static; background:var(--primary-navy);">${call.nivel_educativo_nombre}</span>
+              <span class="call-badge-status" style="position:static; background:var(--guate-cyan);">${call.departamento_nombre || 'Nacional'}</span>
+            </div>
+          </div>
+
+          <h4 style="color: var(--primary-navy); margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+            <i class="fa-solid fa-list-check"></i> Requisitos Documentales Obligatorios (PDF)
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+            ${(call.requisitos || []).map(r => `
+              <div style="background: var(--bg-alt); padding: 12px 16px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong style="color: var(--primary-navy); display: block;">${r.nombre}</strong>
+                  <span style="font-size: 12px; color: var(--text-muted);">${r.descripcion || 'Documento requerido en formato PDF oficial.'}</span>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 11px; font-weight: 700; color: ${r.es_obligatorio ? 'var(--error)' : 'var(--text-muted)'};">
+                    ${r.es_obligatorio ? 'OBLIGATORIO' : 'OPCIONAL'}
+                  </span>
+                  <span style="display: block; font-size: 11px; color: var(--text-muted);">Máx ${r.peso_maximo_mb || 5}MB</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="background: var(--guate-cyan-light); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 24px; font-size: 13px;">
+            <strong><i class="fa-solid fa-calendar-days"></i> Cronograma Oficial de la Convocatoria:</strong>
+            <ul style="margin-left: 20px; margin-top: 6px;">
+              <li>Apertura de Solicitudes: <strong>${call.cronograma_detalle?.apertura_solicitudes || 'Abierta'}</strong></li>
+              <li>Cierre de Solicitudes: <strong>${call.cronograma_detalle?.cierre_solicitudes || 'Próximo'}</strong></li>
+              <li>Publicación de Resultados: <strong>${call.cronograma_detalle?.publicacion_resultados || 'Por definir'}</strong></li>
+            </ul>
+          </div>
+
+          <div style="display: flex; gap: 12px;">
+            ${call.bases_url ? `
+              <a href="${call.bases_url}" target="_blank" class="btn btn-outline" style="flex: 1;">
+                <i class="fa-solid fa-file-pdf" style="color: var(--error);"></i> Descargar Bases Oficiales (PDF)
+              </a>
+            ` : ''}
+            <button class="btn btn-gold" style="flex: 1;" onclick="closeModal('modalCallDetail'); handleApplyDirect('${call.id}');">
+              <i class="fa-solid fa-paper-plane"></i> Iniciar Postulación
+            </button>
+          </div>
+        `;
+      } catch (err) {
+        content.innerHTML = `<div style="color: var(--error); padding: 20px;">${err.message}</div>`;
       }
     }
 
     function initiateGoogleLogin() {
-      hideAlert();
       window.location.href = `${API_BASE}/api/v1/auth/google/login`;
     }
 
-    async function handleEmailLogin(e) {
+    async function handleModalLogin(e) {
       e.preventDefault();
-      hideAlert();
-      const btn = document.getElementById("btnLoginSubmit");
+      const btn = document.getElementById("btnLoginModalSubmit");
       btn.disabled = true;
-      btn.textContent = "Verificando...";
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verificando credenciales...`;
 
       const username = document.getElementById("loginUsername").value.trim();
       const password = document.getElementById("loginPassword").value;
@@ -861,34 +2282,31 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
         });
-
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.detail || "Error al iniciar sesión.");
-        }
+        if (!res.ok) throw new Error(data.detail || "Error al iniciar sesión.");
 
-        renderSession(data);
+        closeModal('modalLogin');
+        setSession(data);
+        showToast(`¡Bienvenido, ${data.nombre_completo}!`, "success");
       } catch (err) {
-        showAlert(err.message, "error");
+        showToast(err.message, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Iniciar Sesión";
+        btn.innerHTML = `Ingresar a la Plataforma`;
       }
     }
 
-    async function handleEmailRegister(e) {
+    async function handleModalRegister(e) {
       e.preventDefault();
-      hideAlert();
-
       const cui = document.getElementById("regCui").value.trim();
       if (!validateCuiAlgorithm(cui)) {
-        showAlert("El CUI ingresado no es válido según el algoritmo del RENAP (Módulo 11). Ejemplo válido: 1000000090101", "error");
+        showToast("El CUI ingresado no cumple con el algoritmo Módulo 11 de RENAP.", "error");
         return;
       }
 
-      const btn = document.getElementById("btnRegisterSubmit");
+      const btn = document.getElementById("btnRegisterModalSubmit");
       btn.disabled = true;
-      btn.textContent = "Creando cuenta...";
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registrando postulante...`;
 
       const payload = {
         cui: cui,
@@ -907,35 +2325,31 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.detail || (data.message || "Error al registrar cuenta."));
-        }
+        if (!res.ok) throw new Error(data.detail || "Error al registrarse.");
 
-        showAlert("¡Registro completado! " + data.message + (data.data?.activation_url ? ` (Token de prueba generado: ${data.data.activation_token})` : ""), "success");
-        setTimeout(() => showTab('login'), 3500);
+        closeModal('modalRegister');
+        showToast("¡Registro exitoso! " + (data.message || "") + (data.data?.activation_url ? ` Token de prueba: ${data.data.activation_token}` : ""), "success");
+        setTimeout(() => openModal('modalLogin'), 2000);
       } catch (err) {
-        showAlert(err.message, "error");
+        showToast(err.message, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Registrar Cuenta";
+        btn.innerHTML = `Crear mi Cuenta de Postulante`;
       }
     }
 
-    async function handleGoogleComplete(e) {
+    async function handleGoogleCompleteModal(e) {
       e.preventDefault();
-      hideAlert();
-
       const cui = document.getElementById("googleCui").value.trim();
       if (!validateCuiAlgorithm(cui)) {
-        showAlert("El CUI ingresado no es válido según el algoritmo del RENAP (Módulo 11). Ejemplo válido: 1000000090101", "error");
+        showToast("El CUI ingresado no es válido según el algoritmo del RENAP.", "error");
         return;
       }
 
       const btn = document.getElementById("btnGoogleCompleteSubmit");
       btn.disabled = true;
-      btn.textContent = "Activando cuenta...";
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Vinculando cuenta...`;
 
       const payload = {
         registration_token: document.getElementById("googleRegToken").value,
@@ -953,69 +2367,188 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.detail || "Error al completar el registro con Google.");
-        }
+        if (!res.ok) throw new Error(data.detail || "Error al completar registro.");
 
-        renderSession(data);
+        closeModal('modalGoogleComplete');
+        setSession(data);
+        showToast("¡Cuenta activada y vinculada exitosamente con Google!", "success");
       } catch (err) {
-        showAlert(err.message, "error");
+        showToast(err.message, "error");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Activar Cuenta y Entrar";
+        btn.innerHTML = `Activar Cuenta y Acceder`;
       }
     }
 
-    function renderSession(data) {
-      document.getElementById("viewLogin").style.display = "none";
-      document.getElementById("viewRegister").style.display = "none";
-      document.getElementById("viewGoogleComplete").style.display = "none";
-      document.getElementById("tabsHeader").style.display = "none";
-      hideAlert();
-
-      document.getElementById("viewSessionActive").style.display = "block";
-      document.getElementById("sessionUserName").textContent = "¡Bienvenido, " + (data.nombre_completo || "Usuario") + "!";
-      document.getElementById("sessionUserEmail").textContent = data.email || "";
-      document.getElementById("sessionUserCui").textContent = data.cui || "Pendiente";
-      document.getElementById("sessionUserRoles").textContent = (data.roles || []).join(", ");
-      document.getElementById("sessionToken").textContent = data.access_token || "";
-
+    function setSession(data) {
       sessionStorage.setItem("access_token", data.access_token);
+      sessionStorage.setItem("user_name", data.nombre_completo || "Usuario");
+      sessionStorage.setItem("user_email", data.email || "");
+      sessionStorage.setItem("user_cui", data.cui || "");
+      sessionStorage.setItem("user_roles", JSON.stringify(data.roles || []));
+
+      renderUserNavBar();
+    }
+
+    function renderUserNavBar() {
+      const token = sessionStorage.getItem("access_token");
+      const name = sessionStorage.getItem("user_name") || "Postulante";
+      const actionsContainer = document.getElementById("headerAuthActions");
+
+      if (token) {
+        actionsContainer.innerHTML = `
+          <div class="user-auth-panel">
+            <button class="btn btn-outline" onclick="openStudentProfileModal()">
+              <i class="fa-solid fa-address-card"></i> Mi Ficha
+            </button>
+            <div class="user-badge">
+              <div class="user-avatar">${name.charAt(0)}</div>
+              <span>${name}</span>
+            </div>
+            <button class="btn btn-outline" onclick="logoutSession()" title="Cerrar Sesión">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        actionsContainer.innerHTML = `
+          <button class="btn btn-outline" onclick="openModal('modalLogin')">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+          </button>
+          <button class="btn btn-gold" onclick="openModal('modalRegister')">
+            <i class="fa-solid fa-user-plus"></i> Registrarme
+          </button>
+        `;
+      }
     }
 
     function logoutSession() {
-      sessionStorage.removeItem("access_token");
-      showTab('login');
-      showAlert("Sesión cerrada.", "info");
+      sessionStorage.clear();
+      renderUserNavBar();
+      showToast("Has cerrado sesión exitosamente.", "info");
+    }
+
+    async function openStudentProfileModal() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) {
+        openModal('modalLogin');
+        return;
+      }
+
+      openModal('modalStudentProfile');
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/students/me/profile`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const p = await res.json();
+          if (p.departamento_residencia_id) {
+            document.getElementById("profileDeptoSelect").value = p.departamento_residencia_id;
+            await loadMunicipalitiesForProfile(p.departamento_residencia_id);
+            if (p.municipio_residencia_id) document.getElementById("profileMuniSelect").value = p.municipio_residencia_id;
+          }
+          document.getElementById("profileDireccion").value = p.direccion_residencia || '';
+          document.getElementById("profileTipoVivienda").value = p.tipo_vivienda || 'PROPIA';
+          document.getElementById("profileIngresoFamiliar").value = p.ingreso_mensual_familiar || 0;
+          document.getElementById("profileDependientes").value = p.dependientes_hogar || 1;
+          document.getElementById("profileTieneEmpleo").value = p.tiene_empleo ? "true" : "false";
+          
+          if (p.nivel_educativo_id) document.getElementById("profileNivelSelect").value = p.nivel_educativo_id;
+          document.getElementById("profilePromedio").value = p.promedio_general || 0;
+          document.getElementById("profileInstitucion").value = p.institucion_origen || '';
+          document.getElementById("profileCarrera").value = p.carrera_o_grado || '';
+        }
+      } catch (err) {
+        console.error("Error al cargar perfil:", err);
+      }
+    }
+
+    async function handleSaveProfile(e) {
+      e.preventDefault();
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const btn = document.getElementById("btnSaveProfile");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando datos...`;
+
+      const payload = {
+        direccion_residencia: document.getElementById("profileDireccion").value.trim() || null,
+        departamento_residencia_id: document.getElementById("profileDeptoSelect").value || null,
+        municipio_residencia_id: document.getElementById("profileMuniSelect").value || null,
+        tipo_vivienda: document.getElementById("profileTipoVivienda").value,
+        ingreso_mensual_familiar: parseFloat(document.getElementById("profileIngresoFamiliar").value) || 0.0,
+        dependientes_hogar: parseInt(document.getElementById("profileDependientes").value, 10) || 1,
+        tiene_empleo: document.getElementById("profileTieneEmpleo").value === "true",
+        ingreso_propio: 0.0,
+        nivel_educativo_id: document.getElementById("profileNivelSelect").value || null,
+        institucion_origen: document.getElementById("profileInstitucion").value.trim() || null,
+        carrera_o_grado: document.getElementById("profileCarrera").value.trim() || null,
+        promedio_general: parseFloat(document.getElementById("profilePromedio").value) || 0.0,
+        carnet_estudiantil: null,
+        perfil_completo: true
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/students/me/profile`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || "Error al guardar el perfil.");
+        }
+
+        closeModal('modalStudentProfile');
+        showToast("¡Ficha del estudiante actualizada exitosamente!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Guardar Ficha del Estudiante`;
+      }
+    }
+
+    function handleApplyDirect(callId) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) {
+        showToast("Debes iniciar sesión para postular a esta beca.", "info");
+        openModal('modalLogin');
+        return;
+      }
+      showToast("¡Tu sesión está activa! En el siguiente paso podrás cargar tus atestados PDF en el Sprint 3.", "success");
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      renderUserNavBar();
+      loadCatalogs();
+      loadScholarshipCalls();
+
       const params = new URLSearchParams(window.location.search);
-      
       if (params.get("access_token")) {
-        renderSession({
+        setSession({
           access_token: params.get("access_token"),
           email: params.get("email") || "",
-          cui: params.get("cui") || "Registrado",
-          nombre_completo: params.get("nombre") || "Usuario Google",
+          cui: params.get("cui") || "",
+          nombre_completo: params.get("nombre") || "Postulante",
           roles: ["POSTULANTE"]
         });
-        showAlert("¡Sesión iniciada con Google exitosamente!", "success");
+        showToast("¡Inicio de sesión con Google completado!", "success");
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (params.get("registration_token")) {
-        document.getElementById("tabsHeader").style.display = "none";
-        document.getElementById("viewLogin").style.display = "none";
-        document.getElementById("viewRegister").style.display = "none";
-        document.getElementById("viewGoogleComplete").style.display = "block";
-
         document.getElementById("googleRegToken").value = params.get("registration_token");
         document.getElementById("googleEmail").value = params.get("email") || "";
         document.getElementById("googlePrimerNombre").value = params.get("primer_nombre") || "";
         document.getElementById("googlePrimerApellido").value = params.get("primer_apellido") || "";
-        
-        showAlert("Autenticación con Google completada. Por favor ingresa tu CUI obligatorio para activar tu cuenta.", "info");
+
+        openModal('modalGoogleComplete');
+        showToast("Ingresa tu CUI obligatorio para activar tu cuenta.", "info");
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     });

@@ -3,9 +3,8 @@ from datetime import datetime, timezone
 import uuid
 from sqlalchemy import Column, String, Boolean, DateTime, Integer, ForeignKey, Text, Table
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base, relationship
-
-Base = declarative_base()
+from sqlalchemy.orm import relationship
+from app.core.database import Base
 
 # Tabla asociativa Usuarios - Roles (Muchos a Muchos)
 user_roles = Table(
