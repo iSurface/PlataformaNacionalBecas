@@ -3,10 +3,17 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal, engine
 from app.infrastructure.models.user import Base, User, Person, Role, Permission
 from app.infrastructure.models.catalog import Department, Municipality, EducationLevel, ScholarshipType
+from app.infrastructure.models.scholarship import ScholarshipCall, CallRequirement
+from app.infrastructure.models.student_profile import StudentProfile
+from app.infrastructure.models.application import Application, ApplicationDocument, ApplicationStatusHistory
+from app.infrastructure.models.evaluation import EvaluationCommittee, CommitteeMember, ApplicationAssignment, EvaluationScore
+from app.infrastructure.models.resolution import CommitteeAct, AwardResolution, ApplicationEvent, InternalNotification, AuditLog
 from app.core.security import get_password_hash
+from datetime import datetime, timezone, timedelta
+import hashlib
 
 def seed_initial_data():
-    """Siembra los datos iniciales indispensables de seguridad, roles y catálogos en PostgreSQL"""
+    """Siembra los datos iniciales indispensables de seguridad, roles, catálogos y Sprints 1 a 5"""
     Base.metadata.create_all(bind=engine)
     db: Session = SessionLocal()
     try:
@@ -34,10 +41,10 @@ def seed_initial_data():
         roles_data = [
             ("SYSADMIN", "Administrador Técnico", "Acceso global al sistema y seguridad", list(perms_map.values())),
             ("POSTULANTE", "Postulante / Estudiante", "Aspirante ciudadano a programas de becas", [perms_map["SCHOLARSHIP_VIEW"]]),
+            ("ADMIN_MINEDUC", "Administrador MINEDUC", "Gestión de convocatorias y expedientes", [perms_map["SCHOLARSHIP_MANAGE"], perms_map["SCHOLARSHIP_VIEW"], perms_map["EVALUATION_MANAGE"]]),
             ("ADMIN_BECAS", "Administrador de Becas", "Gestión de convocatorias y expedientes", [perms_map["SCHOLARSHIP_MANAGE"], perms_map["SCHOLARSHIP_VIEW"]]),
             ("EVALUADOR", "Evaluador Académico", "Calificación técnica y ética de solicitudes", [perms_map["EVALUATION_MANAGE"]]),
-            ("COORD_COMITE", "Coordinador de Comité", "Liderazgo de comités y dirimencia", [perms_map["EVALUATION_MANAGE"]]),
-            ("AUTORIDAD", "Autoridad de Aprobación", "Firma y emisión de resoluciones ministeriales", [perms_map["SCHOLARSHIP_VIEW"]]),
+            ("DIRECTOR", "Director Ministerial", "Aprobación y resolución de becas", [perms_map["SCHOLARSHIP_MANAGE"], perms_map["AUDIT_VIEW"]]),
             ("AUDITOR", "Auditor de Control", "Fiscalización y consulta de bitácoras", [perms_map["AUDIT_VIEW"]])
         ]
         roles_map = {}
@@ -59,7 +66,7 @@ def seed_initial_data():
                 email=admin_email,
                 password_hash=get_password_hash("AdminBecas2026!#Segura"),
                 estado="ACTIVO",
-                roles=[roles_map["SYSADMIN"]]
+                roles=[roles_map["SYSADMIN"], roles_map["ADMIN_MINEDUC"]]
             )
             db.add(admin_user)
             db.flush()
@@ -72,6 +79,50 @@ def seed_initial_data():
             )
             db.add(admin_person)
             print(f" -> Creado Usuario SysAdmin inicial: {admin_email}")
+
+        # 3.1 Usuario Evaluador
+        eval_email = "evaluador1@becas.mineduc.gob.gt"
+        eval_user = db.query(User).filter(User.email == eval_email).first()
+        if not eval_user:
+            eval_user = User(
+                cui="2000000010101",
+                email=eval_email,
+                password_hash=get_password_hash("Evaluador2026!#Seguro"),
+                estado="ACTIVO",
+                roles=[roles_map["EVALUADOR"]]
+            )
+            db.add(eval_user)
+            db.flush()
+            eval_person = Person(
+                usuario_id=eval_user.id,
+                primer_nombre="Carlos",
+                primer_apellido="Méndez",
+                telefono="24119596"
+            )
+            db.add(eval_person)
+            print(f" -> Creado Usuario Evaluador: {eval_email}")
+
+        # 3.2 Usuario Estudiante Demo
+        student_email = "estudiante.demo@becas.mineduc.gob.gt"
+        student_user = db.query(User).filter(User.email == student_email).first()
+        if not student_user:
+            student_user = User(
+                cui="3000000010101",
+                email=student_email,
+                password_hash=get_password_hash("Estudiante2026!#Seguro"),
+                estado="ACTIVO",
+                roles=[roles_map["POSTULANTE"]]
+            )
+            db.add(student_user)
+            db.flush()
+            student_person = Person(
+                usuario_id=student_user.id,
+                primer_nombre="Lucía",
+                primer_apellido="Morales",
+                telefono="55551234"
+            )
+            db.add(student_person)
+            print(f" -> Creado Usuario Estudiante Demo: {student_email}")
 
         # 4. Departamentos de Guatemala
         deptos_data = [
@@ -134,41 +185,37 @@ def seed_initial_data():
                 db.flush()
             tipos_map[code] = stype
 
-        # 7. Convocatorias Iniciales del MINEDUC (Sprint 2 - HU-002, HU-004)
-        from app.infrastructure.models.scholarship import ScholarshipCall, CallRequirement
-        from datetime import datetime, timezone, timedelta
-
+        # 7. Convocatorias Iniciales del MINEDUC
+        lvl_div = db.query(EducationLevel).filter(EducationLevel.codigo == "DIVERSIFICADO").first()
+        now = datetime.now(timezone.utc)
         call_medio = db.query(ScholarshipCall).filter(ScholarshipCall.codigo == "BEC-2026-MEDIO-01").first()
         if not call_medio:
-            lvl_div = db.query(EducationLevel).filter(EducationLevel.codigo == "DIVERSIFICADO").first()
-            now = datetime.now(timezone.utc)
             call_medio = ScholarshipCall(
                 codigo="BEC-2026-MEDIO-01",
                 titulo="Beca Nacional al Mérito Académico - Nivel Diversificado 2026",
                 descripcion="Programa ministerial de estímulo económico mensual para estudiantes sobresalientes de ciclo diversificado en todo el territorio nacional.",
                 tipo_beca_id=tipos_map["EXCELENCIA_ACADEMICA"].id,
                 nivel_educativo_id=lvl_div.id if lvl_div else list(tipos_map.values())[0].id,
-                departamento_id=None, # Cobertura Nacional
+                departamento_id=None,
                 cupos_disponibles=500,
                 presupuesto_total=4500000.00,
                 monto_individual=1000.00,
                 promedio_minimo_requerido=85.0,
-                fecha_inicio=now - timedelta(days=5),
-                fecha_cierre=now + timedelta(days=45),
+                fecha_inicio=now - timedelta(days=10),
+                fecha_cierre=now + timedelta(days=35),
                 estado="PUBLICADA",
                 bases_url="https://becas.mineduc.gob.gt/bases/bases_convocatoria_medio_2026.pdf",
                 cronograma_detalle={
-                    "apertura_solicitudes": (now - timedelta(days=5)).strftime("%Y-%m-%d"),
-                    "cierre_solicitudes": (now + timedelta(days=45)).strftime("%Y-%m-%d"),
-                    "periodo_evaluacion": (now + timedelta(days=50)).strftime("%Y-%m-%d"),
-                    "publicacion_resultados": (now + timedelta(days=65)).strftime("%Y-%m-%d")
+                    "apertura_solicitudes": (now - timedelta(days=10)).strftime("%Y-%m-%d"),
+                    "cierre_solicitudes": (now + timedelta(days=35)).strftime("%Y-%m-%d"),
+                    "periodo_evaluacion": (now + timedelta(days=40)).strftime("%Y-%m-%d"),
+                    "publicacion_resultados": (now + timedelta(days=55)).strftime("%Y-%m-%d")
                 },
                 creado_por_id=admin_user.id
             )
             db.add(call_medio)
             db.flush()
 
-            # Requisitos oficiales
             reqs = [
                 ("Certificado Oficial de Calificaciones del Ciclo Anterior", "Emitido por la dirección del centro educativo con sello oficial", True, "PDF", 5, 1),
                 ("Certificado de Nacimiento (RENAP) o Fotocopia de DPI", "Documento de identificación vigente y legible", True, "PDF", 5, 2),
@@ -186,8 +233,127 @@ def seed_initial_data():
                 ))
             print(" -> Convocatoria Nivel Diversificado sembrada exitosamente")
 
+        # 8. Perfil Estudiante Demo
+        if student_user:
+            profile = db.query(StudentProfile).filter(StudentProfile.usuario_id == student_user.id).first()
+            if not profile:
+                profile = StudentProfile(
+                    usuario_id=student_user.id,
+                    departamento_residencia_id=dept_map["01"].id,
+                    institucion_origen="Instituto Nacional Central para Varones",
+                    carrera_o_grado="Bachillerato en Ciencias y Letras",
+                    promedio_general=92.5,
+                    ingreso_mensual_familiar=3200.0,
+                    dependientes_hogar=4,
+                    tipo_vivienda="ALQUILADA",
+                    perfil_completo=True
+                )
+                db.add(profile)
+                db.flush()
+
+        # 9. Comité Evaluador Colegiado (Sprint 4)
+        committee = db.query(EvaluationCommittee).filter(EvaluationCommittee.codigo == "COM-2026-MEDIO-01").first()
+        if not committee and call_medio:
+            committee = EvaluationCommittee(
+                codigo="COM-2026-MEDIO-01",
+                nombre="Comité Colegiado de Evaluación de Becas de Diversificado",
+                convocatoria_id=call_medio.id,
+                estado="ACTIVO"
+            )
+            db.add(committee)
+            db.flush()
+
+            if eval_user:
+                member = CommitteeMember(
+                    comite_id=committee.id,
+                    usuario_id=eval_user.id,
+                    rol_comite="EVALUADOR",
+                    declaracion_conflicto=True,
+                    fecha_declaracion=now - timedelta(days=2)
+                )
+                db.add(member)
+            print(" -> Comité Evaluador Colegiado sembrado")
+
+        # 10. Expediente Demo Adjudicado (Sprint 3, 4 y 5)
+        if student_user and call_medio:
+            app_demo = db.query(Application).filter(Application.postulante_id == student_user.id).first()
+            if not app_demo:
+                app_demo = Application(
+                    numero_expediente="EXP-2026-MEDIO-00001",
+                    postulante_id=student_user.id,
+                    convocatoria_id=call_medio.id,
+                    estado="ADJUDICADA",
+                    promedio_postulacion=92.5,
+                    puntaje_ponderado_comite=94.5,
+                    dictamen_comite="RECOMENDADO",
+                    fecha_envio=now - timedelta(days=8),
+                    verificado_por_id=admin_user.id,
+                    observaciones_verificacion="Expediente cumple cabalmente con todos los requisitos de bases y atestados probatorios."
+                )
+                db.add(app_demo)
+                db.flush()
+
+                # Trazabilidad completa (Sprint 5 - HU-003)
+                events_data = [
+                    ("CREACION", "Borrador de Expediente Creado", "Se inició el expediente digital.", now - timedelta(days=9)),
+                    ("ENVIO", "Expediente Formalizado", "Postulación formalizada con correlativo oficial EXP-2026-MEDIO-00001.", now - timedelta(days=8)),
+                    ("VERIFICACION", "Filtro Administrativo: ADMISIBLE", "Verificación legal y documental concluida satisfactoriamente.", now - timedelta(days=6)),
+                    ("ASIGNACION", "Asignación a Comité Colegiado", "Expediente asignado al Comité de Becas de Diversificado.", now - timedelta(days=5)),
+                    ("EVALUACION", "Dictamen Colegiado Favorable", "Calificación ponderada: 94.50 / 100 puntos (RECOMENDADO).", now - timedelta(days=3)),
+                    ("ADJUDICACION", "Beca Oficialmente Adjudicada", "Adjudicación ministerial emitida mediante Resolución RES-MINEDUC-2026-0042.", now - timedelta(days=1)),
+                ]
+                for te, tit, desc, dt in events_data:
+                    db.add(ApplicationEvent(
+                        solicitud_id=app_demo.id,
+                        tipo_evento=te,
+                        titulo=tit,
+                        descripcion=desc,
+                        actor_id=admin_user.id,
+                        visible_estudiante=True,
+                        creado_en=dt
+                    ))
+
+                # Notificación al estudiante (HU-005)
+                db.add(InternalNotification(
+                    usuario_id=student_user.id,
+                    titulo="¡Felicidades! Beca Adjudicada",
+                    mensaje="Tu expediente EXP-2026-MEDIO-00001 ha sido aprobado y adjudicado oficialmente mediante Resolución Ministerial RES-MINEDUC-2026-0042.",
+                    tipo="SUCCESS",
+                    leida=False,
+                    creado_en=now - timedelta(days=1)
+                ))
+
+                # Resolución Ministerial Oficial (HU-002)
+                res_demo = db.query(AwardResolution).filter(AwardResolution.numero_resolucion == "RES-MINEDUC-2026-0042").first()
+                if not res_demo:
+                    res_demo = AwardResolution(
+                        convocatoria_id=call_medio.id,
+                        numero_resolucion="RES-MINEDUC-2026-0042",
+                        titulo="Resolución de Adjudicación Oficial de Becas al Mérito Diversificado 2026",
+                        considerando="Que la educación es un derecho humano y deber del Estado garantizar becas a jóvenes de rendimiento destacado.",
+                        por_tanto="Se adjudica el beneficio económico mensual a los estudiantes recomendados por el Comité Colegiado.",
+                        total_becarios_adjudicados=120,
+                        monto_total_comprometido=1200000.00,
+                        emitida_por_id=admin_user.id,
+                        estado="PUBLICADA",
+                        fecha_resolucion=now - timedelta(days=1)
+                    )
+                    db.add(res_demo)
+
+                # Bitácora Inmutable de Auditoría (HU-008)
+                db.add(AuditLog(
+                    usuario_id=admin_user.id,
+                    modulo="ADJUDICACION",
+                    accion="EMITIR_RESOLUCION_MINISTERIAL",
+                    entidad="AwardResolution",
+                    entidad_id="RES-MINEDUC-2026-0042",
+                    datos_nuevos={"total_becarios": 120, "monto_total": 1200000.00},
+                    timestamp=now - timedelta(days=1)
+                ))
+                print(" -> Expediente Demo Adjudicado y Resolución Ministerial sembrados exitosamente")
+
         db.commit()
-        print("¡Siembra de datos iniciales en PostgreSQL completada al 100%!")
+        print("¡Siembra de datos completa (Sprints 1 a 5) en PostgreSQL completada al 100%!")
     except Exception as ex:
         db.rollback()
         print(f"Error sembrando datos: {ex}")

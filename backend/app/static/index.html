@@ -1272,6 +1272,9 @@
         <li class="nav-item"><a href="#como-funciona">¿Cómo Funciona?</a></li>
         <li class="nav-item"><a href="#inclusion">Inclusión y Equidad</a></li>
         <li class="nav-item"><a href="#testimonios">Testimonios</a></li>
+        <li class="nav-item"><a href="#transparencia">Transparencia</a></li>
+        <li class="nav-item" id="navMyExpediente" style="display:none;"><a href="javascript:void(0)" onclick="openMyExpedienteModal()"><i class="fa-solid fa-folder-open"></i> Mi Expediente</a></li>
+        <li class="nav-item" id="navAdminDashboard" style="display:none;"><a href="javascript:void(0)" onclick="openAdminPanelModal()"><i class="fa-solid fa-chart-line"></i> Gestión MINEDUC</a></li>
         <li class="nav-item"><a href="#contacto">Contacto</a></li>
       </ul>
 
@@ -1571,6 +1574,57 @@
               <span>Chimaltenango • Nivel Diversificado</span>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- 8.5 TRANSPARENCY SECTION (Sprint 5 - HU-007) -->
+  <section class="section-padding" id="transparencia" style="background: white; border-top: 1px solid var(--border-color); padding: 80px 0;">
+    <div class="container">
+      <div style="text-align: center; max-width: 760px; margin: 0 auto 40px auto;">
+        <span class="badge" style="background: #e0f2fe; color: #0284c7; padding: 6px 16px; border-radius: 9999px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-scale-balanced"></i> Fiscalización Ciudadana y Datos Abiertos
+        </span>
+        <h2 style="font-size: 32px; color: var(--primary-navy); margin-top: 12px; margin-bottom: 12px;">
+          Padrón Público de Beneficiarios de Becas
+        </h2>
+        <p style="color: var(--text-muted); font-size: 15px;">
+          En cumplimiento del <strong>Decreto 57-2008 del Congreso de la República (Ley de Acceso a la Información Pública)</strong>, se publica el registro oficial de estudiantes adjudicados con protección y anonimización de datos sensibles de menores.
+        </p>
+      </div>
+
+      <div style="background: var(--bg-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); overflow: hidden;">
+        <div style="padding: 20px 24px; background: var(--bg-alt); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--accent-gold); font-size: 20px;"></i>
+            <span style="font-weight: 700; color: var(--primary-navy);">Registro Oficial de Beneficiarios 2026</span>
+          </div>
+          <button class="btn btn-outline" onclick="loadTransparencyRegistry()" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-arrows-rotate"></i> Actualizar Padrón
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+            <thead>
+              <tr style="background: #f8fafc; color: var(--primary-navy); border-bottom: 2px solid var(--border-color);">
+                <th style="padding: 14px 20px;">No. Expediente</th>
+                <th style="padding: 14px 20px;">Beneficiario (Anonimizado)</th>
+                <th style="padding: 14px 20px;">Programa de Beca</th>
+                <th style="padding: 14px 20px;">Departamento</th>
+                <th style="padding: 14px 20px;">Estipendio</th>
+                <th style="padding: 14px 20px;">Resolución Oficial</th>
+              </tr>
+            </thead>
+            <tbody id="transparencyTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                  <i class="fa-solid fa-circle-notch fa-spin"></i> Cargando padrón oficial de transparencia...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -2529,6 +2583,7 @@
       renderUserNavBar();
       loadCatalogs();
       loadScholarshipCalls();
+      loadTransparencyRegistry();
 
       const params = new URLSearchParams(window.location.search);
       if (params.get("access_token")) {
@@ -2553,5 +2608,230 @@
       }
     });
   </script>
+  <!-- MODAL: EXPEDIENTE DIGITAL Y TRAZABILIDAD (Sprint 3, 4, 5) -->
+  <div class="modal-backdrop" id="modalMyExpediente">
+    <div class="modal-card" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; margin: 0; color: var(--primary-navy);">Expediente Digital de Postulación</h3>
+            <span style="font-size: 12px; color: var(--text-muted);" id="expedienteSubtitle">Cargando expediente...</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modalMyExpediente')">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 24px;">
+        <!-- Banner de Estado -->
+        <div id="expedienteStateBanner" style="padding: 16px 20px; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <span style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase;">Estado del Expediente</span>
+            <h4 id="expedienteStateText" style="margin: 2px 0 0 0; color: #15803d; font-size: 20px;">BORRADOR</h4>
+          </div>
+          <div id="expedienteCorrelativoBadge" style="background: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-family: monospace; font-size: 14px; color: var(--primary-navy); border: 1px solid #bbf7d0;">
+            SIN CORRELATIVO
+          </div>
+        </div>
+
+        <!-- Carga de Atestados con SHA-256 -->
+        <div style="margin-bottom: 28px;">
+          <h4 style="font-size: 16px; color: var(--primary-navy); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-file-shield" style="color: var(--accent-gold);"></i> Atestados Probatorios en PDF (Integridad SHA-256)
+          </h4>
+          <div id="expedienteDocsList" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+              Cargando requisitos...
+            </div>
+          </div>
+        </div>
+
+        <!-- Línea de Tiempo de Trazabilidad -->
+        <div>
+          <h4 style="font-size: 16px; color: var(--primary-navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-timeline" style="color: var(--guate-cyan);"></i> Trazabilidad del Proceso en Tiempo Real
+          </h4>
+          <div id="expedienteTimeline" style="position: relative; padding-left: 28px; display: flex; flex-direction: column; gap: 18px;">
+            <div style="color: var(--text-muted); font-size: 13px;">Cargando eventos...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 16px 24px; background: var(--bg-alt); display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-outline" onclick="closeModal('modalMyExpediente')">Cerrar</button>
+        <div id="expedienteActionBtns" style="display: flex; gap: 10px;">
+          <!-- Dinámico: Formalizar o Subsanar -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PANEL DE GESTIÓN MINEDUC Y COMITÉS (Sprints 3, 4, 5) -->
+  <div class="modal-backdrop" id="modalAdminPanel">
+    <div class="modal-card" style="max-width: 960px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-landmark"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; margin: 0; color: var(--primary-navy);">Panel de Gestión Institucional MINEDUC</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">Control Operativo de Sprints 1 a 5</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modalAdminPanel')">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 24px;">
+        <!-- Tabs de navegación interna -->
+        <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px;">
+          <button class="btn btn-gold" id="tabBtnKpis" onclick="switchAdminTab('kpis')" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-chart-pie"></i> Tablero Gerencial
+          </button>
+          <button class="btn btn-outline" id="tabBtnVerify" onclick="switchAdminTab('verify')" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-list-check"></i> Verificación Admisibilidad
+          </button>
+          <button class="btn btn-outline" id="tabBtnCommittee" onclick="switchAdminTab('committee')" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-gavel"></i> Comité y Rúbrica Digital
+          </button>
+          <button class="btn btn-outline" id="tabBtnResolutions" onclick="switchAdminTab('resolutions')" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-file-signature"></i> Resoluciones
+          </button>
+        </div>
+
+        <!-- CONTENIDO TAB 1: KPIS -->
+        <div id="adminTabKpis">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">CONVOCATORIAS ACTIVAS</span>
+              <h3 id="kpiConvocatorias" style="font-size: 28px; color: var(--primary-navy); margin-top: 4px;">-</h3>
+            </div>
+            <div style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">SOLICITUDES TOTALES</span>
+              <h3 id="kpiSolicitudes" style="font-size: 28px; color: var(--guate-cyan); margin-top: 4px;">-</h3>
+            </div>
+            <div style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">BECARIOS ADJUDICADOS</span>
+              <h3 id="kpiAdjudicados" style="font-size: 28px; color: #15803d; margin-top: 4px;">-</h3>
+            </div>
+            <div style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">PRESUPUESTO COMPROMETIDO</span>
+              <h3 id="kpiPresupuesto" style="font-size: 24px; color: var(--accent-gold); margin-top: 4px;">Q 0.00</h3>
+            </div>
+          </div>
+          <div id="kpiDistributionBox" style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);">Distribución Geográfica de Solicitudes</h4>
+            <div id="kpiDeptGrid" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <span style="color: var(--text-muted); font-size: 13px;">Cargando distribución...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENIDO TAB 2: VERIFICACION -->
+        <div id="adminTabVerify" style="display: none;">
+          <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--primary-navy);">Bandeja de Expedientes para Dictamen de Admisibilidad</h4>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color);">
+                  <th style="padding: 10px;">Expediente</th>
+                  <th style="padding: 10px;">Postulante</th>
+                  <th style="padding: 10px;">Promedio</th>
+                  <th style="padding: 10px;">Estado</th>
+                  <th style="padding: 10px; text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="verifyTableBody">
+                <tr><td colspan="5" style="text-align: center; padding: 20px;">Cargando expedientes...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONTENIDO TAB 3: COMITÉ Y RÚBRICA DIGITAL -->
+        <div id="adminTabCommittee" style="display: none;">
+          <div style="background: #fefce8; border: 1px solid #fef08a; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-hand-holding-heart" style="color: #b45309; font-size: 20px;"></i>
+              <div>
+                <strong style="color: #854d0e; font-size: 14px;">Declaración Ética de No Conflicto de Interés</strong>
+                <p style="margin: 0; font-size: 12px; color: #a16207;">Requisito legal obligatorio previo a registrar calificaciones (HU-004).</p>
+              </div>
+            </div>
+            <button class="btn btn-gold" onclick="submitConflictDeclaration()" style="font-size: 12px; padding: 6px 14px;">
+              <i class="fa-solid fa-check"></i> Declarar Ausencia de Conflicto
+            </button>
+          </div>
+
+          <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);">Calificación de Expediente con Rúbrica Estandarizada (0-100 pts)</h4>
+          <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+              <div class="form-group">
+                <label style="font-size: 13px; font-weight: 600;">1. Mérito Académico (Máx 40 pts)</label>
+                <input type="number" id="rubricAcademico" class="form-control" min="0" max="40" step="0.5" value="38" oninput="calcRubricTotal()">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 13px; font-weight: 600;">2. Condición Socioeconómica (Máx 40 pts)</label>
+                <input type="number" id="rubricSocio" class="form-control" min="0" max="40" step="0.5" value="36" oninput="calcRubricTotal()">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 13px; font-weight: 600;">3. Ensayo y Atestados (Máx 20 pts)</label>
+                <input type="number" id="rubricEnsayo" class="form-control" min="0" max="20" step="0.5" value="18" oninput="calcRubricTotal()">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 14px 20px; border-radius: 8px; margin-bottom: 16px;">
+              <span style="font-weight: 700; color: var(--primary-navy); font-size: 15px;">Puntaje Total Consolidado:</span>
+              <span id="rubricTotalDisplay" style="font-size: 22px; font-weight: 800; color: var(--accent-gold);">92.00 / 100 pts</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600;">Dictamen Individual del Evaluador</label>
+              <select id="rubricDictamen" class="form-control">
+                <option value="FAVORABLE">FAVORABLE (Recomendar Adjudicación)</option>
+                <option value="NO_FAVORABLE">NO FAVORABLE (No cumple baremo mínimo)</option>
+                <option value="RESERVA">EN RESERVA (Sujeto a disponibilidad presupuestaria)</option>
+              </select>
+            </div>
+
+            <button class="btn btn-gold" onclick="submitRubricScoreDemo()" style="width: 100%;">
+              <i class="fa-solid fa-signature"></i> Registrar Calificación Digital en Acta
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTENIDO TAB 4: RESOLUCIONES -->
+        <div id="adminTabResolutions" style="display: none;">
+          <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--primary-navy);">Emisión de Resolución Ministerial de Adjudicación (HU-002)</h4>
+          <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div class="form-group">
+                <label style="font-size: 13px; font-weight: 600;">Número Oficial de Resolución</label>
+                <input type="text" id="resNumero" class="form-control" value="RES-MINEDUC-2026-0089">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 13px; font-weight: 600;">Total Becarios Adjudicados</label>
+                <input type="number" id="resBecarios" class="form-control" value="120">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600;">Título Ministerial</label>
+              <input type="text" id="resTitulo" class="form-control" value="Adjudicación Oficial Convocatoria Diversificado 2026">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600;">Monto Total Comprometido (Q)</label>
+              <input type="number" id="resMonto" class="form-control" value="1200000.00">
+            </div>
+            <button class="btn btn-gold" onclick="issueResolutionMinisterial()" style="width: 100%;">
+              <i class="fa-solid fa-stamp"></i> Firmar y Publicar Resolución Ministerial
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

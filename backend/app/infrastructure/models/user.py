@@ -41,6 +41,18 @@ class User(Base):
     roles = relationship("Role", secondary=user_roles, back_populates="usuarios", lazy="joined")
     tokens = relationship("SecurityToken", back_populates="usuario", cascade="all, delete-orphan")
 
+    @property
+    def nombre_completo(self) -> str:
+        if self.persona:
+            return self.persona.nombre_completo
+        return self.email
+
+    @property
+    def rol(self) -> str:
+        if self.roles and len(self.roles) > 0:
+            return self.roles[0].codigo
+        return "POSTULANTE"
+
 class Person(Base):
     __tablename__ = "personas"
 
