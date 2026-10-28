@@ -27,13 +27,16 @@ class Settings(BaseSettings):
     ACTIVATION_TOKEN_EXPIRE_HOURS: int = 24
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 15
 
-    # SMTP Mailpit
+    # SMTP & Amazon SES
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
-    EMAILS_FROM_EMAIL: str = "no-reply@becas.mineduc.gob.gt"
+    EMAILS_FROM_EMAIL: str = "rcuyuna@miumg.edu.gt"
     EMAILS_FROM_NAME: str = "Sistema Nacional de Becas MINEDUC"
+    AWS_REGION: str = "us-east-1"
+    USE_SES: bool = True
+    FRONTEND_BASE_URL: str = "http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com"
 
     # Google OAuth 2.0 (HU-001)
     GOOGLE_CLIENT_ID: Optional[str] = None

@@ -2820,8 +2820,8 @@
         if (!res.ok) throw new Error(data.detail || "Error al registrarse.");
 
         closeModal('modalRegister');
-        showToast("¡Registro exitoso! " + (data.message || "") + (data.data?.activation_url ? ` Token de prueba: ${data.data.activation_token}` : ""), "success");
-        setTimeout(() => openModal('modalLogin'), 2000);
+        showToast("¡Registro completado! Te hemos enviado un enlace de verificación a tu correo (" + payload.email + "). Por favor revísalo para activar tu cuenta.", "success");
+        setTimeout(() => openModal('modalLogin'), 2500);
       } catch (err) {
         showToast(err.message, "error");
       } finally {
@@ -3670,6 +3670,14 @@
 
         openModal('modalGoogleComplete');
         showToast("Ingresa tu CUI obligatorio para activar tu cuenta.", "info");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (params.get("activated") === "true") {
+        showToast("¡Tu cuenta ha sido activada exitosamente! Ya puedes iniciar sesión con tu CUI o correo.", "success");
+        openModal('modalLogin');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (params.get("activated") === "error") {
+        const errorMsg = params.get("error_msg") ? decodeURIComponent(params.get("error_msg")) : "El enlace de activación es inválido o ha expirado.";
+        showToast(errorMsg, "error");
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     });

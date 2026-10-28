@@ -1,8 +1,9 @@
 from typing import Optional
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote_plus
 from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from app.core.config import settings
 from app.core.database import get_db
 from app.schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse, 
@@ -22,11 +23,30 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     res = AuthService.register_user(db, req)
     return GenericResponse(success=True, message=res["message"], data=res)
 
-@router.get("/activate", response_model=GenericResponse, summary="HU-001: Activación de Cuenta")
-def activate_account(token: str = Query(..., description="Token de activación recibido por correo"), db: Session = Depends(get_db)):
+@router.get("/activate", summary="HU-001: Activación de Cuenta")
+def activate_account(
+    token: str = Query(..., description="Token de activación recibido por correo"), 
+    redirect: bool = Query(True, description="Si es True, redirige a la interfaz web con el resultado"),
+    db: Session = Depends(get_db)
+):
     """Activa la cuenta del usuario validando la firma y vigencia del token."""
-    res = AuthService.activate_account(db, token)
-    return GenericResponse(success=True, message=res["message"])
+    base_url = getattr(settings, "FRONTEND_BASE_URL", "http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com").rstrip("/")
+    try:
+        res = AuthService.activate_account(db, token)
+        if redirect:
+            return RedirectResponse(
+                url=f"{base_url}/?activated=true",
+                status_code=status.HTTP_307_TEMPORARY_REDIRECT
+            )
+        return GenericResponse(success=True, message=res["message"])
+    except HTTPException as e:
+        if redirect:
+            err_msg = quote_plus(str(e.detail))
+            return RedirectResponse(
+                url=f"{base_url}/?activated=error&error_msg={err_msg}",
+                status_code=status.HTTP_307_TEMPORARY_REDIRECT
+            )
+        raise e
 
 @router.post("/resend-activation", response_model=GenericResponse, summary="HU-001: Reenviar Token de Activación")
 def resend_activation(email: str = Query(..., description="Correo electrónico de la cuenta registrada"), db: Session = Depends(get_db)):
