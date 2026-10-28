@@ -26,7 +26,7 @@ class User(Base):
     __tablename__ = "usuarios"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    cui = Column(String(13), unique=True, nullable=False, index=True)
+    cui = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(120), unique=True, nullable=False, index=True)
     google_id = Column(String(100), unique=True, nullable=True, index=True)
     password_hash = Column(String(255), nullable=True)

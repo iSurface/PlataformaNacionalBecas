@@ -47,34 +47,15 @@ def validate_password_complexity(password: str) -> bool:
 
 def validate_cui(cui: str) -> bool:
     """
-    Valida sintácticamente el CUI guatemalteco de 13 dígitos:
-    - Longitud exacta de 13 caracteres numéricos.
-    - Primeros 8 dígitos: correlativo.
-    - 9no dígito: verificador (algoritmo módulo 11).
-    - Últimos 4 dígitos: código de departamento (2) y municipio (2).
+    Validación flexible de CUI / Documento de Identificación / Pasaporte Extranjero:
+    - Se elimina el algoritmo de Módulo 11 para evitar rechazo de CUIs legítimos de postulantes.
+    - Permite identificaciones nacionales (únicamente dígitos) y pasaportes para personas extranjeras (alfanuméricos).
+    - Requisito: texto no vacío, entre 3 y 50 caracteres limpios.
     """
-    if not cui or len(cui) != 13 or not cui.isdigit():
+    if not cui:
         return False
-    
-    # Validación básica de código de departamento (01 a 22)
-    depto = int(cui[9:11])
-    if depto < 1 or depto > 22:
-        return False
-
-    # Algoritmo de Módulo 11 para los primeros 9 dígitos
-    correlativo = [int(d) for d in cui[:8]]
-    verificador = int(cui[8])
-    
-    total = sum(d * (i + 2) for i, d in enumerate(correlativo))
-    residuo = total % 11
-    
-    digito_calculado = 11 - residuo
-    if digito_calculado == 11:
-        digito_calculado = 0
-    elif digito_calculado == 10:
-        digito_calculado = 0  # Regla estándar en documento de identidad
-        
-    return verificador == digito_calculado
+    clean = cui.strip()
+    return 3 <= len(clean) <= 50
 
 def create_access_token(subject: Union[str, Any], roles: list[str], expires_delta: Optional[timedelta] = None) -> str:
     """Genera un token JWT firmado con expiración para control de sesión"""

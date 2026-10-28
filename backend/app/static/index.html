@@ -1209,6 +1209,156 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
+    /* ==========================================================================
+       COMPONENTES MÓVILES Y DRAWER RESPONSIVO
+       ========================================================================== */
+    .mobile-nav-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(7, 25, 45, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 1998;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .mobile-nav-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .mobile-nav-drawer {
+      position: fixed;
+      top: 0;
+      right: -340px;
+      width: 320px;
+      max-width: 86vw;
+      height: 100%;
+      background: white;
+      z-index: 1999;
+      box-shadow: -6px 0 26px rgba(0,0,0,0.25);
+      transition: right 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mobile-nav-drawer.active {
+      right: 0;
+    }
+    .mobile-drawer-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-alt);
+    }
+    .mobile-drawer-close {
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: var(--text-heading);
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    .mobile-drawer-close:hover {
+      background: rgba(0,0,0,0.06);
+    }
+    .mobile-drawer-auth {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      background: #fafafa;
+    }
+    .mobile-drawer-menu {
+      list-style: none;
+      padding: 12px 0;
+      margin: 0;
+      flex: 1;
+    }
+    .mobile-drawer-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 22px;
+      color: var(--text-heading);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .mobile-drawer-menu li a:hover,
+    .mobile-drawer-menu li a:active {
+      background: var(--bg-alt);
+      color: var(--guate-cyan);
+      border-left-color: var(--accent-gold);
+    }
+    .mobile-drawer-menu li a i {
+      width: 22px;
+      text-align: center;
+      color: var(--primary-light);
+    }
+    .mobile-drawer-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-alt);
+    }
+
+    /* Contenedor de tablas responsivas con scroll horizontal táctil */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 14px;
+      border-radius: var(--radius-sm);
+    }
+    .table-responsive table {
+      min-width: 620px;
+      width: 100%;
+    }
+
+    /* Caja de opción de persona extranjera */
+    .foreigner-toggle-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      transition: var(--transition);
+    }
+
+    /* Grillas adaptativas */
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .admin-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .admin-tabs-row {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+    }
+
+    /* ==========================================================================
+       MEDIA QUERIES: TABLETS Y ESCRITORIOS MEDIANOS (<= 1024px)
+       ========================================================================== */
     @media (max-width: 1024px) {
       .hero-grid { grid-template-columns: 1fr; gap: 40px; }
       .hero-image-wrapper { max-width: 500px; margin: 0 auto; }
@@ -1216,24 +1366,221 @@
       .calls-grid { grid-template-columns: repeat(2, 1fr); }
       .steps-grid { grid-template-columns: repeat(2, 1fr); }
       .footer-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .admin-kpi-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
+    /* ==========================================================================
+       MEDIA QUERIES: SMARTPHONES Y MÓVILES (<= 768px, ej. Samsung S26 Ultra)
+       ========================================================================== */
     @media (max-width: 768px) {
-      .top-contact-info { display: none; }
-      .nav-menu { display: none; }
-      .mobile-menu-btn { display: block; }
-      .hero-title { font-size: 32px; }
-      .hero-search-box { grid-template-columns: 1fr; }
-      .calls-grid { grid-template-columns: 1fr; }
-      .inclusion-grid { grid-template-columns: 1fr; }
-      .testimonials-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr; }
-      .form-grid-2 { grid-template-columns: 1fr; }
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        position: relative;
+      }
+      .container {
+        padding: 0 16px !important;
+      }
+      .top-bar {
+        display: none !important; /* Ahorra espacio vertical crucial en pantalla móvil */
+      }
+      .navbar {
+        padding: 10px 0 !important;
+      }
+      .brand-logo .logo-emblem {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+        border-radius: 10px !important;
+      }
+      .brand-logo .logo-text h2 {
+        font-size: 17px !important;
+      }
+      .brand-logo .logo-text span {
+        font-size: 9px !important;
+      }
+      .nav-menu {
+        display: none !important;
+      }
+      .header-actions {
+        display: none !important; /* Se ocultan de la barra principal y se manejan en el drawer */
+      }
+      .mobile-menu-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Hero Section en Móvil */
+      .hero-section {
+        padding: 32px 0 46px !important;
+      }
+      .hero-title {
+        font-size: 25px !important;
+        line-height: 1.25 !important;
+        margin-bottom: 12px !important;
+      }
+      .hero-subtitle {
+        font-size: 14px !important;
+        margin-bottom: 20px !important;
+      }
+      .hero-search-box {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        padding: 14px !important;
+      }
+      .hero-search-box .search-input-group {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 8px 0 !important;
+      }
+      .hero-search-box .search-select {
+        font-size: 13px !important;
+      }
+      .hero-search-box .btn {
+        width: 100% !important;
+        min-height: 46px !important;
+      }
+      .hero-stats {
+        flex-direction: column !important;
+        gap: 12px !important;
+      }
+
+      /* Grillas principales en móvil */
+      .calls-grid,
+      .features-grid,
+      .inclusion-grid,
+      .testimonials-grid,
+      .steps-grid,
+      .footer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .form-grid-2,
+      .form-grid-3 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      /* Modales estilo Bottom-Sheet en Smartphone */
+      .modal-overlay {
+        padding: 0 !important;
+        align-items: flex-end !important;
+      }
+      .modal-card,
+      .modal-card-large {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 94vh !important;
+        border-radius: 20px 20px 0 0 !important;
+        margin: 0 !important;
+      }
+      .modal-header {
+        padding: 14px 18px !important;
+        border-radius: 20px 20px 0 0 !important;
+      }
+      .modal-header h3 {
+        font-size: 16px !important;
+      }
+      .modal-body {
+        padding: 16px !important;
+        max-height: calc(94vh - 65px) !important;
+      }
+
+      /* Panel MINEDUC y Tabs en móvil */
+      .admin-tabs-row {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 8px !important;
+        gap: 6px !important;
+      }
+      .admin-tabs-row button {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        font-size: 12px !important;
+        padding: 7px 12px !important;
+      }
+      .admin-kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+      .admin-kpi-grid div {
+        padding: 12px !important;
+      }
+      .admin-kpi-grid h3 {
+        font-size: 20px !important;
+      }
+
+      /* Botones y formularios táctiles */
+      .btn {
+        min-height: 44px;
+      }
+      .input-control, .form-control {
+        min-height: 44px;
+        font-size: 14px !important;
+      }
+    }
+
+    /* ==========================================================================
+       MEDIA QUERIES: SMARTPHONES MUY COMPACTOS (<= 420px, ej. 360px - 412px)
+       ========================================================================== */
+    @media (max-width: 420px) {
+      .brand-logo .logo-text span {
+        display: none !important; /* Solo 'MINEDUC BECAS' para no colisionar */
+      }
+      .hero-title {
+        font-size: 23px !important;
+      }
+      .admin-kpi-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- NAVIGATION DRAWER MÓVIL (Off-Canvas para Smartphones) -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="closeMobileMenu()"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menú Móvil Institucional">
+    <div class="mobile-drawer-header">
+      <div class="brand-logo" style="gap: 10px;">
+        <div class="logo-emblem" style="width: 36px; height: 36px; font-size: 16px;">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="logo-text">
+          <h2 style="font-size: 15px;">MINEDUC BECAS</h2>
+          <span style="font-size: 9px;">Guatemala 2026</span>
+        </div>
+      </div>
+      <button class="mobile-drawer-close" onclick="closeMobileMenu()" aria-label="Cerrar menú móvil">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Panel de Autenticación / Sesión en Móvil -->
+    <div class="mobile-drawer-auth" id="mobileDrawerAuth">
+      <!-- Se renderiza reactivamente según el estado de la sesión -->
+    </div>
+
+    <ul class="mobile-drawer-menu">
+      <li><a href="#inicio" onclick="closeMobileMenu()"><i class="fa-solid fa-house"></i> Inicio</a></li>
+      <li><a href="#convocatorias" onclick="closeMobileMenu()"><i class="fa-solid fa-graduation-cap"></i> Convocatorias 2026</a></li>
+      <li><a href="#como-funciona" onclick="closeMobileMenu()"><i class="fa-solid fa-circle-question"></i> ¿Cómo Funciona?</a></li>
+      <li><a href="#inclusion" onclick="closeMobileMenu()"><i class="fa-solid fa-hand-holding-heart"></i> Inclusión y Equidad</a></li>
+      <li><a href="#testimonios" onclick="closeMobileMenu()"><i class="fa-solid fa-comments"></i> Testimonios Ciudadanos</a></li>
+      <li><a href="#transparencia" onclick="closeMobileMenu()"><i class="fa-solid fa-scale-balanced"></i> Portal de Transparencia</a></li>
+      <li><a href="#contacto" onclick="closeMobileMenu()"><i class="fa-solid fa-phone"></i> Contacto y Soporte</a></li>
+    </ul>
+
+    <div class="mobile-drawer-footer">
+      <div style="font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.5;">
+        <strong>Ministerio de Educación de Guatemala</strong><br>
+        PBX: (+502) 2411-9595 • becas@mineduc.gob.gt
+      </div>
+    </div>
+  </aside>
 
   <!-- 1. TOP BAR UTILITARIO -->
   <div class="top-bar">
@@ -1774,11 +2121,19 @@
             </div>
           </div>
 
+          <!-- Opción de Persona Extranjera / Pasaporte -->
+          <div class="foreigner-toggle-box">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary-navy); margin: 0;">
+              <input type="checkbox" id="regIsForeigner" onchange="toggleForeignerRegistration(this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent-gold); cursor: pointer;">
+              <span><i class="fa-solid fa-earth-americas" style="color: var(--accent-gold);"></i> Soy persona extranjera (usar Pasaporte o Documento Internacional)</span>
+            </label>
+          </div>
+
           <div class="form-group">
-            <label>CUI (DPI de 13 dígitos numéricos) *</label>
-            <input type="text" id="regCui" class="input-control" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+            <label id="regCuiLabel">CUI (Código Único de Identificación) *</label>
+            <input type="text" id="regCui" class="input-control" maxlength="50" placeholder="Ingresa los dígitos de tu CUI" required oninput="validateCuiInput(this)">
             <p class="form-hint" id="cuiValidationHint">
-              <i class="fa-solid fa-shield-halved"></i> Será validado automáticamente mediante el algoritmo Módulo 11 de RENAP.
+              <i class="fa-solid fa-id-card"></i> Ingresa únicamente los dígitos de tu documento sin guiones ni espacios.
             </p>
           </div>
 
@@ -1838,9 +2193,17 @@
             </div>
           </div>
 
+          <!-- Opción de Persona Extranjera / Pasaporte -->
+          <div class="foreigner-toggle-box">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--primary-navy); margin: 0;">
+              <input type="checkbox" id="googleIsForeigner" onchange="toggleForeignerGoogle(this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent-gold); cursor: pointer;">
+              <span><i class="fa-solid fa-earth-americas" style="color: var(--accent-gold);"></i> Soy persona extranjera (usar Pasaporte o Documento Internacional)</span>
+            </label>
+          </div>
+
           <div class="form-group">
-            <label>CUI (DPI de 13 dígitos) *</label>
-            <input type="text" id="googleCui" class="input-control" maxlength="13" placeholder="1000000090101" required oninput="validateCuiInput(this)">
+            <label id="googleCuiLabel">CUI (Código Único de Identificación) *</label>
+            <input type="text" id="googleCui" class="input-control" maxlength="50" placeholder="Ingresa los dígitos de tu CUI" required oninput="validateCuiInput(this)">
           </div>
 
           <div class="form-group">
@@ -1989,37 +2352,74 @@
 
     let gPublicCalls = [];
 
-    function validateCuiAlgorithm(cui) {
-      if (!cui || cui.length !== 13 || !/^\d+$/.test(cui)) return false;
+    function toggleForeignerRegistration(isForeigner) {
+      const label = document.getElementById("regCuiLabel");
+      const input = document.getElementById("regCui");
+      const hint = document.getElementById("cuiValidationHint");
+      if (isForeigner) {
+        if (label) label.innerHTML = `<i class="fa-solid fa-passport"></i> Pasaporte o Documento Extranjero *`;
+        if (input) {
+          input.placeholder = "Ej. A12345678 o código de documento";
+          input.value = "";
+          input.style.borderColor = "var(--border-color)";
+        }
+        if (hint) {
+          hint.innerHTML = `<span style="color: var(--guate-cyan); font-weight: 600;"><i class="fa-solid fa-earth-americas"></i> Registro para personas extranjeras: Sin restricciones de formato, se aceptan letras y números.</span>`;
+        }
+      } else {
+        if (label) label.innerHTML = `CUI (Código Único de Identificación) *`;
+        if (input) {
+          input.placeholder = "Ingresa los dígitos de tu CUI";
+          input.value = "";
+          input.style.borderColor = "var(--border-color)";
+        }
+        if (hint) {
+          hint.innerHTML = `<i class="fa-solid fa-id-card"></i> Ingresa únicamente los dígitos de tu documento sin guiones ni espacios.`;
+        }
+      }
+    }
 
-      const depto = parseInt(cui.substring(9, 11), 10);
-      if (depto < 1 || depto > 22) return false;
-
-      const correlativo = cui.substring(0, 8).split('').map(Number);
-      const verificador = parseInt(cui[8], 10);
-
-      const total = correlativo.reduce((acc, digit, idx) => acc + (digit * (idx + 2)), 0);
-      const residuo = total % 11;
-      let digitoCalculado = 11 - residuo;
-      if (digitoCalculado >= 10) digitoCalculado = 0;
-
-      return verificador === digitoCalculado;
+    function toggleForeignerGoogle(isForeigner) {
+      const label = document.getElementById("googleCuiLabel");
+      const input = document.getElementById("googleCui");
+      if (isForeigner) {
+        if (label) label.innerHTML = `<i class="fa-solid fa-passport"></i> Pasaporte o Documento Extranjero *`;
+        if (input) {
+          input.placeholder = "Ej. A12345678 o código de documento";
+          input.value = "";
+        }
+      } else {
+        if (label) label.innerHTML = `CUI (Código Único de Identificación) *`;
+        if (input) {
+          input.placeholder = "Ingresa los dígitos de tu CUI";
+          input.value = "";
+        }
+      }
     }
 
     function validateCuiInput(input) {
       const val = input.value.trim();
       const hint = document.getElementById("cuiValidationHint");
-      if (val.length === 13) {
-        if (validateCuiAlgorithm(val)) {
-          input.style.borderColor = "var(--success)";
-          if (hint) hint.innerHTML = `<span style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> CUI Válido según algoritmo RENAP (Módulo 11)</span>`;
-        } else {
-          input.style.borderColor = "var(--error)";
-          if (hint) hint.innerHTML = `<span style="color: var(--error); font-weight: 700;"><i class="fa-solid fa-triangle-exclamation"></i> CUI Inválido: Dígito verificador incorrecto. Ej: 1000000090101</span>`;
+      const isForeigner = document.getElementById("regIsForeigner") ? document.getElementById("regIsForeigner").checked : false;
+
+      if (val.length >= 3) {
+        input.style.borderColor = "var(--success)";
+        if (hint) {
+          if (isForeigner) {
+            hint.innerHTML = `<span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Documento internacional ingresado (${val.length} caracteres).</span>`;
+          } else {
+            hint.innerHTML = `<span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> CUI ingresado (${val.length} dígitos).</span>`;
+          }
         }
       } else {
         input.style.borderColor = "var(--border-color)";
-        if (hint) hint.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Será validado automáticamente mediante el algoritmo Módulo 11 de RENAP.`;
+        if (hint) {
+          if (isForeigner) {
+            hint.innerHTML = `<i class="fa-solid fa-earth-americas"></i> Ingresa tu pasaporte o identificación oficial de tu país.`;
+          } else {
+            hint.innerHTML = `<i class="fa-solid fa-id-card"></i> Ingresa únicamente los dígitos de tu documento sin guiones ni espacios.`;
+          }
+        }
       }
     }
 
@@ -2042,21 +2442,27 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+        closeMobileMenu();
       }
     });
 
     function toggleMobileMenu() {
-      const menu = document.querySelector('.nav-menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-      if (menu.style.display === 'flex') {
-        menu.style.flexDirection = 'column';
-        menu.style.position = 'absolute';
-        menu.style.top = '100%';
-        menu.style.left = '0';
-        menu.style.right = '0';
-        menu.style.backgroundColor = 'white';
-        menu.style.padding = '20px';
-        menu.style.boxShadow = 'var(--shadow-lg)';
+      const drawer = document.getElementById('mobileNavDrawer');
+      const backdrop = document.getElementById('mobileNavBackdrop');
+      if (drawer && backdrop) {
+        drawer.classList.toggle('active');
+        backdrop.classList.toggle('active');
+        document.body.style.overflow = drawer.classList.contains('active') ? 'hidden' : 'auto';
+      }
+    }
+
+    function closeMobileMenu() {
+      const drawer = document.getElementById('mobileNavDrawer');
+      const backdrop = document.getElementById('mobileNavBackdrop');
+      if (drawer && backdrop) {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.style.overflow = 'auto';
       }
     }
 
@@ -2353,8 +2759,15 @@
     async function handleModalRegister(e) {
       e.preventDefault();
       const cui = document.getElementById("regCui").value.trim();
-      if (!validateCuiAlgorithm(cui)) {
-        showToast("El CUI ingresado no cumple con el algoritmo Módulo 11 de RENAP.", "error");
+      const isForeigner = document.getElementById("regIsForeigner") ? document.getElementById("regIsForeigner").checked : false;
+
+      if (!cui || cui.length < 3) {
+        showToast(isForeigner ? "Ingresa un número de pasaporte o documento extranjero válido (mínimo 3 caracteres)." : "Ingresa un número de CUI válido.", "error");
+        return;
+      }
+
+      if (!isForeigner && !/^\d+$/.test(cui)) {
+        showToast("El CUI para ciudadanos guatemaltecos debe contener únicamente los dígitos.", "error");
         return;
       }
 
@@ -2396,8 +2809,15 @@
     async function handleGoogleCompleteModal(e) {
       e.preventDefault();
       const cui = document.getElementById("googleCui").value.trim();
-      if (!validateCuiAlgorithm(cui)) {
-        showToast("El CUI ingresado no es válido según el algoritmo del RENAP.", "error");
+      const isForeigner = document.getElementById("googleIsForeigner") ? document.getElementById("googleIsForeigner").checked : false;
+
+      if (!cui || cui.length < 3) {
+        showToast(isForeigner ? "Ingresa un número de pasaporte o documento extranjero válido." : "Ingresa un número de CUI válido.", "error");
+        return;
+      }
+
+      if (!isForeigner && !/^\d+$/.test(cui)) {
+        showToast("El CUI para ciudadanos guatemaltecos debe contener únicamente los dígitos.", "error");
         return;
       }
 
@@ -2495,6 +2915,71 @@
           <button class="btn btn-gold" onclick="openModal('modalRegister')">
             <i class="fa-solid fa-user-plus"></i> Registrarme
           </button>
+        `;
+      }
+
+      renderMobileDrawer();
+    }
+
+    function renderMobileDrawer() {
+      const drawerAuth = document.getElementById('mobileDrawerAuth');
+      if (!drawerAuth) return;
+
+      const token = sessionStorage.getItem("access_token");
+      const name = sessionStorage.getItem("user_name") || "Postulante";
+      const cui = sessionStorage.getItem("user_cui") || "";
+      const email = sessionStorage.getItem("user_email") || "";
+
+      if (token) {
+        let roles = [];
+        try { roles = JSON.parse(sessionStorage.getItem("user_roles") || "[]"); } catch (e) {}
+        const isStaff = roles.some(r => {
+          const code = typeof r === 'string' ? r : (r.codigo || '');
+          return ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"].includes(code);
+        });
+
+        let staffBtn = '';
+        if (isStaff) {
+          staffBtn = `
+            <button class="btn btn-gold" onclick="closeMobileMenu(); openAdminPanel();" style="width: 100%; margin-bottom: 8px; font-size: 13px;">
+              <i class="fa-solid fa-landmark"></i> Panel de Gestión MINEDUC
+            </button>
+          `;
+        }
+
+        drawerAuth.innerHTML = `
+          <div style="background: white; border-radius: 10px; padding: 12px; border: 1px solid var(--border-color); margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+                ${name.charAt(0)}
+              </div>
+              <div style="overflow: hidden;">
+                <strong style="display: block; font-size: 13px; color: var(--text-heading); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">${name}</strong>
+                <span style="display: block; font-size: 11px; color: var(--text-muted);">${cui ? 'ID: ' + cui : email}</span>
+              </div>
+            </div>
+            ${staffBtn}
+            <button class="btn btn-primary" onclick="closeMobileMenu(); openMyExpediente();" style="width: 100%; margin-bottom: 8px; font-size: 13px;">
+              <i class="fa-solid fa-folder-open"></i> Mi Expediente Digital
+            </button>
+            <button class="btn btn-outline" onclick="closeMobileMenu(); openStudentProfileModal();" style="width: 100%; margin-bottom: 8px; font-size: 13px;">
+              <i class="fa-solid fa-address-card"></i> Mi Ficha Socioeconómica
+            </button>
+            <button class="btn btn-outline" onclick="closeMobileMenu(); logoutSession();" style="width: 100%; font-size: 13px; color: var(--error); border-color: #fca5a5;">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </button>
+          </div>
+        `;
+      } else {
+        drawerAuth.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-gold" onclick="closeMobileMenu(); openModal('modalRegister');" style="width: 100%;">
+              <i class="fa-solid fa-user-plus"></i> Registrarme con CUI
+            </button>
+            <button class="btn btn-outline" onclick="closeMobileMenu(); openModal('modalLogin');" style="width: 100%;">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+            </button>
+          </div>
         `;
       }
     }
@@ -2721,31 +3206,31 @@
 
       <div class="modal-body" style="padding: 24px;">
         <!-- Tabs de navegación interna -->
-        <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px; flex-wrap: wrap;">
-          <button class="btn btn-gold" id="tabBtnKpis" onclick="switchAdminTab('kpis')" style="font-size: 13px; padding: 8px 16px;">
+        <div class="admin-tabs-row">
+          <button class="btn btn-gold" id="tabBtnKpis" onclick="switchAdminTab('kpis')">
             <i class="fa-solid fa-chart-pie"></i> Tablero Gerencial
           </button>
-          <button class="btn btn-outline" id="tabBtnVerify" onclick="switchAdminTab('verify')" style="font-size: 13px; padding: 8px 16px;">
+          <button class="btn btn-outline" id="tabBtnVerify" onclick="switchAdminTab('verify')">
             <i class="fa-solid fa-list-check"></i> Verificación Admisibilidad
           </button>
-          <button class="btn btn-outline" id="tabBtnCommittee" onclick="switchAdminTab('committee')" style="font-size: 13px; padding: 8px 16px;">
+          <button class="btn btn-outline" id="tabBtnCommittee" onclick="switchAdminTab('committee')">
             <i class="fa-solid fa-gavel"></i> Comité y Rúbrica
           </button>
-          <button class="btn btn-outline" id="tabBtnResolutions" onclick="switchAdminTab('resolutions')" style="font-size: 13px; padding: 8px 16px;">
+          <button class="btn btn-outline" id="tabBtnResolutions" onclick="switchAdminTab('resolutions')">
             <i class="fa-solid fa-file-signature"></i> Resoluciones
           </button>
           <!-- SPRINT 6: NUEVAS PESTAÑAS -->
-          <button class="btn btn-outline" id="tabBtnSecondApproval" onclick="switchAdminTab('secondApproval')" style="font-size: 13px; padding: 8px 16px; border-color: var(--accent-gold); color: #92400e;">
+          <button class="btn btn-outline" id="tabBtnSecondApproval" onclick="switchAdminTab('secondApproval')" style="border-color: var(--accent-gold); color: #92400e;">
             <i class="fa-solid fa-stamp"></i> Segunda Aprobación (> Q10k)
           </button>
-          <button class="btn btn-outline" id="tabBtnAudit" onclick="switchAdminTab('audit')" style="font-size: 13px; padding: 8px 16px;">
+          <button class="btn btn-outline" id="tabBtnAudit" onclick="switchAdminTab('audit')">
             <i class="fa-solid fa-shield-halved"></i> Bitácora Forense (4D)
           </button>
         </div>
 
         <!-- CONTENIDO TAB 1: KPIS -->
         <div id="adminTabKpis">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+          <div class="admin-kpi-grid">
             <div style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid var(--border-color);">
               <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">CONVOCATORIAS ACTIVAS</span>
               <h3 id="kpiConvocatorias" style="font-size: 28px; color: var(--primary-navy); margin-top: 4px;">-</h3>
@@ -2774,7 +3259,7 @@
         <!-- CONTENIDO TAB 2: VERIFICACION -->
         <div id="adminTabVerify" style="display: none;">
           <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--primary-navy);">Bandeja de Expedientes para Dictamen de Admisibilidad</h4>
-          <div style="overflow-x: auto;">
+          <div class="table-responsive">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
               <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color);">
@@ -2794,7 +3279,7 @@
 
         <!-- CONTENIDO TAB 3: COMITÉ Y RÚBRICA DIGITAL -->
         <div id="adminTabCommittee" style="display: none;">
-          <div style="background: #fefce8; border: 1px solid #fef08a; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="background: #fefce8; border: 1px solid #fef08a; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <i class="fa-solid fa-hand-holding-heart" style="color: #b45309; font-size: 20px;"></i>
               <div>
@@ -2809,7 +3294,7 @@
 
           <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);">Calificación de Expediente con Rúbrica Estandarizada (0-100 pts)</h4>
           <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+            <div class="form-grid-3" style="margin-bottom: 16px;">
               <div class="form-group">
                 <label style="font-size: 13px; font-weight: 600;">1. Mérito Académico (Máx 40 pts)</label>
                 <input type="number" id="rubricAcademico" class="form-control" min="0" max="40" step="0.5" value="38" oninput="calcRubricTotal()">
@@ -2848,7 +3333,7 @@
         <div id="adminTabResolutions" style="display: none;">
           <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--primary-navy);">Emisión de Resolución Ministerial de Adjudicación (HU-002)</h4>
           <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div class="form-grid-2" style="margin-bottom: 16px;">
               <div class="form-group">
                 <label style="font-size: 13px; font-weight: 600;">Número Oficial de Resolución</label>
                 <input type="text" id="resNumero" class="form-control" value="RES-MINEDUC-2026-0089">
@@ -2887,7 +3372,7 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
             <h4 style="font-size: 16px; color: var(--primary-navy); margin: 0;">
               Bandeja de Expedientes Pendientes de Segunda Firma Ministerial
             </h4>
@@ -2896,7 +3381,7 @@
             </button>
           </div>
 
-          <div style="overflow-x: auto; background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+          <div class="table-responsive" style="background: white; border: 1px solid var(--border-color); border-radius: 12px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
               <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
@@ -2953,7 +3438,7 @@
             </div>
           </div>
 
-          <div style="overflow-x: auto; background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+          <div class="table-responsive" style="background: white; border: 1px solid var(--border-color); border-radius: 12px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
               <thead>
                 <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">

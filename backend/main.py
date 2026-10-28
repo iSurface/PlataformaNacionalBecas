@@ -57,6 +57,9 @@ def startup_db_init():
             conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS operacion VARCHAR(100);"))
             conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS resultado VARCHAR(30) DEFAULT 'EXITOSO';"))
             conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS detalles TEXT;"))
+
+            # Sprint 6 - Flexibilización CUI y Documentos Extranjeros
+            conn.execute(text("ALTER TABLE usuarios ALTER COLUMN cui TYPE VARCHAR(50);"))
     except Exception as ex:
         print(f"[STARTUP DDL MIGRATION] {ex}")
 

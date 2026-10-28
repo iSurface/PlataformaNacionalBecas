@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.core.security import validate_password_complexity, validate_cui
 
 class RegisterRequest(BaseModel):
-    cui: str = Field(..., description="Código Único de Identificación (13 dígitos numéricos)")
+    cui: str = Field(..., min_length=3, max_length=50, description="Código Único de Identificación (CUI) o Pasaporte Extranjero")
     primer_nombre: str = Field(..., min_length=2, max_length=60)
     segundo_nombre: Optional[str] = Field(None, max_length=60)
     primer_apellido: str = Field(..., min_length=2, max_length=60)
@@ -19,7 +19,7 @@ class RegisterRequest(BaseModel):
     def validate_cui_field(cls, v: str) -> str:
         v_clean = v.strip()
         if not validate_cui(v_clean):
-            raise ValueError("El CUI ingresado no es válido (debe tener 13 dígitos y verificar algoritmo módulo 11).")
+            raise ValueError("El CUI o documento de identificación debe tener entre 3 y 50 caracteres.")
         return v_clean
 
     @field_validator("password")
@@ -79,7 +79,7 @@ class GoogleCallbackResponse(BaseModel):
 
 class GoogleCompleteRegistrationRequest(BaseModel):
     registration_token: str = Field(..., description="Token seguro temporal firmado devuelto en el callback")
-    cui: str = Field(..., description="Código Único de Identificación (13 dígitos numéricos)")
+    cui: str = Field(..., min_length=3, max_length=50, description="Código Único de Identificación (CUI) o Pasaporte Extranjero")
     primer_nombre: str = Field(..., min_length=2, max_length=60)
     segundo_nombre: Optional[str] = Field(None, max_length=60)
     primer_apellido: str = Field(..., min_length=2, max_length=60)
@@ -90,5 +90,5 @@ class GoogleCompleteRegistrationRequest(BaseModel):
     def validate_cui_field(cls, v: str) -> str:
         v_clean = v.strip()
         if not validate_cui(v_clean):
-            raise ValueError("El CUI ingresado no es válido (debe tener 13 dígitos y verificar algoritmo módulo 11).")
+            raise ValueError("El CUI o documento de identificación debe tener entre 3 y 50 caracteres.")
         return v_clean
