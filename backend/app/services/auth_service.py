@@ -479,12 +479,40 @@ class AuthService:
         if not google_id or not email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Información de Google incompleta en el token.")
 
-        # 2. Validar que CUI o Email no existan previamente
+        # 2. Validar o vincular si el CUI ya pertenece a un usuario existente
         existing_cui = db.query(User).filter(User.cui == req.cui).first()
         if existing_cui:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="El CUI ingresado ya se encuentra registrado en el sistema."
+            if existing_cui.google_id and str(existing_cui.google_id) != str(google_id):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="El CUI ingresado ya se encuentra vinculado a otra cuenta de Google."
+                )
+            
+            # Enlazar google_id y activar cuenta si estaba pendiente
+            existing_cui.google_id = str(google_id)
+            if existing_cui.estado == "PENDIENTE_ACTIVACION":
+                existing_cui.estado = "ACTIVO"
+            if req.telefono and existing_cui.persona and not existing_cui.persona.telefono:
+                existing_cui.persona.telefono = req.telefono
+            existing_cui.ultimo_acceso = datetime.now(timezone.utc)
+            db.commit()
+            db.refresh(existing_cui)
+
+            roles_list = [r.codigo for r in existing_cui.roles if r.es_activo]
+            access_token = create_access_token(
+                subject=str(existing_cui.id),
+                roles=roles_list,
+                expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            )
+            return TokenResponse(
+                access_token=access_token,
+                token_type="bearer",
+                expires_in_seconds=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                user_id=existing_cui.id,
+                cui=existing_cui.cui,
+                email=existing_cui.email,
+                nombre_completo=existing_cui.persona.nombre_completo if existing_cui.persona else existing_cui.email,
+                roles=roles_list
             )
 
         existing_email = db.query(User).filter(User.email == email).first()
