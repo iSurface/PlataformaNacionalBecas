@@ -21,12 +21,47 @@ from app.services.evaluation_service import EvaluationService
 
 router = APIRouter()
 
+@router.get(
+    "/committees",
+    summary="Listar Comités Colegiados",
+    dependencies=[Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN", "ADMIN_BECAS"]))]
+)
+def list_committees(db: Session = Depends(get_db)):
+    committees = db.query(EvaluationCommittee).order_by(EvaluationCommittee.creado_en.desc()).all()
+    results = []
+    for c in committees:
+        members = []
+        for m in (c.miembros or []):
+            u = m.usuario
+            p = u.persona if u else None
+            members.append({
+                "id": str(m.id),
+                "usuario_id": str(m.usuario_id),
+                "nombre": p.nombre_completo if p else (u.email if u else "Usuario"),
+                "email": u.email if u else "",
+                "rol_comite": m.rol_comite,
+                "declaracion_conflicto": m.declaracion_conflicto
+            })
+        results.append({
+            "id": str(c.id),
+            "codigo": c.codigo,
+            "nombre": c.nombre,
+            "convocatoria_id": str(c.convocatoria_id),
+            "convocatoria_titulo": c.convocatoria.titulo if c.convocatoria else "",
+            "estado": c.estado,
+            "fecha_creacion": c.creado_en.isoformat() if c.creado_en else None,
+            "miembros": members,
+            "total_asignados": len(c.asignaciones) if c.asignaciones else 0
+        })
+    return results
+
 @router.post("/committees", summary="HU-002: Constituir Comité Colegiado")
 def create_committee(
     req: CommitteeCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
+
     c = EvaluationService.create_committee(db, req.codigo, req.nombre, req.convocatoria_id)
     return {"id": c.id, "codigo": c.codigo, "nombre": c.nombre, "estado": c.estado}
 

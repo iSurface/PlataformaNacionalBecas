@@ -154,7 +154,7 @@ def list_applications_for_verification(
     convocatoria_id: Optional[UUID] = Query(None),
     estado: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "ADMIN_BECAS", "DIRECTOR", "AUDITOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     query = db.query(Application)

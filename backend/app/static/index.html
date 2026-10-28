@@ -3206,9 +3206,12 @@
 
       <div class="modal-body" style="padding: 24px;">
         <!-- Tabs de navegación interna -->
-        <div class="admin-tabs-row">
+        <div class="admin-tabs-row" id="adminTabsBar">
           <button class="btn btn-gold" id="tabBtnKpis" onclick="switchAdminTab('kpis')">
             <i class="fa-solid fa-chart-pie"></i> Tablero Gerencial
+          </button>
+          <button class="btn btn-outline" id="tabBtnCalls" onclick="switchAdminTab('calls')">
+            <i class="fa-solid fa-graduation-cap"></i> Convocatorias y Becas
           </button>
           <button class="btn btn-outline" id="tabBtnVerify" onclick="switchAdminTab('verify')">
             <i class="fa-solid fa-list-check"></i> Verificación Admisibilidad
@@ -3219,12 +3222,14 @@
           <button class="btn btn-outline" id="tabBtnResolutions" onclick="switchAdminTab('resolutions')">
             <i class="fa-solid fa-file-signature"></i> Resoluciones
           </button>
-          <!-- SPRINT 6: NUEVAS PESTAÑAS -->
           <button class="btn btn-outline" id="tabBtnSecondApproval" onclick="switchAdminTab('secondApproval')" style="border-color: var(--accent-gold); color: #92400e;">
             <i class="fa-solid fa-stamp"></i> Segunda Aprobación (> Q10k)
           </button>
           <button class="btn btn-outline" id="tabBtnAudit" onclick="switchAdminTab('audit')">
             <i class="fa-solid fa-shield-halved"></i> Bitácora Forense (4D)
+          </button>
+          <button class="btn btn-outline" id="tabBtnUsers" onclick="switchAdminTab('users')">
+            <i class="fa-solid fa-users-gear"></i> Usuarios y Roles
           </button>
         </div>
 
@@ -3292,8 +3297,17 @@
             </button>
           </div>
 
-          <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);">Calificación de Expediente con Rúbrica Estandarizada (0-100 pts)</h4>
+          <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);"><i class="fa-solid fa-gavel" style="color: var(--accent-gold);"></i> Calificación de Expediente con Rúbrica Estandarizada (0-100 pts)</h4>
           <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600;">Seleccionar Expediente Admitido a Evaluar:</label>
+              <select id="rubricAppSelect" class="form-control" onchange="onRubricAppSelected()">
+                <option value="">-- Cargando expedientes admitidos... --</option>
+              </select>
+              <div id="rubricAppInfo" style="display: none; margin-top: 8px; padding: 8px 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #166534;">
+                <span id="rubricAppInfoText"></span>
+              </div>
+            </div>
             <div class="form-grid-3" style="margin-bottom: 16px;">
               <div class="form-group">
                 <label style="font-size: 13px; font-weight: 600;">1. Mérito Académico (Máx 40 pts)</label>
@@ -3323,8 +3337,8 @@
               </select>
             </div>
 
-            <button class="btn btn-gold" onclick="submitRubricScoreDemo()" style="width: 100%;">
-              <i class="fa-solid fa-signature"></i> Registrar Calificación Digital en Acta
+            <button class="btn btn-gold" onclick="submitRealRubricScore()" style="width: 100%; font-size: 14px; padding: 10px;">
+              <i class="fa-solid fa-signature"></i> Registrar Calificación Digital Oficial en Base de Datos
             </button>
           </div>
         </div>
@@ -3454,6 +3468,327 @@
             </table>
           </div>
         </div>
+
+        <!-- CONTENIDO TAB: CONVOCATORIAS Y BECAS (ADMIN_BECAS / SYSADMIN) -->
+        <div id="adminTabCalls" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h4 style="font-size: 16px; margin: 0; color: var(--primary-navy);"><i class="fa-solid fa-graduation-cap" style="color: var(--accent-gold);"></i> Catálogo Institucional de Convocatorias</h4>
+              <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-muted);">Administra la creación, bases, requisitos obligatorios y publicación oficial de becas.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-gold" onclick="openCreateCallModal()" style="font-size: 13px; padding: 8px 16px;">
+                <i class="fa-solid fa-plus-circle"></i> + Crear Nueva Beca
+              </button>
+              <button class="btn btn-outline" onclick="openScholarshipTypeModal()" style="font-size: 13px; padding: 8px 14px;">
+                <i class="fa-solid fa-tags"></i> Tipos de Beca
+              </button>
+              <button class="btn btn-outline" onclick="loadAdminCalls()" style="font-size: 13px; padding: 8px 12px;">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                  <th style="padding: 10px 12px;">Código y Título</th>
+                  <th style="padding: 10px 12px;">Tipo y Nivel</th>
+                  <th style="padding: 10px 12px;">Cobertura</th>
+                  <th style="padding: 10px 12px;">Cupos / Monto</th>
+                  <th style="padding: 10px 12px;">Presupuesto</th>
+                  <th style="padding: 10px 12px;">Vigencia</th>
+                  <th style="padding: 10px 12px;">Estado</th>
+                  <th style="padding: 10px 12px; text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="callsTableBody">
+                <tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Cargando convocatorias institucionales...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONTENIDO TAB: USUARIOS Y ROLES (SYSADMIN) -->
+        <div id="adminTabUsers" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h4 style="font-size: 16px; margin: 0; color: var(--primary-navy);"><i class="fa-solid fa-users-gear" style="color: var(--guate-cyan);"></i> Control de Identidades y Roles (RBAC)</h4>
+              <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-muted);">Administra accesos, asignación de permisos de equipo y estado de cuentas de usuario.</p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="usersSearchInput" placeholder="Buscar por nombre, correo o CUI..." class="form-control" style="font-size: 12px; width: 240px; padding: 6px 12px;" oninput="filterAdminUsersTable()">
+              <button class="btn btn-outline" onclick="loadAdminUsers()" style="font-size: 13px; padding: 7px 12px;">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                  <th style="padding: 10px 12px;">CUI / Documento</th>
+                  <th style="padding: 10px 12px;">Nombre Completo</th>
+                  <th style="padding: 10px 12px;">Correo Institucional</th>
+                  <th style="padding: 10px 12px;">Estado</th>
+                  <th style="padding: 10px 12px;">Intentos</th>
+                  <th style="padding: 10px 12px;">Roles Asignados</th>
+                  <th style="padding: 10px 12px; text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Cargando directorio de usuarios...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR NUEVA CONVOCATORIA DE BECA (ADMIN_BECAS) -->
+  <div class="modal-overlay" id="modalCreateScholarshipCall">
+    <div class="modal-container" style="max-width: 780px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; color: white;">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 17px; margin: 0; color: white;">+ Nueva Convocatoria de Beca</h3>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Creación y parametrización de programa en BORRADOR</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modalCreateScholarshipCall')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
+        <form id="formCreateScholarshipCall" onsubmit="submitCreateScholarshipCall(event)">
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Código de Convocatoria (Opcional)</label>
+              <input type="text" id="callNewCodigo" class="form-control" placeholder="Ej: BEC-2026-MEDIO-02 (o autogenerado)">
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Título Oficial del Programa *</label>
+              <input type="text" id="callNewTitulo" class="form-control" placeholder="Ej: Beca Nacional de Posgrado en Ciencias 2026" required minlength="5">
+            </div>
+          </div>
+
+          <div class="form-grid-3" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Tipo de Beca *</label>
+              <select id="callNewTipo" class="form-control" required>
+                <option value="">Cargando tipos...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Nivel Educativo *</label>
+              <select id="callNewNivel" class="form-control" required>
+                <option value="">Cargando niveles...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Cobertura Geográfica *</label>
+              <select id="callNewDepto" class="form-control">
+                <option value="">Nacional (Los 22 Departamentos)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-3" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Cupos Disponibles *</label>
+              <input type="number" id="callNewCupos" class="form-control" value="50" min="1" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Monto Individual por Becario (Q) *</label>
+              <input type="number" id="callNewMontoIndiv" class="form-control" value="15000.00" min="1" step="0.01" required>
+              <span style="font-size: 10px; color: var(--text-muted);">> Q 10k requerirá 2da firma</span>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Presupuesto Total (Q) *</label>
+              <input type="number" id="callNewPresupuesto" class="form-control" value="750000.00" min="0" step="0.01" required>
+            </div>
+          </div>
+
+          <div class="form-grid-3" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Promedio Mínimo Requerido (pts) *</label>
+              <input type="number" id="callNewPromedio" class="form-control" value="80.0" min="0" max="100" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Fecha y Hora de Apertura *</label>
+              <input type="datetime-local" id="callNewFechaInicio" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Fecha y Hora de Cierre *</label>
+              <input type="datetime-local" id="callNewFechaCierre" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label style="font-size: 12px; font-weight: 600;">Descripción Detallada y Bases Legales *</label>
+            <textarea id="callNewDescripcion" class="form-control" rows="3" placeholder="Detalle los objetivos del programa, perfil del postulante y condiciones..." required minlength="10"></textarea>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong style="font-size: 13px; color: var(--primary-navy);"><i class="fa-solid fa-file-pdf"></i> Requisitos Documentales Iniciales</strong>
+              <button type="button" class="btn btn-sm btn-outline" onclick="addRequirementRowToForm()" style="font-size: 11px; padding: 4px 10px;">
+                <i class="fa-solid fa-plus"></i> + Añadir Requisito
+              </button>
+            </div>
+            <div id="callNewReqsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Se agregarán filas interactivas -->
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modalCreateScholarshipCall')">Cancelar</button>
+            <button type="submit" class="btn btn-gold" id="btnSubmitCreateCall">
+              <i class="fa-solid fa-save"></i> Guardar Convocatoria en Borrador
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AGREGAR REQUISITO A CONVOCATORIA (ADMIN_BECAS) -->
+  <div class="modal-overlay" id="modalAddRequirement">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="font-size: 16px; margin: 0; color: white;"><i class="fa-solid fa-file-circle-plus"></i> Agregar Requisito Obligatorio</h3>
+        <button class="modal-close" onclick="closeModal('modalAddRequirement')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <p id="addReqCallTitleDisplay" style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;"></p>
+        <input type="hidden" id="addReqCallId">
+        <form onsubmit="submitAddRequirement(event)">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Nombre del Documento / Atestado *</label>
+            <input type="text" id="addReqNombre" class="form-control" placeholder="Ej: Constancia de Calificaciones Auténtica" required minlength="3">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label style="font-size: 12px; font-weight: 600;">Instrucciones para el Postulante</label>
+            <textarea id="addReqDescripcion" class="form-control" rows="2" placeholder="Documento emitido y sellado por la institución educativa..."></textarea>
+          </div>
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Formato Admitido</label>
+              <select id="addReqTipoDoc" class="form-control">
+                <option value="PDF">Documento PDF</option>
+                <option value="IMAGEN">Imagen (JPG / PNG)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label style="font-size: 12px; font-weight: 600;">Tamaño Máximo (MB)</label>
+              <input type="number" id="addReqPeso" class="form-control" value="5" min="1" max="25">
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modalAddRequirement')">Cancelar</button>
+            <button type="submit" class="btn btn-gold"><i class="fa-solid fa-check"></i> Agregar Requisito</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTIONAR ROLES DE USUARIO (SYSADMIN) -->
+  <div class="modal-overlay" id="modalManageRoles">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-user-shield" style="font-size: 20px; color: white;"></i>
+          <div>
+            <h3 style="font-size: 16px; margin: 0; color: white;">Asignación de Roles Institucionales</h3>
+            <span style="font-size: 11px; color: rgba(255,255,255,0.8);" id="manageRolesUserSubtitle"></span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeModal('modalManageRoles')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <input type="hidden" id="manageRolesUserId">
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">
+          Seleccione los roles que correspondan a las funciones del colaborador. Los cambios se auditan de forma inmediata en la bitácora del sistema.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 18px;">
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_SYSADMIN" value="SYSADMIN">
+            <span><strong>SYSADMIN</strong> - Administrador de Sistemas (Acceso Total y Soporte)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_ADMIN_BECAS" value="ADMIN_BECAS">
+            <span><strong>ADMIN_BECAS</strong> - Administrador de Convocatorias y Programas</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_EVALUADOR" value="EVALUADOR">
+            <span><strong>EVALUADOR</strong> - Evaluador Académico y Comité de Selección</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_DIRECTOR" value="DIRECTOR">
+            <span><strong>DIRECTOR</strong> - Director Ministerial (Doble Aprobación y Resoluciones)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_AUDITOR" value="AUDITOR">
+            <span><strong>AUDITOR</strong> - Auditor Interno y Fiscalización de Transparencia</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_ADMIN_MINEDUC" value="ADMIN_MINEDUC">
+            <span><strong>ADMIN_MINEDUC</strong> - Gestión General Ministerial</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="roleChk_POSTULANTE" value="POSTULANTE">
+            <span><strong>POSTULANTE</strong> - Ciudadano / Estudiante Solicitante de Beca</span>
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalManageRoles')">Cancelar</button>
+          <button type="button" class="btn btn-gold" onclick="submitSaveUserRoles()"><i class="fa-solid fa-save"></i> Guardar Roles</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GESTIÓN DE TIPOS DE BECA (ADMIN_BECAS / SYSADMIN) -->
+  <div class="modal-overlay" id="modalScholarshipTypes">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 16px; margin: 0; color: white;"><i class="fa-solid fa-tags"></i> Catálogo de Tipos de Beca</h3>
+        <button class="modal-close" onclick="closeModal('modalScholarshipTypes')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+          <h5 style="margin: 0 0 10px; font-size: 13px; color: var(--primary-navy);">+ Crear Nuevo Tipo de Beca</h5>
+          <form onsubmit="submitCreateScholarshipType(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <input type="text" id="typeNewCodigo" class="form-control" placeholder="Código (ej. BEC_INVESTIGACION)" required style="font-size: 12px;">
+            <input type="text" id="typeNewNombre" class="form-control" placeholder="Nombre (ej. Beca de Investigación)" required style="font-size: 12px;">
+            <input type="text" id="typeNewDesc" class="form-control" placeholder="Descripción breve..." style="grid-column: span 2; font-size: 12px;">
+            <div style="grid-column: span 2; text-align: right;">
+              <button type="submit" class="btn btn-sm btn-gold" style="font-size: 12px; padding: 6px 14px;"><i class="fa-solid fa-plus"></i> Agregar Tipo</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); text-align: left;">
+                <th style="padding: 8px;">Código</th>
+                <th style="padding: 8px;">Nombre</th>
+                <th style="padding: 8px;">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="typesTableBody">
+              <tr><td colspan="3" style="text-align: center; padding: 14px;">Cargando catálogo...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -3468,13 +3803,60 @@
         openModal('modalLogin');
         return;
       }
+      
+      // Adaptar pestañas según el rol institucional del usuario
+      adaptAdminTabsForRoles();
       openModal('modalAdminPanel');
       switchAdminTab(currentAdminTab || 'kpis');
     }
 
+    function adaptAdminTabsForRoles() {
+      let roles = [];
+      try {
+        roles = JSON.parse(sessionStorage.getItem("user_roles") || "[]");
+      } catch (e) {
+        roles = [];
+      }
+      
+      const isSysAdmin = roles.includes("SYSADMIN");
+      const isAdminBecas = roles.includes("ADMIN_BECAS");
+      const isEvaluador = roles.includes("EVALUADOR");
+      const isDirector = roles.includes("DIRECTOR");
+      const isAuditor = roles.includes("AUDITOR");
+      const isAdminMineduc = roles.includes("ADMIN_MINEDUC");
+
+      const btnCalls = document.getElementById("tabBtnCalls");
+      const btnUsers = document.getElementById("tabBtnUsers");
+      const btnSecond = document.getElementById("tabBtnSecondApproval");
+      const btnAudit = document.getElementById("tabBtnAudit");
+      const btnVerify = document.getElementById("tabBtnVerify");
+      const btnCommittee = document.getElementById("tabBtnCommittee");
+      const btnRes = document.getElementById("tabBtnResolutions");
+
+      // Visibilidad selectiva basada en rol (SysAdmin y Admin Mineduc tienen acceso global)
+      if (btnCalls) btnCalls.style.display = (isSysAdmin || isAdminBecas || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnUsers) btnUsers.style.display = (isSysAdmin || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnSecond) btnSecond.style.display = (isSysAdmin || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnAudit) btnAudit.style.display = (isSysAdmin || isAuditor || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnVerify) btnVerify.style.display = (isSysAdmin || isEvaluador || isAdminBecas || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnCommittee) btnCommittee.style.display = (isSysAdmin || isEvaluador || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnRes) btnRes.style.display = (isSysAdmin || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+
+      // Definir pestaña inicial óptima por rol
+      if (isAdminBecas && !isSysAdmin) {
+        currentAdminTab = 'calls';
+      } else if (isAuditor && !isSysAdmin) {
+        currentAdminTab = 'audit';
+      } else if (isDirector && !isSysAdmin) {
+        currentAdminTab = 'secondApproval';
+      } else if (isEvaluador && !isSysAdmin) {
+        currentAdminTab = 'verify';
+      }
+    }
+
     function switchAdminTab(tabName) {
       currentAdminTab = tabName;
-      const tabs = ['kpis', 'verify', 'committee', 'resolutions', 'secondApproval', 'audit'];
+      const tabs = ['kpis', 'calls', 'verify', 'committee', 'resolutions', 'secondApproval', 'audit', 'users'];
       tabs.forEach(t => {
         const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
         const content = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -3498,6 +3880,12 @@
         loadAdminKpis();
       } else if (tabName === 'verify') {
         loadVerifyApplications();
+      } else if (tabName === 'calls') {
+        loadAdminCalls();
+      } else if (tabName === 'users') {
+        loadAdminUsers();
+      } else if (tabName === 'committee') {
+        loadAdmittedApplicationsForRubric();
       }
     }
 
@@ -3718,6 +4106,713 @@
         }
       } catch (e) {
         console.warn("Aviso al cargar KPIs:", e);
+      }
+    }
+
+
+    // =========================================================================
+    // GESTIÓN DE CONVOCATORIAS Y BECAS (ADMIN_BECAS / SYSADMIN)
+    // =========================================================================
+    let allAdminCallsData = [];
+
+    async function loadAdminCalls() {
+      const token = sessionStorage.getItem("access_token");
+      const tbody = document.getElementById("callsTableBody");
+      if (!token || !tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Consultando convocatorias...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/admin/calls`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al cargar convocatorias");
+        }
+        const calls = await res.json();
+        allAdminCallsData = calls || [];
+
+        if (allAdminCallsData.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">No hay convocatorias registradas. Haz clic en "+ Crear Nueva Beca" para iniciar una.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = allAdminCallsData.map(c => {
+          let badgeEstado = '';
+          if (c.estado === 'BORRADOR') {
+            badgeEstado = `<span style="background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">BORRADOR</span>`;
+          } else if (c.estado === 'PUBLICADA') {
+            badgeEstado = `<span style="background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;"><i class="fa-solid fa-circle-check"></i> PUBLICADA</span>`;
+          } else {
+            badgeEstado = `<span style="background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">${c.estado}</span>`;
+          }
+
+          const montoFmt = `Q ${(c.monto_individual || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}`;
+          const presFmt = `Q ${(c.presupuesto_total || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}`;
+          const fCierre = c.fecha_cierre ? new Date(c.fecha_cierre).toLocaleDateString('es-GT') : '-';
+          const reqCount = c.requisitos ? c.requisitos.length : 0;
+
+          let actionButtons = '';
+          if (c.estado === 'BORRADOR') {
+            actionButtons = `
+              <button class="btn btn-sm btn-gold" onclick="publishCall('${c.id}', '${escape(c.titulo)}', ${reqCount})" style="font-size: 11px; padding: 4px 8px;" title="Hacer pública en catálogo ciudadano">
+                <i class="fa-solid fa-bullhorn"></i> Publicar
+              </button>
+              <button class="btn btn-sm btn-outline" onclick="openAddRequirementModal('${c.id}', '${escape(c.titulo)}')" style="font-size: 11px; padding: 4px 8px;" title="Añadir requisito documental">
+                <i class="fa-solid fa-plus"></i> Requisito
+              </button>
+            `;
+          } else if (c.estado === 'PUBLICADA') {
+            actionButtons = `
+              <button class="btn btn-sm btn-outline" onclick="closeCall('${c.id}', '${escape(c.titulo)}')" style="font-size: 11px; padding: 4px 8px; color: #b91c1c; border-color: #fca5a5;" title="Cerrar recepción de postulaciones">
+                <i class="fa-solid fa-lock"></i> Cerrar
+              </button>
+            `;
+          }
+
+          return `
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 10px 12px;">
+                <strong style="color: var(--primary-navy); font-family: monospace;">${c.codigo}</strong>
+                <div style="font-weight: 600; font-size: 13px; color: #1e293b;">${c.titulo}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${reqCount} requisitos documentales obligatorios</div>
+              </td>
+              <td style="padding: 10px 12px;">
+                <div style="font-weight: 600;">${c.tipo_beca_nombre || 'General'}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${c.nivel_educativo_nombre || 'Nivel Medio'}</div>
+              </td>
+              <td style="padding: 10px 12px; font-size: 12px;">
+                ${c.departamento_nombre || 'Nacional'}
+              </td>
+              <td style="padding: 10px 12px;">
+                <strong>${c.cupos_disponibles} cupos</strong>
+                <div style="font-size: 11px; color: #b45309; font-weight: 700;">${montoFmt} c/u</div>
+              </td>
+              <td style="padding: 10px 12px; font-weight: 700; color: var(--primary-navy);">
+                ${presFmt}
+              </td>
+              <td style="padding: 10px 12px; font-size: 11px; color: var(--text-muted);">
+                Cierre: <strong>${fCierre}</strong>
+              </td>
+              <td style="padding: 10px 12px;">
+                ${badgeEstado}
+              </td>
+              <td style="padding: 10px 12px; text-align: center;">
+                <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                  ${actionButtons}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--error);">${err.message}</td></tr>`;
+      }
+    }
+
+    async function openCreateCallModal() {
+      const selectTipo = document.getElementById("callNewTipo");
+      const selectNivel = document.getElementById("callNewNivel");
+      const selectDepto = document.getElementById("callNewDepto");
+      const reqsContainer = document.getElementById("callNewReqsContainer");
+
+      // Cargar catálogos dinámicamente
+      try {
+        const [resTipos, resNiveles, resDeptos] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/catalogs/scholarship-types`),
+          fetch(`${API_BASE}/api/v1/catalogs/education-levels`),
+          fetch(`${API_BASE}/api/v1/catalogs/departments`)
+        ]);
+
+        if (resTipos.ok && selectTipo) {
+          const tipos = await resTipos.json();
+          selectTipo.innerHTML = tipos.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
+        }
+        if (resNiveles.ok && selectNivel) {
+          const niveles = await resNiveles.json();
+          selectNivel.innerHTML = niveles.map(n => `<option value="${n.id}">${n.nombre}</option>`).join('');
+        }
+        if (resDeptos.ok && selectDepto) {
+          const deptos = await resDeptos.json();
+          selectDepto.innerHTML = `<option value="">Nacional (Los 22 Departamentos)</option>` +
+            deptos.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
+        }
+      } catch (e) {
+        console.warn("Error cargando catálogos para crear convocatoria:", e);
+      }
+
+      // Fechas por defecto: apertura hoy, cierre en 30 días
+      const now = new Date();
+      const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const fmtLocal = d => d.toISOString().slice(0, 16);
+
+      document.getElementById("callNewFechaInicio").value = fmtLocal(now);
+      document.getElementById("callNewFechaCierre").value = fmtLocal(in30Days);
+
+      // Requisito base sugerido
+      if (reqsContainer) {
+        reqsContainer.innerHTML = '';
+        addRequirementRowToForm("Certificado Oficial de Calificaciones", "Certificado oficial autenticado en PDF", "PDF", 5);
+        addRequirementRowToForm("Documento de Identificación (DPI o Pasaporte)", "Documento legible de ambos lados", "PDF", 5);
+      }
+
+      openModal("modalCreateScholarshipCall");
+    }
+
+    let reqRowCount = 0;
+    function addRequirementRowToForm(defNombre = "", defDesc = "", defTipo = "PDF", defPeso = 5) {
+      reqRowCount++;
+      const container = document.getElementById("callNewReqsContainer");
+      if (!container) return;
+
+      const row = document.createElement("div");
+      row.className = "req-dynamic-row";
+      row.id = `reqRow_${reqRowCount}`;
+      row.style.cssText = "display: grid; grid-template-columns: 2fr 2fr 1fr 1fr 30px; gap: 8px; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);";
+      row.innerHTML = `
+        <input type="text" class="form-control req-name" placeholder="Nombre requisito *" value="${defNombre}" required style="font-size: 11px;">
+        <input type="text" class="form-control req-desc" placeholder="Instrucción..." value="${defDesc}" style="font-size: 11px;">
+        <select class="form-control req-tipo" style="font-size: 11px;">
+          <option value="PDF" ${defTipo === 'PDF' ? 'selected' : ''}>PDF</option>
+          <option value="IMAGEN" ${defTipo === 'IMAGEN' ? 'selected' : ''}>Imagen</option>
+        </select>
+        <input type="number" class="form-control req-peso" value="${defPeso}" min="1" max="25" title="MB Máximo" style="font-size: 11px;">
+        <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px;" title="Eliminar">&times;</button>
+      `;
+      container.appendChild(row);
+    }
+
+    async function submitCreateScholarshipCall(event) {
+      event.preventDefault();
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const btn = document.getElementById("btnSubmitCreateCall");
+      if (btn) btn.disabled = true;
+
+      const reqRows = document.querySelectorAll("#callNewReqsContainer .req-dynamic-row");
+      const requisitos_iniciales = [];
+      let orden = 1;
+      reqRows.forEach(row => {
+        const nom = row.querySelector(".req-name")?.value.trim();
+        const desc = row.querySelector(".req-desc")?.value.trim();
+        const tipo = row.querySelector(".req-tipo")?.value || "PDF";
+        const peso = parseInt(row.querySelector(".req-peso")?.value) || 5;
+        if (nom) {
+          requisitos_iniciales.push({
+            nombre: nom,
+            descripcion: desc,
+            es_obligatorio: true,
+            tipo_documento: tipo,
+            peso_maximo_mb: peso,
+            orden: orden++
+          });
+        }
+      });
+
+      const deptoVal = document.getElementById("callNewDepto").value;
+      const payload = {
+        codigo: document.getElementById("callNewCodigo").value.trim() || null,
+        titulo: document.getElementById("callNewTitulo").value.trim(),
+        tipo_beca_id: document.getElementById("callNewTipo").value,
+        nivel_educativo_id: document.getElementById("callNewNivel").value,
+        departamento_id: deptoVal ? deptoVal : null,
+        cupos_disponibles: parseInt(document.getElementById("callNewCupos").value) || 1,
+        monto_individual: parseFloat(document.getElementById("callNewMontoIndiv").value) || 0,
+        presupuesto_total: parseFloat(document.getElementById("callNewPresupuesto").value) || 0,
+        promedio_minimo_requerido: parseFloat(document.getElementById("callNewPromedio").value) || 70,
+        fecha_inicio: new Date(document.getElementById("callNewFechaInicio").value).toISOString(),
+        fecha_cierre: new Date(document.getElementById("callNewFechaCierre").value).toISOString(),
+        descripcion: document.getElementById("callNewDescripcion").value.trim(),
+        requisitos_iniciales: requisitos_iniciales
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al crear la convocatoria.");
+
+        showToast(`¡Convocatoria '${data.titulo}' (${data.codigo}) creada en BORRADOR exitosamente!`, "success");
+        closeModal("modalCreateScholarshipCall");
+        loadAdminCalls();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function publishCall(callId, titulo, reqCount) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      if (!confirm(`¿Confirmas la publicación oficial de la convocatoria?\n\nUna vez publicada, será visible inmediatamente en el catálogo ciudadano para que los estudiantes se postulen.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls/${callId}/publish`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al publicar la convocatoria.");
+
+        showToast(data.message || "Convocatoria publicada oficialmente.", "success");
+        loadAdminCalls();
+        loadAdminKpis();
+        loadPublicScholarships();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function closeCall(callId, titulo) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      if (!confirm(`¿Deseas cerrar formalmente la recepción de postulaciones para esta convocatoria?`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls/${callId}/close`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al cerrar la convocatoria.");
+
+        showToast(data.message || "Convocatoria cerrada exitosamente.", "info");
+        loadAdminCalls();
+        loadAdminKpis();
+        loadPublicScholarships();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    function openAddRequirementModal(callId, titulo) {
+      document.getElementById("addReqCallId").value = callId;
+      document.getElementById("addReqCallTitleDisplay").innerText = `Convocatoria: ${unescape(titulo)}`;
+      document.getElementById("addReqNombre").value = '';
+      document.getElementById("addReqDescripcion").value = '';
+      openModal("modalAddRequirement");
+    }
+
+    async function submitAddRequirement(event) {
+      event.preventDefault();
+      const token = sessionStorage.getItem("access_token");
+      const callId = document.getElementById("addReqCallId").value;
+      if (!token || !callId) return;
+
+      const payload = {
+        nombre: document.getElementById("addReqNombre").value.trim(),
+        descripcion: document.getElementById("addReqDescripcion").value.trim(),
+        es_obligatorio: true,
+        tipo_documento: document.getElementById("addReqTipoDoc").value,
+        peso_maximo_mb: parseInt(document.getElementById("addReqPeso").value) || 5,
+        orden: 1
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/scholarships/calls/${callId}/requirements`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al agregar requisito.");
+
+        showToast(`Requisito '${data.nombre}' agregado con éxito.`, "success");
+        closeModal("modalAddRequirement");
+        loadAdminCalls();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    // =========================================================================
+    // GESTIÓN DE CATÁLOGO DE TIPOS DE BECA (ADMIN_BECAS / SYSADMIN)
+    // =========================================================================
+    async function openScholarshipTypeModal() {
+      openModal("modalScholarshipTypes");
+      loadScholarshipTypesList();
+    }
+
+    async function loadScholarshipTypesList() {
+      const tbody = document.getElementById("typesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 14px;">Cargando...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/catalogs/scholarship-types?only_active=false`);
+        if (!res.ok) throw new Error("Error al consultar tipos de beca");
+        const list = await res.json();
+        tbody.innerHTML = list.map(t => `
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px; font-family: monospace; font-weight: 700;">${t.codigo}</td>
+            <td style="padding: 8px;">${t.nombre}</td>
+            <td style="padding: 8px;">
+              <span style="font-size: 11px; font-weight: 700; color: ${t.es_activo ? '#15803d' : '#94a3b8'};">
+                ${t.es_activo ? 'ACTIVO' : 'INACTIVO'}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--error);">${e.message}</td></tr>`;
+      }
+    }
+
+    async function submitCreateScholarshipType(event) {
+      event.preventDefault();
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const payload = {
+        codigo: document.getElementById("typeNewCodigo").value.trim().toUpperCase(),
+        nombre: document.getElementById("typeNewNombre").value.trim(),
+        descripcion: document.getElementById("typeNewDesc").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/catalogs/scholarship-types`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al crear tipo de beca");
+
+        showToast(`Tipo de beca '${data.nombre}' registrado.`, "success");
+        document.getElementById("typeNewCodigo").value = '';
+        document.getElementById("typeNewNombre").value = '';
+        document.getElementById("typeNewDesc").value = '';
+        loadScholarshipTypesList();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    // =========================================================================
+    // CONTROL DE IDENTIDADES, USUARIOS Y ROLES (SYSADMIN)
+    // =========================================================================
+    let allAdminUsersData = [];
+
+    async function loadAdminUsers() {
+      const token = sessionStorage.getItem("access_token");
+      const tbody = document.getElementById("usersTableBody");
+      if (!token || !tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando directorio de usuarios...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/users?limit=100`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al consultar usuarios");
+        }
+        allAdminUsersData = await res.json();
+        renderAdminUsersTable(allAdminUsersData);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--error);">${err.message}</td></tr>`;
+      }
+    }
+
+    function renderAdminUsersTable(users) {
+      const tbody = document.getElementById("usersTableBody");
+      if (!tbody) return;
+
+      if (!users || users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">No se encontraron usuarios coincidentes.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        let estadoBadge = '';
+        if (u.estado === 'ACTIVO') {
+          estadoBadge = `<span style="background: #dcfce7; color: #15803d; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px;">ACTIVO</span>`;
+        } else if (u.estado === 'BLOQUEADO') {
+          estadoBadge = `<span style="background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px;">BLOQUEADO</span>`;
+        } else {
+          estadoBadge = `<span style="background: #f1f5f9; color: #64748b; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${u.estado}</span>`;
+        }
+
+        const rolesBadges = (u.roles || []).map(r => {
+          let col = '#0369a1', bg = '#e0f2fe';
+          if (r === 'SYSADMIN') { col = '#6d28d9'; bg = '#ede9fe'; }
+          else if (r === 'DIRECTOR') { col = '#b45309'; bg = '#fef3c7'; }
+          else if (r === 'ADMIN_BECAS') { col = '#15803d'; bg = '#dcfce7'; }
+          else if (r === 'AUDITOR') { col = '#be123c'; bg = '#ffe4e6'; }
+          return `<span style="background: ${bg}; color: ${col}; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 3px; display: inline-block;">${r}</span>`;
+        }).join('');
+
+        let unlockBtn = '';
+        if (u.intentos_fallidos > 0 || u.estado === 'BLOQUEADO') {
+          unlockBtn = `<button class="btn btn-sm btn-outline" onclick="unlockUserAccount('${u.id}', '${u.email}')" style="color: #15803d; border-color: #86efac; font-size: 11px; padding: 3px 7px;" title="Desbloquear cuenta"><i class="fa-solid fa-lock-open"></i></button>`;
+        }
+
+        const rolesJson = JSON.stringify(u.roles || []).replace(/"/g, '&quot;');
+        const safeNombre = (u.nombre_completo || '').replace(/'/g, "\\'");
+        const safeEmail = (u.email || '').replace(/'/g, "\\'");
+
+        return `
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 10px 12px; font-family: monospace; font-size: 12px;">${u.cui || '-'}</td>
+            <td style="padding: 10px 12px;">
+              <strong style="color: var(--primary-navy);">${u.nombre_completo || 'Usuario'}</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">${u.telefono || 'Sin teléfono'}</div>
+            </td>
+            <td style="padding: 10px 12px; font-size: 12px; color: #1e293b;">${u.email}</td>
+            <td style="padding: 10px 12px;">${estadoBadge}</td>
+            <td style="padding: 10px 12px; font-weight: 700; text-align: center; color: ${u.intentos_fallidos >= 3 ? '#dc2626' : 'var(--text-body)'};">
+              ${u.intentos_fallidos || 0}
+            </td>
+            <td style="padding: 10px 12px;">${rolesBadges || '<span style="color: var(--text-muted); font-size: 11px;">Sin roles</span>'}</td>
+            <td style="padding: 10px 12px; text-align: center;">
+              <div style="display: flex; gap: 4px; justify-content: center;">
+                <button class="btn btn-sm btn-gold" onclick="openManageRolesModal('${u.id}', '${safeNombre}', '${safeEmail}', ${rolesJson})" style="font-size: 11px; padding: 4px 8px;" title="Editar roles">
+                  <i class="fa-solid fa-user-shield"></i> Roles
+                </button>
+                ${unlockBtn}
+                <button class="btn btn-sm btn-outline" onclick="toggleUserActiveStatus('${u.id}', '${u.estado}')" style="font-size: 11px; padding: 4px 8px;" title="${u.estado === 'ACTIVO' ? 'Inactivar usuario' : 'Activar usuario'}">
+                  ${u.estado === 'ACTIVO' ? '<i class="fa-solid fa-user-slash"></i>' : '<i class="fa-solid fa-user-check"></i>'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterAdminUsersTable() {
+      const q = (document.getElementById("usersSearchInput")?.value || "").toLowerCase().trim();
+      if (!q) {
+        renderAdminUsersTable(allAdminUsersData);
+        return;
+      }
+      const filtered = allAdminUsersData.filter(u => 
+        (u.nombre_completo && u.nombre_completo.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.cui && u.cui.includes(q)) ||
+        (u.roles && u.roles.some(r => r.toLowerCase().includes(q)))
+      );
+      renderAdminUsersTable(filtered);
+    }
+
+    function openManageRolesModal(userId, name, email, roles) {
+      document.getElementById("manageRolesUserId").value = userId;
+      document.getElementById("manageRolesUserSubtitle").innerText = `${name} (${email})`;
+
+      const roleList = ['SYSADMIN', 'ADMIN_BECAS', 'EVALUADOR', 'DIRECTOR', 'AUDITOR', 'ADMIN_MINEDUC', 'POSTULANTE'];
+      roleList.forEach(r => {
+        const chk = document.getElementById(`roleChk_${r}`);
+        if (chk) {
+          chk.checked = Array.isArray(roles) && roles.includes(r);
+        }
+      });
+
+      openModal("modalManageRoles");
+    }
+
+    async function submitSaveUserRoles() {
+      const token = sessionStorage.getItem("access_token");
+      const userId = document.getElementById("manageRolesUserId").value;
+      if (!token || !userId) return;
+
+      const roleList = ['SYSADMIN', 'ADMIN_BECAS', 'EVALUADOR', 'DIRECTOR', 'AUDITOR', 'ADMIN_MINEDUC', 'POSTULANTE'];
+      const selectedRoles = [];
+      roleList.forEach(r => {
+        const chk = document.getElementById(`roleChk_${r}`);
+        if (chk && chk.checked) selectedRoles.push(r);
+      });
+
+      if (selectedRoles.length === 0) {
+        showToast("Debe asignar al menos 1 rol al usuario.", "warning");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/users/${userId}/roles`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ roles_codigos: selectedRoles })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al actualizar roles.");
+
+        showToast(data.message || "Roles actualizados exitosamente.", "success");
+        closeModal("modalManageRoles");
+        loadAdminUsers();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function unlockUserAccount(userId, email) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/users/${userId}/status`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ desbloquear: true, estado: "ACTIVO" })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al desbloquear.");
+
+        showToast(`Cuenta desbloqueada e intentos reiniciados a cero exitosamente.`, "success");
+        loadAdminUsers();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function toggleUserActiveStatus(userId, currentStatus) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const nuevo = currentStatus === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+      if (!confirm(`¿Confirmas cambiar el estado de este usuario a '${nuevo}'?`)) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/users/${userId}/status`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ estado: nuevo })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al actualizar estado.");
+
+        showToast(data.message || `Usuario actualizado a ${nuevo}.`, "info");
+        loadAdminUsers();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    // =========================================================================
+    // COMITÉS Y RÚBRICA DIGITAL (EVALUADOR / DIRECTOR)
+    // =========================================================================
+    let allAdmittedApplicationsForRubric = [];
+
+    async function loadAdmittedApplicationsForRubric() {
+      const token = sessionStorage.getItem("access_token");
+      const select = document.getElementById("rubricAppSelect");
+      if (!token || !select) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=50`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const apps = await res.json();
+          allAdmittedApplicationsForRubric = apps || [];
+          if (allAdmittedApplicationsForRubric.length === 0) {
+            select.innerHTML = `<option value="">No hay expedientes en bandeja para evaluar</option>`;
+            return;
+          }
+
+          select.innerHTML = `<option value="">-- Seleccione un expediente admitido (${allAdmittedApplicationsForRubric.length} disponibles) --</option>` +
+            allAdmittedApplicationsForRubric.map(a => `
+              <option value="${a.id}">Expediente: ${a.numero_expediente || 'S/N'} - ${a.postulante_nombre || 'Postulante'} (Promedio: ${a.promedio_postulacion} pts | Estado: ${a.estado})</option>
+            `).join('');
+        }
+      } catch (e) {
+        console.warn("Aviso cargando expedientes para rúbrica:", e);
+      }
+    }
+
+    function onRubricAppSelected() {
+      const select = document.getElementById("rubricAppSelect");
+      const infoBox = document.getElementById("rubricAppInfo");
+      const infoText = document.getElementById("rubricAppInfoText");
+      if (!select || !infoBox || !infoText) return;
+
+      const appId = select.value;
+      if (!appId) {
+        infoBox.style.display = 'none';
+        return;
+      }
+
+      const app = allAdmittedApplicationsForRubric.find(a => a.id === appId);
+      if (app) {
+        infoBox.style.display = 'block';
+        infoText.innerHTML = `<strong>${app.postulante_nombre || 'Postulante'}</strong> | Convocatoria: <strong>${app.convocatoria_titulo || 'General'}</strong> | Monto Solicitado: <strong>Q ${(app.monto_solicitado || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong> | Estado actual: <code>${app.estado}</code>`;
+      }
+    }
+
+    async function submitRealRubricScore() {
+      const token = sessionStorage.getItem("access_token");
+      const select = document.getElementById("rubricAppSelect");
+      if (!token || !select) return;
+
+      const appId = select.value;
+      if (!appId) {
+        showToast("Por favor selecciona primero un expediente de la lista.", "warning");
+        select.focus();
+        return;
+      }
+
+      const acad = parseFloat(document.getElementById("rubricAcademico")?.value) || 0;
+      const socio = parseFloat(document.getElementById("rubricSocio")?.value) || 0;
+      const ensayo = parseFloat(document.getElementById("rubricEnsayo")?.value) || 0;
+      const dictamen = document.getElementById("rubricDictamen")?.value || "FAVORABLE";
+
+      const payload = {
+        solicitud_id: appId,
+        puntaje_academico: acad,
+        puntaje_socioeconomico: socio,
+        puntaje_ensayo_atestados: ensayo,
+        dictamen_individual: dictamen,
+        observaciones: `Calificación oficial asentada con dictamen ${dictamen}. Puntaje Total: ${(acad + socio + ensayo).toFixed(2)} pts.`
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/evaluations/scores`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al registrar la calificación.");
+
+        showToast(`¡Calificación registrada exitosamente! Puntaje Total Oficial: ${data.puntaje_total} / 100 pts.`, "success");
+        loadAdmittedApplicationsForRubric();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
       }
     }
 

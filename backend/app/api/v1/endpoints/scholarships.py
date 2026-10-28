@@ -3,7 +3,7 @@
 Endpoints de la API: Convocatorias de Becas y Catálogo Ciudadano
 Sprint 2 - HU-002, HU-003, HU-004, HU-005, HU-006
 """
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
@@ -46,6 +46,16 @@ def list_public_calls(
         page_size=page_size
     )
 
+@router.get(
+    "/admin/calls",
+    response_model=List[ScholarshipCallDetailResponse],
+    dependencies=[Depends(require_roles(["ADMIN_BECAS", "SYSADMIN", "DIRECTOR", "AUDITOR"]))],
+    summary="Listar todas las convocatorias para administración"
+)
+def list_admin_calls(db: Session = Depends(get_db)):
+    """Retorna todas las convocatorias (BORRADOR, PUBLICADA, CERRADA) para gestión institucional."""
+    return ScholarshipService.list_admin_calls(db)
+
 @router.get("/calls/{call_id}", response_model=ScholarshipCallDetailResponse, summary="HU-005: Ficha Técnica y Bases de Convocatoria")
 def get_call_detail(call_id: UUID, db: Session = Depends(get_db)):
     """
@@ -62,6 +72,7 @@ def get_call_detail(call_id: UUID, db: Session = Depends(get_db)):
     response_model=ScholarshipCallDetailResponse,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_roles(["ADMIN_BECAS", "SYSADMIN"]))],
+
     summary="HU-002: Creación de Convocatoria (Borrador)"
 )
 def create_scholarship_call(

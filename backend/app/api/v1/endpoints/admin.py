@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from uuid import UUID
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -67,8 +67,35 @@ def assign_roles(
     user.roles = roles_to_assign
     db.commit()
 
+from pydantic import BaseModel, Field
+
+class UserStatusUpdateRequest(BaseModel):
+    estado: Optional[str] = Field(None, description="ACTIVO o INACTIVO")
+    desbloquear: Optional[bool] = Field(False, description="Si es True, reinicia intentos fallidos y desbloquea")
+
+@router.put("/users/{user_id}/status", response_model=GenericResponse, summary="Activar, Inactivar o Desbloquear Usuario")
+def update_user_status(
+    user_id: UUID,
+    req: UserStatusUpdateRequest,
+    db: Session = Depends(get_db),
+    current_admin=Depends(require_roles(["SYSADMIN"]))
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado.")
+
+    if req.estado:
+        user.estado = req.estado
+    if req.desbloquear:
+        user.intentos_fallidos = 0
+        user.bloqueado_hasta = None
+        if user.estado == "BLOQUEADO":
+            user.estado = "ACTIVO"
+
+    db.commit()
     return GenericResponse(
         success=True,
-        message=f"Roles actualizados exitosamente para el usuario {user.email}.",
-        data={"user_id": str(user.id), "roles": [r.codigo for r in roles_to_assign]}
+        message=f"Estado del usuario {user.email} actualizado exitosamente.",
+        data={"user_id": str(user.id), "estado": user.estado, "intentos_fallidos": user.intentos_fallidos}
     )
+

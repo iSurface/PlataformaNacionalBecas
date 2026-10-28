@@ -292,3 +292,38 @@ class ScholarshipService:
             actualizado_en=call.actualizado_en,
             requisitos=reqs
         )
+
+    @staticmethod
+    def list_admin_calls(db: Session) -> List[ScholarshipCallDetailResponse]:
+        """Retorna todas las convocatorias (BORRADOR, PUBLICADA, CERRADA) para gestión institucional."""
+        calls = db.query(ScholarshipCall).filter(ScholarshipCall.es_activo == True).order_by(ScholarshipCall.creado_en.desc()).all()
+        results = []
+        for call in calls:
+            reqs = [CallRequirementResponse.model_validate(r) for r in call.requisitos]
+            depto_nombre = call.departamento.nombre if call.departamento else "Cobertura Nacional"
+            results.append(ScholarshipCallDetailResponse(
+                id=call.id,
+                codigo=call.codigo,
+                titulo=call.titulo,
+                descripcion=call.descripcion,
+                tipo_beca_id=call.tipo_beca_id,
+                nivel_educativo_id=call.nivel_educativo_id,
+                departamento_id=call.departamento_id,
+                cupos_disponibles=call.cupos_disponibles,
+                presupuesto_total=float(call.presupuesto_total),
+                monto_individual=float(call.monto_individual),
+                promedio_minimo_requerido=call.promedio_minimo_requerido,
+                fecha_inicio=call.fecha_inicio,
+                fecha_cierre=call.fecha_cierre,
+                bases_url=call.bases_url,
+                cronograma_detalle=call.cronograma_detalle,
+                estado=call.estado,
+                tipo_beca_nombre=call.tipo_beca.nombre if call.tipo_beca else "",
+                nivel_educativo_nombre=call.nivel_educativo.nombre if call.nivel_educativo else "",
+                departamento_nombre=depto_nombre,
+                creado_en=call.creado_en,
+                actualizado_en=call.actualizado_en,
+                requisitos=reqs
+            ))
+        return results
+

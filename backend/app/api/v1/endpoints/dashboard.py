@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/kpis", response_model=DashboardKpis, summary="HU-006: Métricas y Tablero Gerencial de Impacto")
 def get_kpis(
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "AUDITOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     return DashboardService.get_management_kpis(db)
@@ -37,7 +37,7 @@ def get_audit_logs(
     solicitud_id: Optional[str] = Query(None, description="Filtrar por ID de solicitud"),
     operacion: Optional[str] = Query(None, description="Filtrar por tipo de operación"),
     resultado: Optional[str] = Query(None, description="Filtrar por resultado: EXITOSO, DENEGADO, ERROR"),
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "AUDITOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     logs = AuditService.list_logs(db, limit=limit, solicitud_id=solicitud_id, operacion=operacion, resultado=resultado)
