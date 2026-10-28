@@ -25,10 +25,13 @@ class Application(Base):
 
     # Máquina de Estados:
     # BORRADOR, ENVIADA, EN_VERIFICACION, OBSERVADA, SUBSANADA, ADMISIBLE, NO_ADMISIBLE,
-    # ASIGNADA_COMITE, EN_EVALUACION, DICTAMINADA, ADJUDICADA, RECHAZADA, DESISTIDA
+    # ASIGNADA_COMITE, EN_EVALUACION, DICTAMINADA, PENDIENTE_SEGUNDA_APROBACION, ADJUDICADA, RECHAZADA, DESISTIDA
     estado = Column(String(40), nullable=False, default="BORRADOR", index=True)
 
     promedio_postulacion = Column(Float, nullable=False, default=0.0)
+    monto_solicitado = Column(Float, nullable=True, default=0.0) # Monto financiero del beneficio
+    requiere_segunda_aprobacion = Column(Boolean, nullable=False, default=False) # True si monto > Q10,000 (HU-001)
+
     datos_formulario = Column(JSON, nullable=True) # Respuestas y formulario complementario
 
     motivo_desistimiento = Column(String(255), nullable=True)
@@ -39,6 +42,15 @@ class Application(Base):
     puntaje_ponderado_comite = Column(Float, nullable=True)
     dictamen_comite = Column(String(30), nullable=True) # RECOMENDADO, NO_RECOMENDADO
 
+    # Doble Aprobación y Gobernanza (Sprint 6 - HU-001)
+    primera_aprobacion_por_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id"), nullable=True)
+    fecha_primera_aprobacion = Column(DateTime(timezone=True), nullable=True)
+    observaciones_primera_aprobacion = Column(Text, nullable=True)
+
+    segunda_aprobacion_por_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id"), nullable=True)
+    fecha_segunda_aprobacion = Column(DateTime(timezone=True), nullable=True)
+    observaciones_segunda_aprobacion = Column(Text, nullable=True)
+
     fecha_creacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     fecha_envio = Column(DateTime(timezone=True), nullable=True)
     fecha_actualizacion = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
@@ -47,6 +59,8 @@ class Application(Base):
     postulante = relationship("User", foreign_keys=[postulante_id], backref="solicitudes")
     convocatoria = relationship("ScholarshipCall", backref="solicitudes")
     verificado_por = relationship("User", foreign_keys=[verificado_por_id])
+    primera_aprobacion_por = relationship("User", foreign_keys=[primera_aprobacion_por_id])
+    segunda_aprobacion_por = relationship("User", foreign_keys=[segunda_aprobacion_por_id])
     documentos = relationship("ApplicationDocument", back_populates="solicitud", cascade="all, delete-orphan")
     historial = relationship("ApplicationStatusHistory", back_populates="solicitud", cascade="all, delete-orphan", order_by="ApplicationStatusHistory.fecha_cambio.desc()")
 

@@ -40,6 +40,23 @@ def startup_db_init():
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS google_id VARCHAR(100) UNIQUE;"))
             conn.execute(text("ALTER TABLE usuarios ALTER COLUMN password_hash DROP NOT NULL;"))
+
+            # Sprint 6 - HU-001: Doble Aprobación y Gobernanza Financiera (> Q10k)
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS monto_solicitado FLOAT DEFAULT 0.0;"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS requiere_segunda_aprobacion BOOLEAN DEFAULT FALSE;"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS primera_aprobacion_por_id UUID REFERENCES usuarios(id);"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS fecha_primera_aprobacion TIMESTAMP WITH TIME ZONE;"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS observaciones_primera_aprobacion TEXT;"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS segunda_aprobacion_por_id UUID REFERENCES usuarios(id);"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS fecha_segunda_aprobacion TIMESTAMP WITH TIME ZONE;"))
+            conn.execute(text("ALTER TABLE solicitudes_beca ADD COLUMN IF NOT EXISTS observaciones_segunda_aprobacion TEXT;"))
+
+            # Sprint 6 - HU-003: Bitácora Forense de 4 Dimensiones
+            conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS usuario_nombre VARCHAR(150);"))
+            conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS usuario_rol VARCHAR(50);"))
+            conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS operacion VARCHAR(100);"))
+            conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS resultado VARCHAR(30) DEFAULT 'EXITOSO';"))
+            conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS detalles TEXT;"))
     except Exception as ex:
         print(f"[STARTUP DDL MIGRATION] {ex}")
 

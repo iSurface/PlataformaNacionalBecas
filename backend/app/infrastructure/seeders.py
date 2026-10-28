@@ -102,6 +102,28 @@ def seed_initial_data():
             db.add(eval_person)
             print(f" -> Creado Usuario Evaluador: {eval_email}")
 
+        # 3.2 Usuario Director Ministerial (Sprint 6 - HU-001 Doble Aprobación)
+        director_email = "director@becas.mineduc.gob.gt"
+        director_user = db.query(User).filter(User.email == director_email).first()
+        if not director_user:
+            director_user = User(
+                cui="4000000010101",
+                email=director_email,
+                password_hash=get_password_hash("Director2026!#Seguro"),
+                estado="ACTIVO",
+                roles=[roles_map["DIRECTOR"]]
+            )
+            db.add(director_user)
+            db.flush()
+            director_person = Person(
+                usuario_id=director_user.id,
+                primer_nombre="Elena",
+                primer_apellido="Sandoval",
+                telefono="24119597"
+            )
+            db.add(director_person)
+            print(f" -> Creado Usuario Director Ministerial: {director_email}")
+
         # 3.2 Usuario Estudiante Demo
         student_email = "estudiante.demo@becas.mineduc.gob.gt"
         student_user = db.query(User).filter(User.email == student_email).first()
@@ -340,17 +362,163 @@ def seed_initial_data():
                     )
                     db.add(res_demo)
 
-                # Bitácora Inmutable de Auditoría (HU-008)
+                # Bitácora Inmutable de Auditoría (HU-008 & HU-003)
                 db.add(AuditLog(
                     usuario_id=admin_user.id,
+                    usuario_nombre=admin_user.nombre_completo,
+                    usuario_rol="ADMIN_MINEDUC",
                     modulo="ADJUDICACION",
                     accion="EMITIR_RESOLUCION_MINISTERIAL",
+                    operacion="EMITIR_RESOLUCION_MINISTERIAL",
+                    resultado="EXITOSO",
+                    detalles="Resolución ministerial RES-MINEDUC-2026-0042 publicada oficialmente para 120 becarios.",
                     entidad="AwardResolution",
                     entidad_id="RES-MINEDUC-2026-0042",
                     datos_nuevos={"total_becarios": 120, "monto_total": 1200000.00},
                     timestamp=now - timedelta(days=1)
                 ))
                 print(" -> Expediente Demo Adjudicado y Resolución Ministerial sembrados exitosamente")
+
+        # 11. Convocatoria y Expediente de Mayor Cuantía (> Q 10,000) (Sprint 6 - HU-001)
+        lvl_mae = db.query(EducationLevel).filter(EducationLevel.codigo == "MAESTRIA").first()
+        call_posgrado = db.query(ScholarshipCall).filter(ScholarshipCall.codigo == "BEC-2026-POSGRADO-01").first()
+        if not call_posgrado:
+            call_posgrado = ScholarshipCall(
+                codigo="BEC-2026-POSGRADO-01",
+                titulo="Beca Nacional de Posgrado e Investigación Científica 2026",
+                descripcion="Programa ministerial de alto nivel para estudios avanzados de maestría y doctorado con financiamiento de Q 15,000.00.",
+                tipo_beca_id=tipos_map["EXCELENCIA_ACADEMICA"].id,
+                nivel_educativo_id=lvl_mae.id if lvl_mae else list(tipos_map.values())[0].id,
+                departamento_id=None,
+                cupos_disponibles=200,
+                presupuesto_total=3000000.00,
+                monto_individual=15000.00, # > Q 10,000.00 (Requiere Doble Aprobación)
+                promedio_minimo_requerido=85.0,
+                fecha_inicio=now - timedelta(days=15),
+                fecha_cierre=now + timedelta(days=45),
+                estado="PUBLICADA",
+                bases_url="https://becas.mineduc.gob.gt/bases/bases_convocatoria_posgrado_2026.pdf",
+                cronograma_detalle={
+                    "apertura_solicitudes": (now - timedelta(days=15)).strftime("%Y-%m-%d"),
+                    "cierre_solicitudes": (now + timedelta(days=45)).strftime("%Y-%m-%d")
+                },
+                creado_por_id=admin_user.id
+            )
+            db.add(call_posgrado)
+            db.flush()
+            print(" -> Convocatoria Posgrado (> Q10k) sembrada exitosamente")
+
+        # Estudiante Posgrado Demo
+        posgrado_email = "estudiante.posgrado@becas.mineduc.gob.gt"
+        posgrado_user = db.query(User).filter(User.email == posgrado_email).first()
+        if not posgrado_user:
+            posgrado_user = User(
+                cui="5000000010101",
+                email=posgrado_email,
+                password_hash=get_password_hash("Posgrado2026!#Seguro"),
+                estado="ACTIVO",
+                roles=[roles_map["POSTULANTE"]]
+            )
+            db.add(posgrado_user)
+            db.flush()
+            posgrado_person = Person(
+                usuario_id=posgrado_user.id,
+                primer_nombre="Fernando",
+                primer_apellido="Reyes",
+                telefono="55554321"
+            )
+            db.add(posgrado_person)
+
+            # Perfil
+            db.add(StudentProfile(
+                usuario_id=posgrado_user.id,
+                departamento_residencia_id=dept_map["01"].id,
+                institucion_origen="Universidad de San Carlos de Guatemala",
+                carrera_o_grado="Maestría en Ciencias de la Computación",
+                promedio_general=95.0,
+                ingreso_mensual_familiar=5000.0,
+                dependientes_hogar=2,
+                tipo_vivienda="PROPIA",
+                perfil_completo=True
+            ))
+
+        if posgrado_user and call_posgrado:
+            app_posgrado = db.query(Application).filter(Application.postulante_id == posgrado_user.id).first()
+            if not app_posgrado:
+                app_posgrado = Application(
+                    numero_expediente="EXP-2026-POSGRADO-00001",
+                    postulante_id=posgrado_user.id,
+                    convocatoria_id=call_posgrado.id,
+                    estado="PENDIENTE_SEGUNDA_APROBACION",
+                    promedio_postulacion=95.0,
+                    monto_solicitado=15000.00,
+                    requiere_segunda_aprobacion=True,
+                    puntaje_ponderado_comite=96.0,
+                    dictamen_comite="RECOMENDADO",
+                    primera_aprobacion_por_id=admin_user.id,
+                    fecha_primera_aprobacion=now - timedelta(days=2),
+                    observaciones_primera_aprobacion="Aprobación técnica de primera fase emitida. Supera el umbral de Q 10,000.00; requiere segunda aprobación de Dirección Ministerial (HU-001).",
+                    fecha_envio=now - timedelta(days=10),
+                    verificado_por_id=admin_user.id
+                )
+                db.add(app_posgrado)
+                db.flush()
+
+                # Trazabilidad
+                db.add(ApplicationEvent(
+                    solicitud_id=app_posgrado.id,
+                    tipo_evento="CREACION",
+                    titulo="Borrador Creado",
+                    descripcion="Expediente digital de posgrado iniciado.",
+                    actor_id=posgrado_user.id,
+                    visible_estudiante=True,
+                    creado_en=now - timedelta(days=12)
+                ))
+                db.add(ApplicationEvent(
+                    solicitud_id=app_posgrado.id,
+                    tipo_evento="ENVIO",
+                    titulo="Expediente Formalizado",
+                    descripcion="Postulación formalizada con correlativo EXP-2026-POSGRADO-00001.",
+                    actor_id=posgrado_user.id,
+                    visible_estudiante=True,
+                    creado_en=now - timedelta(days=10)
+                ))
+                db.add(ApplicationEvent(
+                    solicitud_id=app_posgrado.id,
+                    tipo_evento="APROBACION_FASE_1",
+                    titulo="Primera Aprobación Emitida (> Q 10,000)",
+                    descripcion="Expediente por Q 15,000.00 aprobado en primera fase por Coordinación. En espera de segunda firma de Dirección Ministerial.",
+                    actor_id=admin_user.id,
+                    visible_estudiante=True,
+                    creado_en=now - timedelta(days=2)
+                ))
+
+                # Notificación
+                db.add(InternalNotification(
+                    usuario_id=posgrado_user.id,
+                    titulo="Primera Aprobación Emitida (> Q 10,000)",
+                    mensaje="Tu expediente EXP-2026-POSGRADO-00001 (Q 15,000.00) superó satisfactoriamente la primera fase de aprobación. Actualmente se encuentra en Dirección Ministerial para la segunda aprobación obligatoria.",
+                    tipo="ACTION_REQUIRED",
+                    leida=False,
+                    creado_en=now - timedelta(days=2)
+                ))
+
+                # Bitácora Forense (HU-003)
+                db.add(AuditLog(
+                    usuario_id=admin_user.id,
+                    usuario_nombre=admin_user.nombre_completo,
+                    usuario_rol="ADMIN_MINEDUC",
+                    modulo="POSTULACIONES",
+                    accion="APROBACION_PRIMERA_FASE",
+                    operacion="APROBACION_PRIMERA_FASE_MAYOR_10K",
+                    resultado="EXITOSO",
+                    detalles="Primera aprobación completada para expediente EXP-2026-POSGRADO-00001 por Q 15,000.00. Se activa bandera de requerimiento de segunda firma.",
+                    entidad="Application",
+                    entidad_id=str(app_posgrado.id),
+                    datos_nuevos={"estado": "PENDIENTE_SEGUNDA_APROBACION", "monto": 15000.00},
+                    timestamp=now - timedelta(days=2)
+                ))
+                print(" -> Expediente Demo Posgrado PENDIENTE_SEGUNDA_APROBACION sembrado exitosamente")
 
         db.commit()
         print("¡Siembra de datos completa (Sprints 1 a 5) en PostgreSQL completada al 100%!")

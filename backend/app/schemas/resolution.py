@@ -58,13 +58,22 @@ class InternalNotificationResponse(BaseModel):
 
 class AuditLogResponse(BaseModel):
     id: UUID
+    # 1. Quién
     usuario_id: Optional[UUID] = None
+    usuario_nombre: Optional[str] = None
+    usuario_rol: Optional[str] = None
     ip_address: Optional[str] = None
+    # 2. Cuándo
+    timestamp: datetime
+    # 3. Qué Operación
     modulo: str
     accion: str
+    operacion: Optional[str] = None
     entidad: str
     entidad_id: Optional[str] = None
-    timestamp: datetime
+    # 4. Resultado
+    resultado: str = "EXITOSO"
+    detalles: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -2451,16 +2451,38 @@
       const actionsContainer = document.getElementById("headerAuthActions");
 
       if (token) {
-        actionsContainer.innerHTML = `
-          <div class="user-auth-panel">
-            <button class="btn btn-outline" onclick="openStudentProfileModal()">
-              <i class="fa-solid fa-address-card"></i> Mi Ficha
+        let roles = [];
+        try { roles = JSON.parse(sessionStorage.getItem("user_roles") || "[]"); } catch (e) {}
+        const isStaff = roles.some(r => {
+          const code = typeof r === 'string' ? r : (r.codigo || '');
+          return ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"].includes(code);
+        });
+
+        let extraBtns = '';
+        if (isStaff) {
+          extraBtns += `
+            <button class="btn btn-gold" onclick="openAdminPanel()" style="font-size: 13px; padding: 7px 14px;" title="Panel de Gestión y Comités">
+              <i class="fa-solid fa-landmark"></i> Panel MINEDUC
             </button>
-            <div class="user-badge">
-              <div class="user-avatar">${name.charAt(0)}</div>
-              <span>${name}</span>
+          `;
+        }
+        extraBtns += `
+          <button class="btn btn-outline" onclick="openMyExpediente()" style="font-size: 13px; padding: 7px 14px;" title="Ver Mi Expediente Digital">
+            <i class="fa-solid fa-folder-open"></i> Mi Expediente
+          </button>
+        `;
+
+        actionsContainer.innerHTML = `
+          <div class="user-auth-panel" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            ${extraBtns}
+            <button class="btn btn-outline" onclick="openStudentProfileModal()" style="font-size: 13px; padding: 7px 12px;" title="Mi Ficha Socioeconómica">
+              <i class="fa-solid fa-address-card"></i>
+            </button>
+            <div class="user-badge" style="display: flex; align-items: center; gap: 8px;">
+              <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">${name.charAt(0)}</div>
+              <span style="font-size: 13px; font-weight: 600;">${name}</span>
             </div>
-            <button class="btn btn-outline" onclick="logoutSession()" title="Cerrar Sesión">
+            <button class="btn btn-outline" onclick="logoutSession()" title="Cerrar Sesión" style="padding: 7px 10px;">
               <i class="fa-solid fa-right-from-bracket"></i>
             </button>
           </div>
@@ -2608,17 +2630,17 @@
       }
     });
   </script>
-  <!-- MODAL: EXPEDIENTE DIGITAL Y TRAZABILIDAD (Sprint 3, 4, 5) -->
-  <div class="modal-backdrop" id="modalMyExpediente">
-    <div class="modal-card" style="max-width: 860px; max-height: 90vh; overflow-y: auto;">
+  <!-- MODAL: EXPEDIENTE DIGITAL Y TRAZABILIDAD (Sprints 3, 4, 5, 6) -->
+  <div class="modal-overlay" id="modalMyExpediente">
+    <div class="modal-card modal-card-large" style="max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
             <i class="fa-solid fa-folder-open"></i>
           </div>
           <div>
-            <h3 style="font-size: 18px; margin: 0; color: var(--primary-navy);">Expediente Digital de Postulación</h3>
-            <span style="font-size: 12px; color: var(--text-muted);" id="expedienteSubtitle">Cargando expediente...</span>
+            <h3 style="font-size: 18px; margin: 0; color: white;">Expediente Digital de Postulación</h3>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.8);" id="expedienteSubtitle">Cargando expediente...</span>
           </div>
         </div>
         <button class="modal-close" onclick="closeModal('modalMyExpediente')">&times;</button>
@@ -2626,13 +2648,26 @@
 
       <div class="modal-body" style="padding: 24px;">
         <!-- Banner de Estado -->
-        <div id="expedienteStateBanner" style="padding: 16px 20px; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div id="expedienteStateBanner" style="padding: 16px 20px; border-radius: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
           <div>
             <span style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase;">Estado del Expediente</span>
             <h4 id="expedienteStateText" style="margin: 2px 0 0 0; color: #15803d; font-size: 20px;">BORRADOR</h4>
           </div>
           <div id="expedienteCorrelativoBadge" style="background: white; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-family: monospace; font-size: 14px; color: var(--primary-navy); border: 1px solid #bbf7d0;">
             SIN CORRELATIVO
+          </div>
+        </div>
+
+        <!-- Alerta de Mayor Cuantía (> Q 10,000) Sprint 6 HU-001 -->
+        <div id="expedienteHighAmountAlert" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-left: 5px solid #d97706; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-scale-balanced" style="color: #d97706; font-size: 22px;"></i>
+            <div>
+              <strong style="color: #92400e; font-size: 14px;">Beca de Mayor Cuantía — Sujeta a Doble Aprobación Ministerial (HU-001)</strong>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #78350f;" id="expedienteHighAmountText">
+                Monto superior a Q 10,000.00: Requiere doble aprobación y firma ratificatoria de Dirección Ministerial.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -2648,10 +2683,10 @@
           </div>
         </div>
 
-        <!-- Línea de Tiempo de Trazabilidad -->
+        <!-- Línea de Tiempo de Trazabilidad (Sprint 6 - HU-002) -->
         <div>
           <h4 style="font-size: 16px; color: var(--primary-navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-timeline" style="color: var(--guate-cyan);"></i> Trazabilidad del Proceso en Tiempo Real
+            <i class="fa-solid fa-timeline" style="color: var(--guate-cyan);"></i> Trazabilidad del Proceso en Tiempo Real (HU-002)
           </h4>
           <div id="expedienteTimeline" style="position: relative; padding-left: 28px; display: flex; flex-direction: column; gap: 18px;">
             <div style="color: var(--text-muted); font-size: 13px;">Cargando eventos...</div>
@@ -2662,23 +2697,23 @@
       <div class="modal-footer" style="padding: 16px 24px; background: var(--bg-alt); display: flex; justify-content: space-between; align-items: center;">
         <button class="btn btn-outline" onclick="closeModal('modalMyExpediente')">Cerrar</button>
         <div id="expedienteActionBtns" style="display: flex; gap: 10px;">
-          <!-- Dinámico: Formalizar o Subsanar -->
+          <!-- Dinámico -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: PANEL DE GESTIÓN MINEDUC Y COMITÉS (Sprints 3, 4, 5) -->
-  <div class="modal-backdrop" id="modalAdminPanel">
-    <div class="modal-card" style="max-width: 960px; max-height: 90vh; overflow-y: auto;">
+  <!-- MODAL: PANEL DE GESTIÓN MINEDUC Y COMITÉS (Sprints 1 a 6) -->
+  <div class="modal-overlay" id="modalAdminPanel">
+    <div class="modal-card modal-card-large" style="max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px;">
             <i class="fa-solid fa-landmark"></i>
           </div>
           <div>
-            <h3 style="font-size: 18px; margin: 0; color: var(--primary-navy);">Panel de Gestión Institucional MINEDUC</h3>
-            <span style="font-size: 12px; color: var(--text-muted);">Control Operativo de Sprints 1 a 5</span>
+            <h3 style="font-size: 18px; margin: 0; color: white;">Panel de Control Institucional MINEDUC</h3>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.8);">Gobernanza Financiera, Comités Colegiados y Auditoría</span>
           </div>
         </div>
         <button class="modal-close" onclick="closeModal('modalAdminPanel')">&times;</button>
@@ -2686,7 +2721,7 @@
 
       <div class="modal-body" style="padding: 24px;">
         <!-- Tabs de navegación interna -->
-        <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px;">
+        <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px; flex-wrap: wrap;">
           <button class="btn btn-gold" id="tabBtnKpis" onclick="switchAdminTab('kpis')" style="font-size: 13px; padding: 8px 16px;">
             <i class="fa-solid fa-chart-pie"></i> Tablero Gerencial
           </button>
@@ -2694,10 +2729,17 @@
             <i class="fa-solid fa-list-check"></i> Verificación Admisibilidad
           </button>
           <button class="btn btn-outline" id="tabBtnCommittee" onclick="switchAdminTab('committee')" style="font-size: 13px; padding: 8px 16px;">
-            <i class="fa-solid fa-gavel"></i> Comité y Rúbrica Digital
+            <i class="fa-solid fa-gavel"></i> Comité y Rúbrica
           </button>
           <button class="btn btn-outline" id="tabBtnResolutions" onclick="switchAdminTab('resolutions')" style="font-size: 13px; padding: 8px 16px;">
             <i class="fa-solid fa-file-signature"></i> Resoluciones
+          </button>
+          <!-- SPRINT 6: NUEVAS PESTAÑAS -->
+          <button class="btn btn-outline" id="tabBtnSecondApproval" onclick="switchAdminTab('secondApproval')" style="font-size: 13px; padding: 8px 16px; border-color: var(--accent-gold); color: #92400e;">
+            <i class="fa-solid fa-stamp"></i> Segunda Aprobación (> Q10k)
+          </button>
+          <button class="btn btn-outline" id="tabBtnAudit" onclick="switchAdminTab('audit')" style="font-size: 13px; padding: 8px 16px;">
+            <i class="fa-solid fa-shield-halved"></i> Bitácora Forense (4D)
           </button>
         </div>
 
@@ -2829,9 +2871,540 @@
             </button>
           </div>
         </div>
+
+        <!-- CONTENIDO TAB 5: SEGUNDA APROBACIÓN (> Q10,000) (Sprint 6 - HU-001) -->
+        <div id="adminTabSecondApproval" style="display: none;">
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-left: 5px solid #d97706; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <i class="fa-solid fa-scale-balanced" style="color: #d97706; font-size: 22px; margin-top: 2px;"></i>
+              <div>
+                <strong style="color: #92400e; font-size: 14px;">Gobernanza Financiera y Segregación Estricta de Funciones (RB-014)</strong>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #78350f; line-height: 1.5;">
+                  Toda solicitud de beca con monto superior a <strong>Q 10,000.00</strong> requiere obligatoriamente una segunda aprobación emitida por Dirección Ministerial. 
+                  Por mandato anti-fraude, la segunda aprobación <strong>no puede ser efectuada por la misma persona</strong> que emitió la primera firma.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h4 style="font-size: 16px; color: var(--primary-navy); margin: 0;">
+              Bandeja de Expedientes Pendientes de Segunda Firma Ministerial
+            </h4>
+            <button class="btn btn-outline" onclick="loadPendingSecondApproval()" style="font-size: 12px; padding: 6px 12px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Actualizar Bandeja
+            </button>
+          </div>
+
+          <div style="overflow-x: auto; background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                  <th style="padding: 12px 14px;">Expediente</th>
+                  <th style="padding: 12px 14px;">Postulante</th>
+                  <th style="padding: 12px 14px;">Monto Beca</th>
+                  <th style="padding: 12px 14px;">Primer Aprobador</th>
+                  <th style="padding: 12px 14px;">Fecha 1ra Firma</th>
+                  <th style="padding: 12px 14px; text-align: center;">Acciones de Control</th>
+                </tr>
+              </thead>
+              <tbody id="secondApprovalTableBody">
+                <tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Cargando expedientes pendientes de segunda aprobación...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- CONTENIDO TAB 6: BITÁCORA FORENSE DE 4 DIMENSIONES (Sprint 6 - HU-003) -->
+        <div id="adminTabAudit" style="display: none;">
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <i class="fa-solid fa-shield-halved" style="color: #16a34a; font-size: 22px; margin-top: 2px;"></i>
+              <div>
+                <strong style="color: #166534; font-size: 14px;">Bitácora Forense Inmutable en 4 Dimensiones (HU-003)</strong>
+                <p style="margin: 4px 0 0; font-size: 13px; color: #14532d; line-height: 1.5;">
+                  Fiscalización pública auditable: Cada registro responde con exactitud a: 
+                  <strong>¿Quién?</strong> (Funcionario + rol + IP), <strong>¿Cuándo?</strong> (Timestamp UTC inmutable), 
+                  <strong>¿Qué Operación?</strong> (Acción efectuada) y <strong>¿Cuál fue el Resultado?</strong> (EXITOSO / DENEGADO / ERROR con justificación).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros de búsqueda en auditoría -->
+          <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; background: #f8fafc; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);">
+            <div style="flex: 1; min-width: 200px;">
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Filtrar Operación</label>
+              <input type="text" id="auditFilterOperacion" class="form-control" placeholder="Ej: APROBACION, SEGUNDA, CAMBIO..." oninput="loadAuditLogsTable()" style="padding: 6px 12px; font-size: 13px;">
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Resultado</label>
+              <select id="auditFilterResultado" class="form-control" onchange="loadAuditLogsTable()" style="padding: 6px 12px; font-size: 13px;">
+                <option value="">Todos los Resultados</option>
+                <option value="EXITOSO">EXITOSO (Conforme)</option>
+                <option value="DENEGADO">DENEGADO (Bloqueo RB-014)</option>
+                <option value="ERROR">ERROR</option>
+              </select>
+            </div>
+            <div style="align-self: flex-end;">
+              <button class="btn btn-outline" onclick="loadAuditLogsTable()" style="font-size: 13px; padding: 7px 14px;">
+                <i class="fa-solid fa-filter"></i> Refrescar
+              </button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto; background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid var(--border-color); color: var(--text-muted);">
+                  <th style="padding: 10px 12px;">1. ¿Quién?</th>
+                  <th style="padding: 10px 12px;">2. ¿Cuándo?</th>
+                  <th style="padding: 10px 12px;">3. ¿Qué Operación?</th>
+                  <th style="padding: 10px 12px;">4. Resultado y Causa</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody">
+                <tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">Cargando registros forenses de auditoría...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <script>
+    let currentAdminTab = 'kpis';
+
+    function openAdminPanel() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) {
+        showToast("Debes iniciar sesión con perfil institucional para acceder al panel.", "warning");
+        openModal('modalLogin');
+        return;
+      }
+      openModal('modalAdminPanel');
+      switchAdminTab(currentAdminTab || 'kpis');
+    }
+
+    function switchAdminTab(tabName) {
+      currentAdminTab = tabName;
+      const tabs = ['kpis', 'verify', 'committee', 'resolutions', 'secondApproval', 'audit'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        const content = document.getElementById('adminTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) {
+          if (t === tabName) {
+            btn.className = "btn btn-gold";
+          } else {
+            btn.className = "btn btn-outline";
+          }
+        }
+        if (content) {
+          content.style.display = (t === tabName) ? 'block' : 'none';
+        }
+      });
+
+      if (tabName === 'secondApproval') {
+        loadPendingSecondApproval();
+      } else if (tabName === 'audit') {
+        loadAuditLogsTable();
+      } else if (tabName === 'kpis') {
+        loadAdminKpis();
+      } else if (tabName === 'verify') {
+        loadVerifyApplications();
+      }
+    }
+
+    async function loadPendingSecondApproval() {
+      const token = sessionStorage.getItem("access_token");
+      const tbody = document.getElementById("secondApprovalTableBody");
+      if (!token || !tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Consultando expedientes de mayor cuantía...</td></tr>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/pending-second-approval`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al consultar expedientes");
+        }
+        const data = await res.json();
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 28px; color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> No hay expedientes pendientes de segunda aprobación ministerial. Todos los expedientes mayores a Q 10,000 se encuentran debidamente ratificados.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.map(app => {
+          const montoFmt = app.monto_solicitado ? `Q ${app.monto_solicitado.toLocaleString('es-GT', {minimumFractionDigits: 2})}` : 'Q 0.00';
+          const fecha1ra = app.fecha_primera_aprobacion ? new Date(app.fecha_primera_aprobacion).toLocaleString('es-GT') : 'Reciente';
+          return `
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 12px 14px;">
+                <strong style="color: var(--primary-navy); font-family: monospace;">${app.numero_expediente || 'S/N'}</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">${app.convocatoria_titulo || ''}</div>
+              </td>
+              <td style="padding: 12px 14px;">
+                <strong>${app.postulante_nombre || 'Postulante'}</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">Promedio: ${app.promedio_postulacion} pts</div>
+              </td>
+              <td style="padding: 12px 14px;">
+                <span style="font-weight: 800; color: #b45309; font-size: 14px;">${montoFmt}</span>
+                <span style="display: block; font-size: 10px; color: var(--text-muted); font-weight: 700;">> Q 10,000 (RB-013)</span>
+              </td>
+              <td style="padding: 12px 14px;">
+                <div style="font-weight: 600; color: var(--primary-navy);">${app.primera_aprobacion_por_nombre || 'Comité Evaluador'}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${app.observaciones_primera_aprobacion || 'Favorable en 1ra fase'}</div>
+              </td>
+              <td style="padding: 12px 14px; font-size: 12px; color: var(--text-muted); font-family: monospace;">
+                ${fecha1ra}
+              </td>
+              <td style="padding: 12px 14px; text-align: center;">
+                <div style="display: flex; gap: 6px; justify-content: center;">
+                  <button class="btn btn-gold" onclick="executeSecondApproval('${app.id}', '${app.numero_expediente}')" style="font-size: 11px; padding: 6px 12px;">
+                    <i class="fa-solid fa-signature"></i> Ratificar 2da Firma
+                  </button>
+                  <button class="btn btn-outline" onclick="executeReject('${app.id}', '${app.numero_expediente}')" style="font-size: 11px; padding: 6px 10px; color: var(--error); border-color: var(--error);" title="Rechazar expediente">
+                    <i class="fa-solid fa-ban"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--error);">${err.message}</td></tr>`;
+      }
+    }
+
+    async function executeSecondApproval(appId, expNum) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const obs = prompt(`¿Desea ratificar la segunda aprobación ministerial para el expediente ${expNum}?\n\nIngrese observaciones o justificación ministerial (opcional):`, "Segunda aprobación ratificada de conformidad con el artículo de gobernanza y techos presupuestarios del MINEDUC.");
+      if (obs === null) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/approve-second`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ observaciones: obs })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.detail || "Error al ratificar segunda aprobación.");
+        }
+
+        showToast(`¡Segunda aprobación ratificada exitosamente! Expediente ${expNum} adjudicado de forma definitiva.`, "success");
+        loadPendingSecondApproval();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+        loadPendingSecondApproval();
+      }
+    }
+
+    async function executeReject(appId, expNum) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const motivo = prompt(`Rechazo formal de expediente ${expNum}\n\nIngrese el motivo legal o justificación del rechazo:`);
+      if (!motivo || motivo.trim().length < 3) {
+        if (motivo !== null) showToast("Debe ingresar un motivo válido de al menos 3 caracteres.", "warning");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/reject?motivo=${encodeURIComponent(motivo.trim())}`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al rechazar expediente.");
+
+        showToast(`Expediente ${expNum} rechazado formalmente con registro forense en auditoría.`, "info");
+        loadPendingSecondApproval();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function loadAuditLogsTable() {
+      const token = sessionStorage.getItem("access_token");
+      const tbody = document.getElementById("auditTableBody");
+      if (!token || !tbody) return;
+
+      const operacionFilter = (document.getElementById("auditFilterOperacion")?.value || "").trim();
+      const resultadoFilter = (document.getElementById("auditFilterResultado")?.value || "").trim();
+
+      let url = `${API_BASE}/api/v1/dashboard/audit-logs?limit=50`;
+      if (operacionFilter) url += `&operacion=${encodeURIComponent(operacionFilter)}`;
+      if (resultadoFilter) url += `&resultado=${encodeURIComponent(resultadoFilter)}`;
+
+      try {
+        const res = await fetch(url, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Error al consultar bitácora de auditoría");
+        }
+        const logs = await res.json();
+        if (!logs || logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">No se encontraron asientos de auditoría con los criterios seleccionados.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => {
+          let resBadge = '';
+          if (l.resultado === 'EXITOSO') {
+            resBadge = `<span style="background: #dcfce7; color: #15803d; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-circle-check"></i> EXITOSO</span>`;
+          } else if (l.resultado === 'DENEGADO') {
+            resBadge = `<span style="background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-triangle-exclamation"></i> DENEGADO (RB-014)</span>`;
+          } else {
+            resBadge = `<span style="background: #fef3c7; color: #b45309; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${l.resultado || 'INFO'}</span>`;
+          }
+
+          const dateStr = l.timestamp ? new Date(l.timestamp).toLocaleString('es-GT') : '-';
+
+          return `
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 10px 12px; vertical-align: top;">
+                <strong style="color: var(--primary-navy);">${l.usuario_nombre || 'Sistema Automatizado'}</strong>
+                <div style="margin-top: 2px;">
+                  <span style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${l.usuario_rol || 'SISTEMA'}</span>
+                  <span style="font-size: 11px; color: var(--text-muted); margin-left: 4px;">IP: ${l.ip_address || '127.0.0.1'}</span>
+                </div>
+              </td>
+              <td style="padding: 10px 12px; vertical-align: top; font-family: monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap;">
+                ${dateStr}
+              </td>
+              <td style="padding: 10px 12px; vertical-align: top;">
+                <strong style="color: #0e2b4c; font-size: 12px;">${l.operacion || l.accion}</strong>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                  Módulo: <strong>${l.modulo}</strong> | Entidad: <code>${l.entidad}</code> ${l.entidad_id ? `(#${l.entidad_id.substring(0,8)})` : ''}
+                </div>
+              </td>
+              <td style="padding: 10px 12px; vertical-align: top;">
+                <div>${resBadge}</div>
+                <p style="margin: 4px 0 0; font-size: 11px; color: #334155; line-height: 1.4;">${l.detalles || 'Operación registrada en libro inmutable.'}</p>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--error);">${err.message}</td></tr>`;
+      }
+    }
+
+    async function loadAdminKpis() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/dashboard/kpis`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const kpis = await res.json();
+          const convEl = document.getElementById("kpiConvocatorias");
+          const solEl = document.getElementById("kpiSolicitudes");
+          const adjEl = document.getElementById("kpiAdjudicados");
+          const presEl = document.getElementById("kpiPresupuesto");
+
+          if (convEl) convEl.innerText = kpis.total_convocatorias_activas || 0;
+          if (solEl) solEl.innerText = kpis.total_solicitudes_recibidas || 0;
+          if (adjEl) adjEl.innerText = kpis.total_becarios_adjudicados || 0;
+          if (presEl) presEl.innerText = `Q ${(kpis.presupuesto_total_comprometido || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}`;
+
+          const gridEl = document.getElementById("kpiDeptGrid");
+          if (gridEl && kpis.distribucion_geografica) {
+            gridEl.innerHTML = Object.entries(kpis.distribucion_geografica).map(([dept, cant]) => `
+              <div style="background: #f8fafc; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 12px;">
+                <strong>${dept}:</strong> <span style="color: var(--primary-navy); font-weight: 700;">${cant}</span>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (e) {
+        console.warn("Aviso al cargar KPIs:", e);
+      }
+    }
+
+    async function loadVerifyApplications() {
+      const token = sessionStorage.getItem("access_token");
+      const tbody = document.getElementById("verifyTableBody");
+      if (!token || !tbody) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=20`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const apps = await res.json();
+          if (apps.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No hay expedientes en bandeja.</td></tr>`;
+            return;
+          }
+          tbody.innerHTML = apps.map(a => `
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 10px;">
+                <strong>${a.numero_expediente || 'Borrador'}</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">${a.convocatoria_titulo || ''}</div>
+              </td>
+              <td style="padding: 10px;">${a.postulante_nombre || 'Postulante'}</td>
+              <td style="padding: 10px; font-weight: 700;">${a.promedio_postulacion} pts</td>
+              <td style="padding: 10px;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;">${a.estado}</span></td>
+              <td style="padding: 10px; text-align: center;">
+                <button class="btn btn-gold" onclick="executeApproveFirst('${a.id}')" style="font-size: 11px; padding: 4px 8px;">
+                  <i class="fa-solid fa-check"></i> Aprobar 1ra Fase
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--error);">${e.message}</td></tr>`;
+      }
+    }
+
+    async function executeApproveFirst(appId) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+      const montoStr = prompt("Ingrese el monto evaluado/aprobado para esta beca en Quetzales (si supera Q 10,000 requerirá segunda firma de Dirección):", "15000");
+      if (montoStr === null) return;
+      const monto = parseFloat(montoStr) || 0;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/approve-first`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ monto_aprobado: monto, observaciones: "Aprobación de primera fase emitida por comité." })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error en primera aprobación.");
+
+        if (data.requiere_segunda_aprobacion || monto > 10000) {
+          showToast(`Primera aprobación completada. Por superar Q 10,000 (Monto: Q ${monto.toFixed(2)}), el expediente pasó a estado PENDIENTE_SEGUNDA_APROBACION.`, "warning");
+        } else {
+          showToast(`Expediente aprobado y adjudicado directamente (Monto: Q ${monto.toFixed(2)}).`, "success");
+        }
+        loadVerifyApplications();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function openMyExpediente() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) {
+        showToast("Inicia sesión para visualizar tu expediente.", "info");
+        openModal('modalLogin');
+        return;
+      }
+
+      openModal('modalMyExpediente');
+      const stateText = document.getElementById("expedienteStateText");
+      const correlativoBadge = document.getElementById("expedienteCorrelativoBadge");
+      const subtitle = document.getElementById("expedienteSubtitle");
+      const docsList = document.getElementById("expedienteDocsList");
+      const timeline = document.getElementById("expedienteTimeline");
+      const highAlert = document.getElementById("expedienteHighAmountAlert");
+      const highText = document.getElementById("expedienteHighAmountText");
+      const actionBtns = document.getElementById("expedienteActionBtns");
+
+      docsList.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando atestados...</div>`;
+      timeline.innerHTML = `<div style="color: var(--text-muted); font-size: 13px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando eventos de trazabilidad...</div>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/my-applications`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("No se pudo obtener el expediente.");
+
+        const apps = await res.json();
+        if (!apps || apps.length === 0) {
+          stateText.innerText = "SIN POSTULACIONES ACTIVAS";
+          correlativoBadge.innerText = "NO DISPONIBLE";
+          subtitle.innerText = "No tienes una postulación activa en este momento.";
+          docsList.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">Explora las convocatorias abiertas en la plataforma para postular a una beca.</div>`;
+          timeline.innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">No hay eventos registrados.</div>`;
+          if (highAlert) highAlert.style.display = 'none';
+          return;
+        }
+
+        const app = apps[0];
+        subtitle.innerText = app.convocatoria_titulo || "Convocatoria Oficial MINEDUC";
+        stateText.innerText = app.estado;
+        correlativoBadge.innerText = app.numero_expediente || "EN TRÁMITE";
+
+        // Alerta de monto mayor a Q 10,000 (Sprint 6 - HU-001)
+        const monto = app.monto_solicitado || 0;
+        if (highAlert) {
+          if (app.requiere_segunda_aprobacion || monto > 10000) {
+            highAlert.style.display = 'block';
+            if (highText) {
+              if (app.estado === 'PENDIENTE_SEGUNDA_APROBACION') {
+                highText.innerHTML = `Monto de la Beca: <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>. Cuenta con primera aprobación por <strong>${app.primera_aprobacion_por_nombre || 'Coordinación'}</strong>. Actualmente en espera de segunda firma de Dirección Ministerial (HU-001).`;
+              } else {
+                highText.innerHTML = `Monto de la Beca: <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>. De conformidad con la regla de gobernanza financiera, supera el umbral de Q 10,000.00 y requiere doble aprobación.`;
+              }
+            }
+          } else {
+            highAlert.style.display = 'none';
+          }
+        }
+
+        // Documentos
+        if (app.documentos && app.documentos.length > 0) {
+          docsList.innerHTML = app.documentos.map(d => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-file-pdf" style="color: #dc2626; font-size: 20px;"></i>
+                <div>
+                  <strong style="font-size: 13px; color: var(--primary-navy);">${d.nombre_archivo}</strong>
+                  <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">SHA-256: ${d.archivo_hash_sha256.substring(0, 16)}... (${(d.tamano_bytes / 1024).toFixed(1)} KB)</div>
+                </div>
+              </div>
+              <span style="font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px;">CONFORME</span>
+            </div>
+          `).join('');
+        } else {
+          docsList.innerHTML = `<div style="text-align: center; padding: 14px; color: var(--text-muted); font-size: 13px;">No se registran documentos cargados aún.</div>`;
+        }
+
+        // Cargar Trazabilidad en tiempo real (HU-002)
+        const resEvents = await fetch(`${API_BASE}/api/v1/resolutions/timeline/${app.id}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (resEvents.ok) {
+          const events = await resEvents.json();
+          if (events.length === 0) {
+            timeline.innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">Sin eventos de trazabilidad.</div>`;
+          } else {
+            timeline.innerHTML = events.map(e => `
+              <div style="position: relative; margin-bottom: 12px;">
+                <div style="position: absolute; left: -28px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--guate-cyan); border: 2px solid white; box-shadow: 0 0 0 2px var(--guate-cyan);"></div>
+                <strong style="font-size: 13px; color: var(--primary-navy);">${e.titulo}</strong>
+                <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">${new Date(e.creado_en).toLocaleString('es-GT')}</div>
+                <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-body);">${e.descripcion}</p>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+  </script>
 </body>
 </html>

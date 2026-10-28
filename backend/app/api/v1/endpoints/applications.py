@@ -14,7 +14,8 @@ from app.infrastructure.models.application import Application, ApplicationDocume
 from app.schemas.application import (
     ApplicationDraftCreate, ApplicationDraftUpdate, ApplicationWithdrawRequest,
     ApplicationSubmitResponse, ApplicationVerificationRequest,
-    ApplicationDocumentResponse, ApplicationResponse
+    ApplicationDocumentResponse, ApplicationResponse,
+    FirstApprovalRequest, SecondApprovalRequest
 )
 from app.services.application_service import ApplicationService
 from app.services.document_service import DocumentService
@@ -22,6 +23,8 @@ from app.services.document_service import DocumentService
 router = APIRouter()
 
 def _map_app(app: Application) -> ApplicationResponse:
+    monto = app.monto_solicitado or (app.convocatoria.monto_individual if app.convocatoria else 0.0)
+    requiere_2da = app.requiere_segunda_aprobacion or (monto > 10000.0)
     return ApplicationResponse(
         id=app.id,
         numero_expediente=app.numero_expediente,
@@ -32,11 +35,21 @@ def _map_app(app: Application) -> ApplicationResponse:
         postulante_nombre=app.postulante.nombre_completo if app.postulante else None,
         estado=app.estado,
         promedio_postulacion=app.promedio_postulacion,
+        monto_solicitado=monto,
+        requiere_segunda_aprobacion=requiere_2da,
         datos_formulario=app.datos_formulario,
         motivo_desistimiento=app.motivo_desistimiento,
         observaciones_verificacion=app.observaciones_verificacion,
         puntaje_ponderado_comite=app.puntaje_ponderado_comite,
         dictamen_comite=app.dictamen_comite,
+        primera_aprobacion_por_id=app.primera_aprobacion_por_id,
+        primera_aprobacion_por_nombre=app.primera_aprobacion_por.nombre_completo if app.primera_aprobacion_por else None,
+        fecha_primera_aprobacion=app.fecha_primera_aprobacion,
+        observaciones_primera_aprobacion=app.observaciones_primera_aprobacion,
+        segunda_aprobacion_por_id=app.segunda_aprobacion_por_id,
+        segunda_aprobacion_por_nombre=app.segunda_aprobacion_por.nombre_completo if app.segunda_aprobacion_por else None,
+        fecha_segunda_aprobacion=app.fecha_segunda_aprobacion,
+        observaciones_segunda_aprobacion=app.observaciones_segunda_aprobacion,
         fecha_creacion=app.fecha_creacion,
         fecha_envio=app.fecha_envio,
         documentos=[
@@ -152,6 +165,19 @@ def list_applications_for_verification(
     apps = query.order_by(Application.fecha_creacion.desc()).limit(limit).all()
     return [_map_app(a) for a in apps]
 
+# =========================================================================
+# SPRINT 6: GOBERNANZA, DOBLE APROBACIÓN Y AUDITORÍA FORENSE
+# =========================================================================
+
+@router.get("/pending-second-approval", response_model=List[ApplicationResponse], summary="HU-001: Listado de Expedientes Pendientes de Segunda Aprobación (> Q10,000)")
+def list_pending_second_approval(
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    db: Session = Depends(get_db)
+):
+    """Retorna solicitudes de beca con monto > Q 10,000.00 que requieren ratificación de Dirección Ministerial."""
+    apps = db.query(Application).filter(Application.estado == "PENDIENTE_SEGUNDA_APROBACION").order_by(Application.fecha_actualizacion.desc()).all()
+    return [_map_app(a) for a in apps]
+
 @router.get("/{application_id}", response_model=ApplicationResponse, summary="Consultar Detalle de Expediente")
 def get_application_detail(
     application_id: UUID,
@@ -177,4 +203,60 @@ def verify_application(
     db: Session = Depends(get_db)
 ):
     app = ApplicationService.verify_admissibility(db, application_id, current_user.id, req.estado, req.observaciones)
+    return _map_app(app)
+
+@router.post("/{application_id}/approve-first", response_model=ApplicationResponse, summary="HU-001: Primera Aprobación (Evaluador / Coordinador)")
+def approve_first(
+    application_id: UUID,
+    req: FirstApprovalRequest,
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR"])),
+    db: Session = Depends(get_db)
+):
+    """
+    Emite la primera aprobación del expediente.
+    Si el monto > Q 10,000.00, transiciona a PENDIENTE_SEGUNDA_APROBACION.
+    Si el monto <= Q 10,000.00, se adjudica directamente.
+    """
+    app = ApplicationService.approve_first_phase(
+        db=db,
+        solicitud_id=application_id,
+        approver=current_user,
+        monto_aprobado=req.monto_aprobado,
+        observaciones=req.observaciones
+    )
+    return _map_app(app)
+
+@router.post("/{application_id}/approve-second", response_model=ApplicationResponse, summary="HU-001: Segunda Aprobación Ministerial Obligatoria (> Q10,000)")
+def approve_second(
+    application_id: UUID,
+    req: SecondApprovalRequest,
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    db: Session = Depends(get_db)
+):
+    """
+    Segunda aprobación obligatoria emitida por Dirección Ministerial.
+    Aplica RB-014: Se deniega si el usuario es el mismo que realizó la primera aprobación.
+    """
+    app = ApplicationService.approve_second_phase(
+        db=db,
+        solicitud_id=application_id,
+        approver=current_user,
+        observaciones=req.observaciones
+    )
+    return _map_app(app)
+
+@router.post("/{application_id}/reject", response_model=ApplicationResponse, summary="HU-003: Rechazo Formal de Expediente con Asiento Forense")
+def reject_application(
+    application_id: UUID,
+    motivo: str = Query(..., min_length=3, description="Causa o justificación legal del rechazo"),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR"])),
+    db: Session = Depends(get_db)
+):
+    """Rechaza el expediente y asienta el registro inmutable en bitácora de auditoría."""
+    app = ApplicationService.reject_application(
+        db=db,
+        solicitud_id=application_id,
+        reviewer=current_user,
+        motivo=motivo
+    )
     return _map_app(app)

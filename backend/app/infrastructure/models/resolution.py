@@ -108,16 +108,27 @@ class AuditLog(Base):
     __tablename__ = "bitacora_auditoria"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # Dimensión 1: ¿Quién realizó la acción?
     usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id"), nullable=True)
+    usuario_nombre = Column(String(150), nullable=True) # Nombre capturado en el momento
+    usuario_rol = Column(String(50), nullable=True) # Rol activo en la transacción
     ip_address = Column(String(50), nullable=True)
     
+    # Dimensión 2: ¿Cuándo ocurrió?
+    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+
+    # Dimensión 3: ¿Qué operación se ejecutó?
     modulo = Column(String(50), nullable=False) # IAM, POSTULACIONES, EVALUACIONES, ADJUDICACION
     accion = Column(String(100), nullable=False) # CREAR_SOLICITUD, ASIGNAR_COMITE, ADJUDICAR_BECA, etc.
+    operacion = Column(String(100), nullable=True) # Operación explícita (HU-003)
     entidad = Column(String(50), nullable=False) # Application, EvaluationScore, etc.
     entidad_id = Column(String(100), nullable=True)
 
+    # Dimensión 4: ¿Cuál fue el resultado?
+    resultado = Column(String(30), nullable=False, default="EXITOSO") # EXITOSO, DENEGADO, ERROR
+    detalles = Column(Text, nullable=True) # Justificación, motivo o causa del resultado
+
     datos_anteriores = Column(JSON, nullable=True)
     datos_nuevos = Column(JSON, nullable=True)
-    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
 
     usuario = relationship("User")

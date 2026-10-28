@@ -9,8 +9,92 @@ from app.infrastructure.models.application import Application, ApplicationDocume
 from app.infrastructure.models.scholarship import ScholarshipCall, CallRequirement
 from app.infrastructure.models.student_profile import StudentProfile
 from app.infrastructure.models.resolution import ApplicationEvent, InternalNotification, AuditLog
+from app.infrastructure.models.user import User
+from app.services.audit_service import AuditService
 
 class ApplicationService:
+    @staticmethod
+    def transition_state(
+        db: Session,
+        solicitud: Application,
+        nuevo_estado: str,
+        actor: User,
+        comentario: str,
+        tipo_evento: str,
+        titulo_evento: str,
+        descripcion_evento: str,
+        notif_tipo: str = "INFO",
+        operacion_audit: Optional[str] = None,
+        resultado_audit: str = "EXITOSO",
+        detalles_audit: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        notificar_estudiante: bool = True
+    ) -> Application:
+        """
+        Helper centralizado para transicionar el estado de un expediente garantizando:
+        - Registro de historial de estado (ApplicationStatusHistory)
+        - Evento visible en tiempo real para el estudiante (ApplicationEvent - HU-002)
+        - Notificación interna al buzón del estudiante (InternalNotification - HU-002)
+        - Registro forense inmutable de auditoría en 4 dimensiones (AuditLog - HU-003)
+        """
+        estado_anterior = solicitud.estado
+        solicitud.estado = nuevo_estado
+        solicitud.fecha_actualizacion = datetime.now(timezone.utc)
+
+        # 1. Historial de estados
+        history = ApplicationStatusHistory(
+            solicitud_id=solicitud.id,
+            estado_anterior=estado_anterior,
+            estado_nuevo=nuevo_estado,
+            cambiado_por_id=actor.id,
+            comentario=comentario
+        )
+        db.add(history)
+
+        # 2. Evento de trazabilidad del estudiante (HU-002)
+        event = ApplicationEvent(
+            solicitud_id=solicitud.id,
+            tipo_evento=tipo_evento,
+            titulo=titulo_evento,
+            descripcion=descripcion_evento,
+            actor_id=actor.id,
+            visible_estudiante=True
+        )
+        db.add(event)
+
+        # 3. Notificación interna obligatoria al estudiante (HU-002)
+        if notificar_estudiante and solicitud.postulante_id:
+            notif = InternalNotification(
+                usuario_id=solicitud.postulante_id,
+                titulo=titulo_evento,
+                mensaje=f"Expediente {solicitud.numero_expediente or 'En trámite'}: {descripcion_evento}",
+                tipo=notif_tipo
+            )
+            db.add(notif)
+
+        # 4. Asiento en Bitácora Forense (HU-003)
+        user_rol = actor.rol if hasattr(actor, 'rol') else (actor.roles[0].codigo if actor.roles else "USUARIO")
+        audit = AuditLog(
+            usuario_id=actor.id,
+            usuario_nombre=actor.nombre_completo,
+            usuario_rol=user_rol,
+            modulo="POSTULACIONES",
+            accion="CAMBIO_ESTADO",
+            operacion=operacion_audit or f"CAMBIO_ESTADO_{nuevo_estado}",
+            resultado=resultado_audit,
+            detalles=detalles_audit or comentario,
+            entidad="Application",
+            entidad_id=str(solicitud.id),
+            ip_address=ip_address,
+            datos_anteriores={"estado": estado_anterior},
+            datos_nuevos={"estado": nuevo_estado}
+        )
+        db.add(audit)
+
+        db.commit()
+        db.refresh(solicitud)
+        return solicitud
+
     @staticmethod
     def create_or_get_draft(db: Session, user_id: UUID, convocatoria_id: UUID) -> Application:
         convocatoria = db.query(ScholarshipCall).filter(ScholarshipCall.id == convocatoria_id).first()
@@ -40,11 +124,16 @@ class ApplicationService:
                 detail=f"El promedio académico ({promedio:.1f}) no alcanza el mínimo requerido para esta beca ({convocatoria.promedio_minimo:.1f})"
             )
 
+        monto = convocatoria.monto_individual or 0.0
+        requiere_2da = (monto > 10000.0)
+
         solicitud = Application(
             postulante_id=user_id,
             convocatoria_id=convocatoria_id,
             estado="BORRADOR",
             promedio_postulacion=promedio,
+            monto_solicitado=monto,
+            requiere_segunda_aprobacion=requiere_2da,
             datos_formulario={}
         )
         db.add(solicitud)
@@ -56,7 +145,7 @@ class ApplicationService:
             solicitud_id=solicitud.id,
             tipo_evento="CREACION",
             titulo="Borrador Creado",
-            descripcion="Se ha iniciado el expediente digital de postulación.",
+            descripcion=f"Se ha iniciado el expediente digital de postulación. Monto referencial: Q {monto:,.2f}.",
             actor_id=user_id,
             visible_estudiante=True
         )
@@ -300,3 +389,170 @@ class ApplicationService:
         db.commit()
         db.refresh(solicitud)
         return solicitud
+
+    @staticmethod
+    def approve_first_phase(
+        db: Session,
+        solicitud_id: UUID,
+        approver: User,
+        monto_aprobado: Optional[float] = None,
+        observaciones: Optional[str] = None,
+        ip_address: Optional[str] = None
+    ) -> Application:
+        """
+        HU-001: Primera fase de aprobación (Evaluador / Coordinador).
+        Si el monto de la beca supera Q 10,000.00, pasa a PENDIENTE_SEGUNDA_APROBACION.
+        Si es menor o igual a Q 10,000.00, se adjudica directamente.
+        """
+        solicitud = db.query(Application).filter(Application.id == solicitud_id).first()
+        if not solicitud:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expediente no encontrado")
+
+        if solicitud.estado not in ["DICTAMINADA", "ADMISIBLE", "EN_EVALUACION", "ENVIADA"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"No se puede emitir primera aprobación sobre un expediente en estado '{solicitud.estado}'"
+            )
+
+        if monto_aprobado is not None and monto_aprobado > 0:
+            solicitud.monto_solicitado = monto_aprobado
+        elif not solicitud.monto_solicitado and solicitud.convocatoria:
+            solicitud.monto_solicitado = solicitud.convocatoria.monto_individual or 0.0
+
+        monto = solicitud.monto_solicitado or 0.0
+        solicitud.primera_aprobacion_por_id = approver.id
+        solicitud.fecha_primera_aprobacion = datetime.now(timezone.utc)
+        solicitud.observaciones_primera_aprobacion = observaciones
+
+        if monto > 10000.0:
+            solicitud.requiere_segunda_aprobacion = True
+            nuevo_estado = "PENDIENTE_SEGUNDA_APROBACION"
+            titulo_evento = "Primera Aprobación Emitida (> Q 10,000)"
+            desc_evento = f"Expediente evaluado favorablemente por {approver.nombre_completo}. Por superar el monto de Q 10,000.00 (Monto: Q {monto:,.2f}), requiere segunda aprobación de Dirección Ministerial (HU-001)."
+            notif_tipo = "ACTION_REQUIRED"
+            operacion = "APROBACION_PRIMERA_FASE_MAYOR_10K"
+        else:
+            solicitud.requiere_segunda_aprobacion = False
+            nuevo_estado = "ADJUDICADA"
+            titulo_evento = "Beca Aprobada y Adjudicada"
+            desc_evento = f"Expediente aprobado y adjudicado satisfactoriamente por {approver.nombre_completo} (Monto: Q {monto:,.2f})."
+            notif_tipo = "SUCCESS"
+            operacion = "APROBACION_DIRECTA_MENOR_10K"
+
+        return ApplicationService.transition_state(
+            db=db,
+            solicitud=solicitud,
+            nuevo_estado=nuevo_estado,
+            actor=approver,
+            comentario=observaciones or desc_evento,
+            tipo_evento="APROBACION_FASE_1",
+            titulo_evento=titulo_evento,
+            descripcion_evento=desc_evento,
+            notif_tipo=notif_tipo,
+            operacion_audit=operacion,
+            resultado_audit="EXITOSO",
+            detalles_audit=f"Primera aprobación completada. Monto: Q {monto:,.2f}. Requiere 2da firma: {solicitud.requiere_segunda_aprobacion}",
+            ip_address=ip_address
+        )
+
+    @staticmethod
+    def approve_second_phase(
+        db: Session,
+        solicitud_id: UUID,
+        approver: User,
+        observaciones: Optional[str] = None,
+        ip_address: Optional[str] = None
+    ) -> Application:
+        """
+        HU-001: Segunda fase de aprobación obligatoria para montos > Q 10,000.00.
+        Aplica estrictamente RB-014 (Segregación de Funciones): no puede aprobar la misma persona.
+        """
+        solicitud = db.query(Application).filter(Application.id == solicitud_id).first()
+        if not solicitud:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expediente no encontrado")
+
+        if solicitud.estado != "PENDIENTE_SEGUNDA_APROBACION":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"El expediente está en estado '{solicitud.estado}', no requiere ni permite segunda aprobación."
+            )
+
+        user_rol = approver.rol if hasattr(approver, 'rol') else (approver.roles[0].codigo if approver.roles else "USUARIO")
+
+        # REGLA DE NEGOCIO ESTRICTA (RB-014): SEGREGACIÓN DE FUNCIONES
+        if solicitud.primera_aprobacion_por_id and str(solicitud.primera_aprobacion_por_id) == str(approver.id):
+            # Registrar intento de colusión en bitácora forense de auditoría con resultado DENEGADO (HU-003)
+            AuditService.log(
+                db=db,
+                modulo="POSTULACIONES",
+                accion="SEGUNDA_APROBACION",
+                operacion="SEGUNDA_APROBACION_MONTO_MAYOR_10K",
+                resultado="DENEGADO",
+                detalles=f"Violación de Segregación de Funciones (RB-014): El usuario {approver.nombre_completo} ({approver.email}) intentó realizar ambas aprobaciones para la solicitud {solicitud.numero_expediente}.",
+                entidad="Application",
+                entidad_id=str(solicitud.id),
+                usuario_id=approver.id,
+                usuario_nombre=approver.nombre_completo,
+                usuario_rol=user_rol,
+                ip_address=ip_address,
+                datos_anteriores={"estado": solicitud.estado, "primera_aprobacion_por_id": str(solicitud.primera_aprobacion_por_id)}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Violación de regla de negocio (RB-014): La segunda aprobación debe ser realizada por un funcionario distinto al que emitió la primera aprobación."
+            )
+
+        solicitud.segunda_aprobacion_por_id = approver.id
+        solicitud.fecha_segunda_aprobacion = datetime.now(timezone.utc)
+        solicitud.observaciones_segunda_aprobacion = observaciones
+
+        monto = solicitud.monto_solicitado or 0.0
+        primer_aprobador_nombre = solicitud.primera_aprobacion_por.nombre_completo if solicitud.primera_aprobacion_por else "Comité Evaluador"
+        desc_evento = f"Segunda aprobación ministerial ratificada por {approver.nombre_completo} ({user_rol}). Primera firma por {primer_aprobador_nombre}. Beca por Q {monto:,.2f} formalmente adjudicada."
+
+        return ApplicationService.transition_state(
+            db=db,
+            solicitud=solicitud,
+            nuevo_estado="ADJUDICADA",
+            actor=approver,
+            comentario=observaciones or desc_evento,
+            tipo_evento="SEGUNDA_APROBACION",
+            titulo_evento="Segunda Aprobación Ministerial Ratificada",
+            descripcion_evento=desc_evento,
+            notif_tipo="SUCCESS",
+            operacion_audit="SEGUNDA_APROBACION_MONTO_MAYOR_10K",
+            resultado_audit="EXITOSO",
+            detalles_audit=f"Segregación verificada. 1ra firma: {primer_aprobador_nombre}, 2da firma: {approver.nombre_completo}. Monto: Q {monto:,.2f}",
+            ip_address=ip_address
+        )
+
+    @staticmethod
+    def reject_application(
+        db: Session,
+        solicitud_id: UUID,
+        reviewer: User,
+        motivo: str,
+        ip_address: Optional[str] = None
+    ) -> Application:
+        """
+        HU-003: Rechazo formal de solicitud con registro forense y notificación inmediata.
+        """
+        solicitud = db.query(Application).filter(Application.id == solicitud_id).first()
+        if not solicitud:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expediente no encontrado")
+
+        return ApplicationService.transition_state(
+            db=db,
+            solicitud=solicitud,
+            nuevo_estado="RECHAZADA",
+            actor=reviewer,
+            comentario=f"Rechazo de solicitud: {motivo}",
+            tipo_evento="RECHAZO",
+            titulo_evento="Solicitud No Aprobada",
+            descripcion_evento=f"La solicitud fue rechazada por la autoridad evaluadora. Motivo: {motivo}",
+            notif_tipo="WARNING",
+            operacion_audit="RECHAZO_SOLICITUD",
+            resultado_audit="EXITOSO",
+            detalles_audit=f"Rechazo formal emitido por {reviewer.nombre_completo}. Motivo: {motivo}",
+            ip_address=ip_address
+        )
