@@ -146,6 +146,35 @@ def seed_initial_data():
             db.add(student_person)
             print(f" -> Creado Usuario Estudiante Demo: {student_email}")
 
+        # 3.3 Usuarios Institucionales Solicitados (5 Usuarios de Equipo)
+        team_users = [
+            ("daniel.leonardo@becas.mineduc.gob.gt", "1001000100101", "Daniel2026!#Seguro", "ADMIN_BECAS", "Daniel", "Leonardo", "24119598"),
+            ("erick.chuquiej@becas.mineduc.gob.gt", "1002000200101", "Erick2026!#Seguro", "EVALUADOR", "Erick", "Chuquiej", "24119599"),
+            ("raul.alvarez@becas.mineduc.gob.gt", "1003000300101", "Raul2026!#Seguro", "SYSADMIN", "Raúl", "Álvarez", "24119600"),
+            ("walter.celada@becas.mineduc.gob.gt", "1004000400101", "Walter2026!#Seguro", "DIRECTOR", "Walter", "Celada", "24119601"),
+            ("javier.alvizures@becas.mineduc.gob.gt", "1005000500101", "Javier2026!#Seguro", "AUDITOR", "Javier", "Alvizures", "24119602"),
+        ]
+        for email, cui_val, pwd, role_code, p_nombre, p_apellido, tel in team_users:
+            u = db.query(User).filter(User.email == email).first()
+            if not u:
+                u = User(
+                    cui=cui_val,
+                    email=email,
+                    password_hash=get_password_hash(pwd),
+                    estado="ACTIVO",
+                    roles=[roles_map[role_code]]
+                )
+                db.add(u)
+                db.flush()
+                p = Person(
+                    usuario_id=u.id,
+                    primer_nombre=p_nombre,
+                    primer_apellido=p_apellido,
+                    telefono=tel
+                )
+                db.add(p)
+                print(f" -> Creado Usuario de Equipo [{role_code}]: {email}")
+
         # 4. Departamentos de Guatemala
         deptos_data = [
             ("01", "Guatemala"), ("02", "El Progreso"), ("03", "Sacatepéquez"), ("04", "Chimaltenango"),
