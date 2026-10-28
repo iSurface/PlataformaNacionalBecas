@@ -118,10 +118,10 @@ class ApplicationService:
         profile = db.query(StudentProfile).filter(StudentProfile.usuario_id == user_id).first()
         promedio = profile.promedio_general if profile and profile.promedio_general else 85.0
 
-        if convocatoria.promedio_minimo and promedio < convocatoria.promedio_minimo:
+        if convocatoria.promedio_minimo_requerido and promedio < convocatoria.promedio_minimo_requerido:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"El promedio académico ({promedio:.1f}) no alcanza el mínimo requerido para esta beca ({convocatoria.promedio_minimo:.1f})"
+                detail=f"El promedio académico ({promedio:.1f}) no alcanza el mínimo requerido para esta beca ({convocatoria.promedio_minimo_requerido:.1f})"
             )
 
         monto = convocatoria.monto_individual or 0.0

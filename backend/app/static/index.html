@@ -1620,8 +1620,8 @@
         <li class="nav-item"><a href="#inclusion">Inclusión y Equidad</a></li>
         <li class="nav-item"><a href="#testimonios">Testimonios</a></li>
         <li class="nav-item"><a href="#transparencia">Transparencia</a></li>
-        <li class="nav-item" id="navMyExpediente" style="display:none;"><a href="javascript:void(0)" onclick="openMyExpedienteModal()"><i class="fa-solid fa-folder-open"></i> Mi Expediente</a></li>
-        <li class="nav-item" id="navAdminDashboard" style="display:none;"><a href="javascript:void(0)" onclick="openAdminPanelModal()"><i class="fa-solid fa-chart-line"></i> Gestión MINEDUC</a></li>
+        <li class="nav-item" id="navMyExpediente" style="display:none;"><a href="javascript:void(0)" onclick="openMyExpediente()"><i class="fa-solid fa-folder-open"></i> Mi Expediente</a></li>
+        <li class="nav-item" id="navAdminDashboard" style="display:none;"><a href="javascript:void(0)" onclick="openAdminPanel()"><i class="fa-solid fa-landmark"></i> Panel MINEDUC</a></li>
         <li class="nav-item"><a href="#contacto">Contacto</a></li>
       </ul>
 
@@ -2337,6 +2337,30 @@
     </div>
   </div>
 
+  <!-- 6. EXPEDIENTE DE POSTULACIÓN CIUDADANA Y CARGA DOCUMENTAL SHA-256 (SPRINT 3 - HU-001 a HU-006) -->
+  <div class="modal-overlay" id="modalApplyScholarship">
+    <div class="modal-card modal-card-large" style="max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-navy), #1e3a8a); color: white;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; margin: 0; color: white;" id="applyModalTitle">Postulación Oficial a Beca</h3>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.85);" id="applyModalSubtitle">Carga Probatoria de Atestados Digitales con Integridad SHA-256</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" onclick="closeModal('modalApplyScholarship')" style="color: white;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="applyModalContent" style="padding: 24px;">
+        <div style="text-align: center; padding: 40px;">
+          <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy);"></i>
+          <p style="margin-top: 12px; color: var(--text-muted); font-size: 14px;">Iniciando expediente de postulación digital...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -2873,10 +2897,13 @@
       if (token) {
         let roles = [];
         try { roles = JSON.parse(sessionStorage.getItem("user_roles") || "[]"); } catch (e) {}
-        const isStaff = roles.some(r => {
-          const code = typeof r === 'string' ? r : (r.codigo || '');
-          return ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"].includes(code);
-        });
+        const roleCodes = (roles || []).map(r => typeof r === 'string' ? r : (r.codigo || ''));
+        const isStaff = roleCodes.some(c => ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN", "ADMIN_BECAS", "AUDITOR"].includes(c));
+
+        const navAdmin = document.getElementById("navAdminDashboard");
+        if (navAdmin) navAdmin.style.display = isStaff ? 'block' : 'none';
+        const navExp = document.getElementById("navMyExpediente");
+        if (navExp) navExp.style.display = 'block';
 
         let extraBtns = '';
         if (isStaff) {
@@ -2908,6 +2935,11 @@
           </div>
         `;
       } else {
+        const navAdmin = document.getElementById("navAdminDashboard");
+        if (navAdmin) navAdmin.style.display = 'none';
+        const navExp = document.getElementById("navMyExpediente");
+        if (navExp) navExp.style.display = 'none';
+
         actionsContainer.innerHTML = `
           <button class="btn btn-outline" onclick="openModal('modalLogin')">
             <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
@@ -2933,10 +2965,8 @@
       if (token) {
         let roles = [];
         try { roles = JSON.parse(sessionStorage.getItem("user_roles") || "[]"); } catch (e) {}
-        const isStaff = roles.some(r => {
-          const code = typeof r === 'string' ? r : (r.codigo || '');
-          return ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"].includes(code);
-        });
+        const roleCodes = (roles || []).map(r => typeof r === 'string' ? r : (r.codigo || ''));
+        const isStaff = roleCodes.some(c => ["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN", "ADMIN_BECAS", "AUDITOR"].includes(c));
 
         let staffBtn = '';
         if (isStaff) {
@@ -3076,14 +3106,543 @@
       }
     }
 
-    function handleApplyDirect(callId) {
+    // =========================================================================
+    // SPRINT 3: POSTULACIÓN CIUDADANA Y CARGA DOCUMENTAL SHA-256 (HU-001 - HU-006)
+    // =========================================================================
+    let gCurrentApplication = null;
+    let gCurrentCall = null;
+
+    async function handleApplyDirect(callId) {
       const token = sessionStorage.getItem("access_token");
       if (!token) {
-        showToast("Debes iniciar sesión para postular a esta beca.", "info");
+        showToast("Debes iniciar sesión con tu cuenta de postulante para aplicar a esta beca.", "info");
         openModal('modalLogin');
         return;
       }
-      showToast("¡Tu sesión está activa! En el siguiente paso podrás cargar tus atestados PDF en el Sprint 3.", "success");
+
+      openModal('modalApplyScholarship');
+      const container = document.getElementById("applyModalContent");
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+          <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy);"></i>
+          <p style="margin-top: 14px; color: var(--text-muted); font-size: 14px;">Preparando tu expediente digital ante el MINEDUC...</p>
+        </div>
+      `;
+
+      try {
+        // 1. Crear o recuperar borrador existente (HU-001)
+        const resDraft = await fetch(`${API_BASE}/api/v1/applications/draft`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ convocatoria_id: callId })
+        });
+
+        const draftData = await resDraft.json();
+        if (!resDraft.ok) {
+          throw new Error(draftData.detail || "No se pudo iniciar el expediente de postulación.");
+        }
+        gCurrentApplication = draftData;
+
+        // 2. Obtener detalles de la convocatoria y sus requisitos oficiales (HU-004)
+        const resCall = await fetch(`${API_BASE}/api/v1/scholarships/calls/${callId}`);
+        if (!resCall.ok) throw new Error("No se pudo obtener la información técnica de la convocatoria.");
+        gCurrentCall = await resCall.json();
+
+        // 3. Renderizar el modal completo con requisitos probatorios y SHA-256
+        renderApplicationModal(gCurrentApplication, gCurrentCall);
+      } catch (err) {
+        container.innerHTML = `
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 24px; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 32px; color: #dc2626; margin-bottom: 12px;"></i>
+            <h4 style="color: #991b1b; font-size: 16px; margin-bottom: 8px;">No se pudo procesar la postulación</h4>
+            <p style="color: #7f1d1d; font-size: 14px; line-height: 1.5; margin-bottom: 20px;">${err.message}</p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button class="btn btn-outline" onclick="closeModal('modalApplyScholarship')">Regresar</button>
+              <button class="btn btn-gold" onclick="openStudentProfileModal()"><i class="fa-solid fa-address-card"></i> Actualizar Mi Ficha Estudiantil</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function refreshApplicationModal(appId) {
+      const token = sessionStorage.getItem("access_token");
+      try {
+        const resApp = await fetch(`${API_BASE}/api/v1/applications/${appId}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (resApp.ok) {
+          gCurrentApplication = await resApp.json();
+          renderApplicationModal(gCurrentApplication, gCurrentCall);
+        }
+      } catch (e) {
+        console.error("Error al refrescar expediente:", e);
+      }
+    }
+
+    function renderApplicationModal(app, call) {
+      const container = document.getElementById("applyModalContent");
+      if (!container) return;
+
+      const titleEl = document.getElementById("applyModalTitle");
+      const subEl = document.getElementById("applyModalSubtitle");
+      if (titleEl) titleEl.innerText = `${call.codigo || 'EXP'} - ${call.titulo}`;
+      if (subEl) subEl.innerText = `Estado: ${app.estado} | Expediente: ${app.numero_expediente || 'Borrador en Trámite'}`;
+
+      const monto = app.monto_solicitado || call.monto_individual || 0;
+      const userName = sessionStorage.getItem("user_name") || "Postulante";
+      const userCui = sessionStorage.getItem("user_cui") || "Documento Registrado";
+
+      const reqs = call.requisitos || [];
+      const uploadedDocs = app.documentos || [];
+
+      // Validar si todos los requisitos obligatorios ya fueron cargados
+      const mandatoryReqs = reqs.filter(r => r.es_obligatorio);
+      const uploadedReqIds = new Set(uploadedDocs.map(d => d.requisito_id));
+      const allMandatoryUploaded = mandatoryReqs.every(r => uploadedReqIds.has(r.id));
+      const missingCount = mandatoryReqs.filter(r => !uploadedReqIds.has(r.id)).length;
+
+      let statusBadgeColor = "#e0f2fe";
+      let statusTextColor = "#0369a1";
+      if (app.estado === "ENVIADA") { statusBadgeColor = "#dcfce7"; statusTextColor = "#166534"; }
+      else if (app.estado === "OBSERVADA") { statusBadgeColor = "#fef3c7"; statusTextColor = "#b45309"; }
+
+      let highGovernanceAlert = '';
+      if (monto > 10000 || app.requiere_segunda_aprobacion) {
+        highGovernanceAlert = `
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #d97706; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+            <strong style="color: #92400e;"><i class="fa-solid fa-scale-balanced"></i> Gobernanza Financiera (RB-013 / RB-014):</strong>
+            <span style="color: #b45309; display: block; margin-top: 2px;">
+              El monto referencial de <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong> supera el umbral de Q 10,000.00. Una vez evaluado favorablemente por el Comité, requerirá ratificación con segunda firma ministerial.
+            </span>
+          </div>
+        `;
+      }
+
+      let observationAlert = '';
+      if (app.estado === "OBSERVADA") {
+        observationAlert = `
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #e11d48; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;">
+            <strong style="color: #9f1239; font-size: 14px;"><i class="fa-solid fa-triangle-exclamation"></i> Expediente Observado por el Evaluador:</strong>
+            <p style="color: #be123c; margin: 4px 0 8px;">${app.observaciones_verificacion || 'Por favor reemplaza o completa los atestados observados.'}</p>
+            <span style="color: #881337; font-size: 12px; font-weight: 600;">Carga los nuevos documentos corregidos a continuación y presiona "Subsanar Expediente".</span>
+          </div>
+        `;
+      }
+
+      let alreadySubmittedBox = '';
+      if (app.estado === "ENVIADA" || app.estado === "ADMITIDA" || app.estado === "ADJUDICADA") {
+        alreadySubmittedBox = `
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 38px; color: #16a34a; margin-bottom: 10px;"></i>
+            <h4 style="color: #166534; font-size: 17px; margin-bottom: 6px;">¡Tu postulación ha sido enviada formalmente!</h4>
+            <p style="color: #14532d; font-size: 14px; margin-bottom: 14px;">
+              Correlativo Oficial Asignado: <strong style="font-family: monospace; font-size: 15px; background: white; padding: 4px 10px; border-radius: 6px; border: 1px solid #86efac;">${app.numero_expediente}</strong>
+            </p>
+            <button class="btn btn-gold" onclick="closeModal('modalApplyScholarship'); openMyExpediente();" style="font-size: 13px;">
+              <i class="fa-solid fa-folder-open"></i> Ver Mi Expediente Digital y Trazabilidad
+            </button>
+          </div>
+        `;
+      }
+
+      // Tarjetas de Requisitos
+      const reqsHtml = reqs.map((r, idx) => {
+        const doc = uploadedDocs.find(d => d.requisito_id === r.id);
+        const isUploaded = !!doc;
+
+        return `
+          <div style="background: white; border: 1px solid ${isUploaded ? '#86efac' : 'var(--border-color)'}; border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: ${isUploaded ? '0 1px 3px rgba(22, 163, 74, 0.1)' : 'none'};">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 240px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <strong style="color: var(--primary-navy); font-size: 14px;">${idx + 1}. ${r.nombre}</strong>
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: ${r.es_obligatorio ? '#fee2e2' : '#f1f5f9'}; color: ${r.es_obligatorio ? '#991b1b' : '#475569'};">
+                    ${r.es_obligatorio ? 'OBLIGATORIO' : 'OPCIONAL'}
+                  </span>
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 8px; line-height: 1.4;">${r.descripcion || 'Documento requerido en formato oficial PDF.'}</p>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                  <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Formato PDF • Máximo ${r.peso_maximo_mb || 5}MB
+                </div>
+              </div>
+              <div style="text-align: right; min-width: 140px;">
+                ${isUploaded ? `
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #166534; background: #dcfce7; padding: 4px 10px; border-radius: 20px;">
+                    <i class="fa-solid fa-circle-check"></i> Cargado Conforme
+                  </span>
+                ` : `
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #dc2626; background: #fef2f2; padding: 4px 10px; border-radius: 20px;">
+                    <i class="fa-solid fa-circle-xmark"></i> Pendiente
+                  </span>
+                `}
+              </div>
+            </div>
+
+            <!-- Detalle del documento cargado o formulario de subida -->
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-color);">
+              ${isUploaded ? `
+                <div style="background: #f8fafc; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <div style="overflow: hidden; max-width: 80%;">
+                    <div style="font-size: 13px; font-weight: 600; color: var(--primary-navy); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                      <i class="fa-solid fa-file-pdf" style="color: #dc2626; margin-right: 6px;"></i> ${doc.nombre_archivo}
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-family: monospace; word-break: break-all; margin-top: 2px;" title="${doc.archivo_hash_sha256}">
+                      <i class="fa-solid fa-fingerprint" style="color: var(--guate-cyan);"></i> SHA-256: ${doc.archivo_hash_sha256.substring(0, 24)}... (${(doc.tamano_bytes / 1024).toFixed(1)} KB)
+                    </div>
+                  </div>
+                  ${app.estado === "BORRADOR" || app.estado === "OBSERVADA" ? `
+                    <div>
+                      <input type="file" id="file_req_${r.id}" accept=".pdf,application/pdf" style="display: none;" onchange="handleFileUploadDirect('${app.id}', '${r.id}', this)">
+                      <button class="btn btn-outline" style="font-size: 11px; padding: 5px 10px;" onclick="document.getElementById('file_req_${r.id}').click()">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reemplazar
+                      </button>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : `
+                ${app.estado === "BORRADOR" || app.estado === "OBSERVADA" ? `
+                  <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="file_req_${r.id}" accept=".pdf,application/pdf" class="form-control" style="font-size: 12px; padding: 6px 10px; flex: 1; min-width: 220px;" onchange="previewFileSha256(this, 'hash_preview_${r.id}')">
+                    <button class="btn btn-gold" id="btn_upload_${r.id}" onclick="uploadApplicantDocument('${app.id}', '${r.id}')" style="font-size: 12px; padding: 7px 16px; white-space: nowrap;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i> Subir Atestado PDF
+                    </button>
+                  </div>
+                  <div id="hash_preview_${r.id}" style="font-size: 11px; margin-top: 6px; font-family: monospace;"></div>
+                ` : `
+                  <div style="font-size: 12px; color: var(--text-muted); font-style: italic;">No se adjuntó documento para este requisito opcional.</div>
+                `}
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        ${alreadySubmittedBox}
+        ${observationAlert}
+        ${highGovernanceAlert}
+
+        <!-- Resumen de Convocatoria y Postulante -->
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Convocatoria Oficial</span>
+              <h4 style="margin: 2px 0 0; color: var(--primary-navy); font-size: 16px;">${call.titulo}</h4>
+            </div>
+            <span style="font-size: 12px; font-weight: 800; background: ${statusBadgeColor}; color: ${statusTextColor}; padding: 4px 12px; border-radius: 20px;">
+              ${app.estado}
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; font-size: 13px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <div>
+              <span style="color: var(--text-muted); font-size: 11px; display: block;">POSTULANTE:</span>
+              <strong style="color: var(--text-heading);">${userName}</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">${userCui}</div>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 11px; display: block;">PROMEDIO ACADÉMICO:</span>
+              <strong style="color: var(--guate-cyan); font-size: 15px;">${app.promedio_postulacion || 85} pts</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">Requerido: ${call.promedio_minimo_requerido || 85} pts</div>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 11px; display: block;">MONTO INDIVIDUAL DE BECA:</span>
+              <strong style="color: #b45309; font-size: 15px;">Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>
+              <div style="font-size: 11px; color: var(--text-muted);">Cobertura Departamental</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Atestados Probatorios -->
+        <div style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h4 style="color: var(--primary-navy); font-size: 15px; margin: 0;">
+              <i class="fa-solid fa-file-circle-check"></i> Atestados Probatorios Requeridos (${uploadedDocs.length} de ${reqs.length} cargados)
+            </h4>
+            <div style="font-size: 12px;">
+              ${missingCount > 0 ? `
+                <span style="color: #dc2626; font-weight: 600;"><i class="fa-solid fa-clock"></i> Faltan ${missingCount} obligatorio(s)</span>
+              ` : `
+                <span style="color: #166534; font-weight: 700;"><i class="fa-solid fa-check-double"></i> ¡Requisitos completos!</span>
+              `}
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; background: #f0fdfa; border: 1px solid #ccfbf1; padding: 10px 14px; border-radius: 8px;">
+            <i class="fa-solid fa-shield-halved" style="color: var(--guate-cyan);"></i> 
+            <strong>Seguridad Criptográfica SHA-256:</strong> Cada archivo PDF es procesado criptográficamente en el servidor generando una huella inmutable que garantiza autenticidad y previene alteraciones conforme a la Ley de Transparencia.
+          </div>
+
+          ${reqsHtml}
+        </div>
+
+        <!-- Barra de Acciones Finales -->
+        ${app.estado === "BORRADOR" ? `
+          <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="closeModal('modalApplyScholarship'); showToast('Tu borrador se ha guardado en el sistema.', 'info');">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Borrador
+            </button>
+            <button class="btn btn-gold" id="btnSubmitOfficialApp" onclick="submitApplicantApplication('${app.id}', '${call.id}')" style="font-size: 14px; padding: 10px 24px;" ${!allMandatoryUploaded ? 'disabled' : ''}>
+              <i class="fa-solid fa-paper-plane"></i> Formalizar y Enviar Postulación Oficial
+            </button>
+          </div>
+          ${!allMandatoryUploaded ? `
+            <div style="font-size: 12px; color: #dc2626; text-align: right; margin-top: 8px;">
+              * Para formalizar la postulación debes cargar todos los atestados marcados como OBLIGATORIO.
+            </div>
+          ` : ''}
+        ` : ''}
+
+        ${app.estado === "OBSERVADA" ? `
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="closeModal('modalApplyScholarship');">Cerrar</button>
+            <button class="btn btn-gold" onclick="cureApplicantApplication('${app.id}')" style="font-size: 14px; padding: 10px 24px;">
+              <i class="fa-solid fa-file-circle-check"></i> Enviar Expediente Subsanado
+            </button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    async function previewFileSha256(input, previewElementId) {
+      const el = document.getElementById(previewElementId);
+      if (!el || !input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      if (!file.name.toLowerCase().endsWith(".pdf")) {
+        el.innerHTML = `<span style="color: #dc2626;"><i class="fa-solid fa-triangle-exclamation"></i> Por favor selecciona un documento en formato PDF oficial.</span>`;
+        return;
+      }
+      el.innerHTML = `<span style="color: var(--guate-cyan);"><i class="fa-solid fa-spinner fa-spin"></i> Calculando huella SHA-256 en navegador...</span>`;
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        el.innerHTML = `<span style="color: #0284c7;"><i class="fa-solid fa-fingerprint"></i> SHA-256 Local: <code>${hashHex}</code> (${(file.size / 1024).toFixed(1)} KB)</span>`;
+      } catch (e) {
+        el.innerHTML = `<span style="color: var(--text-muted);">PDF listo para cargar (${(file.size / 1024).toFixed(1)} KB)</span>`;
+      }
+    }
+
+    async function handleFileUploadDirect(appId, reqId, input) {
+      if (!input.files || input.files.length === 0) return;
+      await uploadApplicantDocumentWithFile(appId, reqId, input.files[0]);
+    }
+
+    async function uploadApplicantDocument(appId, reqId) {
+      const fileInput = document.getElementById(`file_req_${reqId}`);
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        showToast("Por favor selecciona un archivo PDF antes de presionar subir.", "warning");
+        return;
+      }
+      await uploadApplicantDocumentWithFile(appId, reqId, fileInput.files[0]);
+    }
+
+    async function uploadApplicantDocumentWithFile(appId, reqId, file) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      if (!file.name.toLowerCase().endsWith(".pdf")) {
+        showToast("El archivo debe estar en formato PDF oficial.", "error");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showToast("El archivo excede el tamaño máximo permitido de 10MB.", "error");
+        return;
+      }
+
+      const btn = document.getElementById(`btn_upload_${reqId}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Subiendo PDF...`;
+      }
+
+      const formData = new FormData();
+      formData.append("requisito_id", reqId);
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/documents`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al subir el atestado probatorio.");
+
+        showToast(`¡Atestado "${file.name}" cargado exitosamente! Hash SHA-256 verificado.`, "success");
+        await refreshApplicationModal(appId);
+      } catch (err) {
+        showToast(err.message, "error");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Subir Atestado PDF`;
+        }
+      }
+    }
+
+    async function submitApplicantApplication(appId, callId) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      if (!confirm("¿Confirmas el envío formal de tu postulación? Se asignará un correlativo oficial inmutable ante el Ministerio de Educación.")) {
+        return;
+      }
+
+      const submitBtn = document.getElementById("btnSubmitOfficialApp");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Formalizando Expediente Digital...`;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/submit`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al formalizar la postulación.");
+
+        showToast(`¡Postulación formalizada con éxito! Correlativo Oficial: ${data.numero_expediente}`, "success");
+        closeModal("modalApplyScholarship");
+        setTimeout(() => {
+          openMyExpediente();
+        }, 350);
+      } catch (err) {
+        showToast(err.message, "error");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Formalizar y Enviar Postulación Oficial`;
+        }
+      }
+    }
+
+    async function cureApplicantApplication(appId) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      if (!confirm("¿Confirmas el reenvío de tu expediente con los atestados subsanados?")) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/cure`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al registrar la subsanación.");
+
+        showToast("¡Expediente subsanado exitosamente! Ha pasado a estado SUBSANADA para revisión administrativa.", "success");
+        closeModal("modalApplyScholarship");
+        openMyExpediente();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function withdrawApplicantApplication(appId) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const motivo = prompt("Por favor ingresa la causa o justificación del desistimiento voluntario de la postulación:");
+      if (!motivo || motivo.trim().length < 5) {
+        showToast("Debes ingresar un motivo válido de desistimiento (mínimo 5 caracteres).", "warning");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/withdraw`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ motivo: motivo.trim() })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al procesar el desistimiento.");
+
+        showToast("Desistimiento voluntario registrado formalmente. Expediente cerrado.", "info");
+        openMyExpediente();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function loadAdminResolutionsTab() {
+      const select = document.getElementById("resConvocatoriaSelect");
+      if (!select) return;
+      if (gPublicCalls && gPublicCalls.length > 0) {
+        select.innerHTML = `<option value="">-- Seleccionar Convocatoria (${gPublicCalls.length} disponibles) --</option>` +
+          gPublicCalls.map(c => `<option value="${c.id}">${c.codigo} - ${c.titulo}</option>`).join('');
+      } else {
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/scholarships/calls`);
+          if (res.ok) {
+            const data = await res.json();
+            const items = data.items || data || [];
+            select.innerHTML = `<option value="">-- Seleccionar Convocatoria (${items.length} disponibles) --</option>` +
+              items.map(c => `<option value="${c.id}">${c.codigo} - ${c.titulo}</option>`).join('');
+          }
+        } catch (e) {
+          console.warn("Aviso al cargar convocatorias para resoluciones:", e);
+        }
+      }
+    }
+
+    async function issueResolutionMinisterial() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const num = document.getElementById("resNumero")?.value.trim() || `RES-MINEDUC-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const becarios = parseInt(document.getElementById("resBecarios")?.value, 10) || 1;
+      const titulo = document.getElementById("resTitulo")?.value.trim() || "Resolución Ministerial de Adjudicación de Becas";
+      const monto = parseFloat(document.getElementById("resMonto")?.value) || 1200000.0;
+      const convSelect = document.getElementById("resConvocatoriaSelect");
+      let convId = convSelect?.value;
+      if (!convId && gPublicCalls && gPublicCalls.length > 0) {
+        convId = gPublicCalls[0].id;
+      }
+
+      if (!convId) {
+        showToast("Por favor selecciona una convocatoria para emitir la resolución ministerial.", "warning");
+        if (convSelect) convSelect.focus();
+        return;
+      }
+
+      const payload = {
+        convocatoria_id: convId,
+        numero_resolucion: num,
+        titulo: titulo,
+        considerando: "Que la educación es un derecho fundamental del pueblo guatemalteco y deber ineludible del Estado según la Constitución Política.",
+        por_tanto: "El Ministerio de Educación, de conformidad con los dictámenes de las comisiones colegiadas evaluadoras, adjudica las becas oficiales.",
+        total_becarios_adjudicados: becarios,
+        monto_total_comprometido: monto
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/resolutions/awards`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al emitir resolución ministerial.");
+
+        showToast(`¡Resolución Ministerial "${data.numero_resolucion}" emitida y asentada con éxito!`, "success");
+        loadTransparencyRegistry();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
     }
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -3360,6 +3919,12 @@
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="font-size: 13px; font-weight: 600;">Título Ministerial</label>
               <input type="text" id="resTitulo" class="form-control" value="Adjudicación Oficial Convocatoria Diversificado 2026">
+            </div>
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600;">Convocatoria de Beca</label>
+              <select id="resConvocatoriaSelect" class="form-control">
+                <option value="">Seleccione convocatoria asociada...</option>
+              </select>
             </div>
             <div class="form-group" style="margin-bottom: 16px;">
               <label style="font-size: 13px; font-weight: 600;">Monto Total Comprometido (Q)</label>
@@ -3818,12 +4383,14 @@
         roles = [];
       }
       
-      const isSysAdmin = roles.includes("SYSADMIN");
-      const isAdminBecas = roles.includes("ADMIN_BECAS");
-      const isEvaluador = roles.includes("EVALUADOR");
-      const isDirector = roles.includes("DIRECTOR");
-      const isAuditor = roles.includes("AUDITOR");
-      const isAdminMineduc = roles.includes("ADMIN_MINEDUC");
+      const roleCodes = (roles || []).map(r => typeof r === 'string' ? r : (r.codigo || ''));
+
+      const isSysAdmin = roleCodes.includes("SYSADMIN");
+      const isAdminBecas = roleCodes.includes("ADMIN_BECAS");
+      const isEvaluador = roleCodes.includes("EVALUADOR");
+      const isDirector = roleCodes.includes("DIRECTOR");
+      const isAuditor = roleCodes.includes("AUDITOR");
+      const isAdminMineduc = roleCodes.includes("ADMIN_MINEDUC");
 
       const btnCalls = document.getElementById("tabBtnCalls");
       const btnUsers = document.getElementById("tabBtnUsers");
@@ -3839,7 +4406,7 @@
       if (btnSecond) btnSecond.style.display = (isSysAdmin || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
       if (btnAudit) btnAudit.style.display = (isSysAdmin || isAuditor || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
       if (btnVerify) btnVerify.style.display = (isSysAdmin || isEvaluador || isAdminBecas || isAdminMineduc) ? 'inline-flex' : 'none';
-      if (btnCommittee) btnCommittee.style.display = (isSysAdmin || isEvaluador || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
+      if (btnCommittee) btnCommittee.style.display = (isSysAdmin || isEvaluador || isDirector || isAdminMineduc || isAdminBecas) ? 'inline-flex' : 'none';
       if (btnRes) btnRes.style.display = (isSysAdmin || isDirector || isAdminMineduc) ? 'inline-flex' : 'none';
 
       // Definir pestaña inicial óptima por rol
@@ -3886,6 +4453,8 @@
         loadAdminUsers();
       } else if (tabName === 'committee') {
         loadAdmittedApplicationsForRubric();
+      } else if (tabName === 'resolutions') {
+        loadAdminResolutionsTab();
       }
     }
 
@@ -4960,6 +5529,37 @@
           `).join('');
         } else {
           docsList.innerHTML = `<div style="text-align: center; padding: 14px; color: var(--text-muted); font-size: 13px;">No se registran documentos cargados aún.</div>`;
+        }
+
+        // Acciones dinámicas del expediente
+        if (actionBtns) {
+          if (app.estado === "BORRADOR") {
+            actionBtns.innerHTML = `
+              <button class="btn btn-outline" style="color: var(--error); border-color: var(--error); font-size: 13px;" onclick="withdrawApplicantApplication('${app.id}')">
+                <i class="fa-solid fa-ban"></i> Desistir
+              </button>
+              <button class="btn btn-gold" style="font-size: 13px;" onclick="closeModal('modalMyExpediente'); handleApplyDirect('${app.convocatoria_id}')">
+                <i class="fa-solid fa-pen-to-square"></i> Continuar Carga y Envío
+              </button>
+            `;
+          } else if (app.estado === "OBSERVADA") {
+            actionBtns.innerHTML = `
+              <button class="btn btn-outline" style="color: var(--error); border-color: var(--error); font-size: 13px;" onclick="withdrawApplicantApplication('${app.id}')">
+                <i class="fa-solid fa-ban"></i> Desistir
+              </button>
+              <button class="btn btn-gold" style="font-size: 13px;" onclick="closeModal('modalMyExpediente'); handleApplyDirect('${app.convocatoria_id}')">
+                <i class="fa-solid fa-wrench"></i> Subsanar Atestados Observados
+              </button>
+            `;
+          } else if (app.estado === "ENVIADA") {
+            actionBtns.innerHTML = `
+              <button class="btn btn-outline" style="color: var(--error); border-color: var(--error); font-size: 13px;" onclick="withdrawApplicantApplication('${app.id}')">
+                <i class="fa-solid fa-ban"></i> Desistir de Postulación
+              </button>
+            `;
+          } else {
+            actionBtns.innerHTML = '';
+          }
         }
 
         // Cargar Trazabilidad en tiempo real (HU-002)

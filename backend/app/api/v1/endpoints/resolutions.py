@@ -22,7 +22,7 @@ router = APIRouter()
 @router.post("/acts", summary="HU-001: Emitir Acta Colegiada de Dictamen")
 def create_committee_act(
     req: CommitteeActCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     act = ResolutionService.create_committee_act(
@@ -39,7 +39,7 @@ def create_committee_act(
 @router.post("/awards", response_model=AwardResolutionResponse, summary="HU-002: Emitir Resolución Ministerial de Adjudicación")
 def issue_award_resolution(
     req: AwardResolutionCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     res = ResolutionService.issue_award_resolution(
@@ -70,7 +70,7 @@ def get_application_timeline(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    is_admin = any(r.codigo in ["SYSADMIN", "ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR"] for r in current_user.roles)
+    is_admin = any(r.codigo in ["SYSADMIN", "ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "ADMIN_BECAS", "AUDITOR"] for r in current_user.roles)
     events = ResolutionService.get_events_for_application(db, solicitud_id, current_user.id, is_admin)
     return [
         ApplicationEventResponse(

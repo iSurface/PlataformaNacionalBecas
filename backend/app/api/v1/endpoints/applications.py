@@ -171,7 +171,7 @@ def list_applications_for_verification(
 
 @router.get("/pending-second-approval", response_model=List[ApplicationResponse], summary="HU-001: Listado de Expedientes Pendientes de Segunda Aprobación (> Q10,000)")
 def list_pending_second_approval(
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """Retorna solicitudes de beca con monto > Q 10,000.00 que requieren ratificación de Dirección Ministerial."""
@@ -189,7 +189,7 @@ def get_application_detail(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expediente no encontrado")
     
     # Validar que sea el postulante o personal MINEDUC
-    is_admin = any(r.codigo in ["SYSADMIN", "ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR"] for r in current_user.roles)
+    is_admin = any(r.codigo in ["SYSADMIN", "ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "ADMIN_BECAS", "AUDITOR"] for r in current_user.roles)
     if not is_admin and str(app.postulante_id) != str(current_user.id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No autorizado")
 
@@ -199,7 +199,7 @@ def get_application_detail(
 def verify_application(
     application_id: UUID,
     req: ApplicationVerificationRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     app = ApplicationService.verify_admissibility(db, application_id, current_user.id, req.estado, req.observaciones)
@@ -209,7 +209,7 @@ def verify_application(
 def approve_first(
     application_id: UUID,
     req: FirstApprovalRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """
@@ -230,7 +230,7 @@ def approve_first(
 def approve_second(
     application_id: UUID,
     req: SecondApprovalRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """
@@ -249,7 +249,7 @@ def approve_second(
 def reject_application(
     application_id: UUID,
     motivo: str = Query(..., min_length=3, description="Causa o justificación legal del rechazo"),
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """Rechaza el expediente y asienta el registro inmutable en bitácora de auditoría."""

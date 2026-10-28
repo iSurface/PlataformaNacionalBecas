@@ -37,7 +37,7 @@ def get_audit_logs(
     solicitud_id: Optional[str] = Query(None, description="Filtrar por ID de solicitud"),
     operacion: Optional[str] = Query(None, description="Filtrar por tipo de operación"),
     resultado: Optional[str] = Query(None, description="Filtrar por resultado: EXITOSO, DENEGADO, ERROR"),
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "AUDITOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "AUDITOR", "SYSADMIN", "ADMIN_BECAS"])),
     db: Session = Depends(get_db)
 ):
     logs = AuditService.list_logs(db, limit=limit, solicitud_id=solicitud_id, operacion=operacion, resultado=resultado)

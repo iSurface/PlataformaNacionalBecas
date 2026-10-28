@@ -58,7 +58,7 @@ def list_committees(db: Session = Depends(get_db)):
 @router.post("/committees", summary="HU-002: Constituir Comité Colegiado")
 def create_committee(
     req: CommitteeCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN", "ADMIN_BECAS"])),
     db: Session = Depends(get_db)
 ):
 
@@ -69,7 +69,7 @@ def create_committee(
 def add_member(
     comite_id: UUID,
     req: CommitteeMemberAdd,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     m = EvaluationService.add_committee_member(db, comite_id, req.usuario_id, req.rol_comite)
@@ -89,7 +89,7 @@ def declare_conflict(
 def assign_applications(
     comite_id: UUID,
     req: AssignApplicationsRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     total = EvaluationService.assign_applications_to_committee(db, comite_id, req.solicitud_ids)
@@ -98,7 +98,7 @@ def assign_applications(
 @router.post("/scores", response_model=EvaluationScoreResponse, summary="HU-005: Registrar Calificación de Rúbrica Digital (0-100 pts)")
 def submit_score(
     req: EvaluationRubricScoreRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     score = EvaluationService.submit_rubric_score(
@@ -128,7 +128,7 @@ def submit_score(
 def consolidate_scores(
     comite_id: UUID,
     solicitud_id: UUID,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     res = EvaluationService.consolidate_committee_scores(db, solicitud_id)
