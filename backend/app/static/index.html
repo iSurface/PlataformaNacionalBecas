@@ -1626,6 +1626,9 @@
       </ul>
 
       <div class="header-actions" id="headerAuthActions">
+        <button class="btn btn-outline" onclick="openDirectVerifyModal()" style="font-size: 13px; padding: 7px 12px; border-color: #0284c7; color: #0284c7;" title="Verificar Cuenta Directa">
+          <i class="fa-solid fa-user-check"></i> Verificar Cuenta
+        </button>
         <button class="btn btn-outline" onclick="openModal('modalLogin')">
           <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
         </button>
@@ -2078,6 +2081,51 @@
         <p style="text-align: center; font-size: 13px; margin-top: 18px; color: var(--text-muted);">
           ¿Aún no tienes cuenta? 
           <a href="javascript:void(0)" onclick="closeModal('modalLogin'); openModal('modalRegister');" style="color: var(--primary-navy); font-weight: 700;">Regístrate aquí</a>
+        </p>
+
+        <div style="text-align: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); font-size: 13px;">
+          <a href="javascript:void(0)" onclick="closeModal('modalLogin'); openDirectVerifyModal();" style="color: #0284c7; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-circle-check"></i> ¿Cuenta pendiente de activación? Verificar aquí
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.5 DIRECT VERIFY MODAL -->
+  <div class="modal-overlay" id="modalDirectVerify">
+    <div class="modal-card">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0;"><i class="fa-solid fa-user-check" style="color: var(--accent-gold);"></i> Verificar tu Cuenta</h3>
+        <button type="button" class="btn-close-modal" onclick="closeModal('modalDirectVerify')" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; color: #166534;">
+          <strong style="font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;"><i class="fa-solid fa-shield-check"></i> Activación Directa en Pantalla</strong>
+          <span id="directVerifySubtitle">Para comenzar a postular a las becas oficiales del MINEDUC, activa tu cuenta con un solo clic.</span>
+        </div>
+
+        <div id="directVerifySummaryBox" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; font-size: 13px;">
+          <div style="margin-bottom: 6px;"><strong>Postulante:</strong> <span id="directVerifyNameDisplay">-</span></div>
+          <div style="margin-bottom: 6px;"><strong>CUI / Documento:</strong> <span id="directVerifyCuiDisplay" style="font-family: monospace; font-weight: 700; color: var(--primary-navy);">-</span></div>
+          <div><strong>Correo:</strong> <span id="directVerifyEmailDisplay" style="color: var(--text-muted);">-</span></div>
+        </div>
+
+        <form onsubmit="handleDirectVerifySubmit(event)">
+          <div class="form-group" id="directVerifyInputGroup">
+            <label>CUI o Correo Electrónico *</label>
+            <input type="text" id="directVerifyIdentifier" class="input-control" placeholder="Ingresa tu CUI o tu correo registrado" required>
+            <p class="form-hint">Ingresa el CUI o correo que utilizaste al registrarte.</p>
+          </div>
+
+          <button type="submit" id="btnDirectVerifySubmit" class="btn btn-gold" style="width: 100%; padding: 13px; font-weight: 700; font-size: 15px; margin-top: 10px;">
+            <i class="fa-solid fa-shield-check"></i> Verificar y Activar mi Cuenta Ahora
+          </button>
+        </form>
+
+        <p style="text-align: center; font-size: 13px; margin-top: 18px; color: var(--text-muted);">
+          ¿Ya verificaste tu cuenta? 
+          <a href="javascript:void(0)" onclick="closeModal('modalDirectVerify'); openModal('modalLogin');" style="color: var(--primary-navy); font-weight: 700;">Iniciar Sesión</a>
         </p>
       </div>
     </div>
@@ -2801,6 +2849,78 @@
       window.location.href = `${API_BASE}/api/v1/auth/google/login`;
     }
 
+    function openDirectVerifyModal(userData = null) {
+      const summaryBox = document.getElementById("directVerifySummaryBox");
+      const nameDisp = document.getElementById("directVerifyNameDisplay");
+      const cuiDisp = document.getElementById("directVerifyCuiDisplay");
+      const emailDisp = document.getElementById("directVerifyEmailDisplay");
+      const input = document.getElementById("directVerifyIdentifier");
+      const subTitle = document.getElementById("directVerifySubtitle");
+
+      if (userData && (userData.email || userData.cui)) {
+        if (summaryBox) summaryBox.style.display = 'block';
+        if (nameDisp) nameDisp.textContent = userData.nombre || "Nuevo Postulante";
+        if (cuiDisp) cuiDisp.textContent = userData.cui || "No indicado";
+        if (emailDisp) emailDisp.textContent = userData.email || "-";
+        if (input) input.value = userData.cui || userData.email || "";
+        if (subTitle) subTitle.textContent = "Tu cuenta ha sido creada. Haz clic en el botón de abajo para activarla inmediatamente sin necesidad de revisar ningún correo.";
+      } else {
+        if (summaryBox) summaryBox.style.display = 'none';
+        if (input && !input.value) input.value = "";
+        if (subTitle) subTitle.textContent = "Para comenzar a postular a las becas oficiales del MINEDUC, activa tu cuenta con un solo clic.";
+      }
+
+      openModal('modalDirectVerify');
+      if (input) input.focus();
+    }
+
+    async function handleDirectVerifySubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById("directVerifyIdentifier");
+      const val = input ? input.value.trim() : "";
+      if (!val) {
+        showToast("Por favor ingresa tu CUI o correo electrónico registrado.", "warning");
+        return;
+      }
+
+      const btn = document.getElementById("btnDirectVerifySubmit");
+      const origText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Activando cuenta...`;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/verify-direct`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: val })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(formatApiError(data, "Error al verificar la cuenta."));
+
+        closeModal('modalDirectVerify');
+        showToast("¡Cuenta verificada y activada con éxito! Ya puedes iniciar sesión.", "success");
+
+        // Pre-fill login modal
+        const loginUser = document.getElementById("loginUsername");
+        if (loginUser) loginUser.value = (data.data && (data.data.cui || data.data.email)) ? (data.data.cui || data.data.email) : val;
+
+        setTimeout(() => {
+          openModal('modalLogin');
+          const loginPw = document.getElementById("loginPassword");
+          if (loginPw) loginPw.focus();
+        }, 600);
+      } catch (err) {
+        showToast(err.message || formatApiError(err), "error");
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText || `<i class="fa-solid fa-shield-check"></i> Verificar y Activar mi Cuenta Ahora`;
+        }
+      }
+    }
+
     async function handleModalLogin(e) {
       e.preventDefault();
       const btn = document.getElementById("btnLoginModalSubmit");
@@ -2823,7 +2943,14 @@
         setSession(data);
         showToast(`¡Bienvenido, ${data.nombre_completo}!`, "success");
       } catch (err) {
-        showToast(err.message || formatApiError(err), "error");
+        const msg = err.message || formatApiError(err);
+        showToast(msg, "error");
+        if (msg.toLowerCase().includes("no ha sido activada") || msg.toLowerCase().includes("activación")) {
+          setTimeout(() => {
+            closeModal('modalLogin');
+            openDirectVerifyModal({ cui: username, email: username, nombre: username });
+          }, 1200);
+        }
       } finally {
         btn.disabled = false;
         btn.innerHTML = `Ingresar a la Plataforma`;
@@ -2878,8 +3005,13 @@
         if (!res.ok) throw new Error(formatApiError(data, "Error al registrarse."));
 
         closeModal('modalRegister');
-        showToast("¡Registro completado! Te hemos enviado un enlace de verificación a tu correo (" + payload.email + "). Por favor revísalo para activar tu cuenta.", "success");
-        setTimeout(() => openModal('modalLogin'), 2500);
+        showToast("¡Cuenta registrada exitosamente! Actívala a continuación para continuar.", "success");
+        
+        openDirectVerifyModal({
+          nombre: `${payload.primer_nombre} ${payload.primer_apellido}`,
+          cui: payload.cui,
+          email: payload.email
+        });
       } catch (err) {
         showToast(err.message || formatApiError(err), "error");
       } finally {
@@ -2999,6 +3131,9 @@
         if (navExp) navExp.style.display = 'none';
 
         actionsContainer.innerHTML = `
+          <button class="btn btn-outline" onclick="openDirectVerifyModal()" style="font-size: 13px; padding: 7px 12px; border-color: #0284c7; color: #0284c7;" title="Verificar Cuenta Directa">
+            <i class="fa-solid fa-user-check"></i> Verificar Cuenta
+          </button>
           <button class="btn btn-outline" onclick="openModal('modalLogin')">
             <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
           </button>
@@ -3066,6 +3201,9 @@
             </button>
             <button class="btn btn-outline" onclick="closeMobileMenu(); openModal('modalLogin');" style="width: 100%;">
               <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+            </button>
+            <button class="btn btn-outline" onclick="closeMobileMenu(); openDirectVerifyModal();" style="width: 100%; border-color: #0284c7; color: #0284c7;">
+              <i class="fa-solid fa-user-check"></i> Verificar Cuenta
             </button>
           </div>
         `;

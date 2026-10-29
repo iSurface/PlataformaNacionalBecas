@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -58,7 +58,10 @@ class ResetPasswordRequest(BaseModel):
 class GenericResponse(BaseModel):
     success: bool
     message: str
-    data: Optional[dict] = None
+    data: Optional[Any] = None
+
+class DirectVerifyRequest(BaseModel):
+    identifier: str = Field(..., min_length=3, max_length=100, description="CUI o correo electrónico registrado")
 
 # ==========================================
 # ESQUEMAS GOOGLE OAUTH 2.0 (HU-001)

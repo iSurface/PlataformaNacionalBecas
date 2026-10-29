@@ -129,6 +129,44 @@ class AuthService:
         }
 
     @staticmethod
+    def activate_account_direct(db: Session, identifier: str) -> dict:
+        """HU-001: Verificación y activación directa de cuenta por CUI o Correo Electrónico"""
+        clean_id = identifier.strip()
+        user = db.query(User).filter((User.email == clean_id) | (User.cui == clean_id)).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No se encontró ninguna cuenta registrada con el CUI o correo electrónico proporcionado."
+            )
+
+        if user.estado == "ACTIVO":
+            return {
+                "success": True,
+                "message": "Tu cuenta ya se encuentra activa y verificada. Ya puedes iniciar sesión.",
+                "email": user.email,
+                "cui": user.cui
+            }
+
+        user.estado = "ACTIVO"
+        # Marcar cualquier token de activación como consumido
+        tokens = db.query(SecurityToken).filter(
+            SecurityToken.usuario_id == user.id,
+            SecurityToken.tipo == "ACTIVACION_CUENTA"
+        ).all()
+        for t in tokens:
+            t.es_consumido = True
+
+        db.commit()
+        db.refresh(user)
+
+        return {
+            "success": True,
+            "message": "¡Tu cuenta ha sido verificada y activada exitosamente! Ya puedes iniciar sesión con tu usuario y contraseña.",
+            "email": user.email,
+            "cui": user.cui
+        }
+
+    @staticmethod
     def resend_activation_token(db: Session, email: str) -> dict:
         """HU-001: Reenvío / Consulta de token de activación para cuentas registradas"""
         user = db.query(User).filter(User.email == email).first()

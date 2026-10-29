@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     EMAILS_FROM_EMAIL: str = "rcuyuna@miumg.edu.gt"
     EMAILS_FROM_NAME: str = "Sistema Nacional de Becas MINEDUC"
     AWS_REGION: str = "us-east-1"
-    USE_SES: bool = True
+    USE_SES: bool = False
     FRONTEND_BASE_URL: str = "http://becas-alb-production-1257891277.us-east-1.elb.amazonaws.com"
 
     # Google OAuth 2.0 (HU-001)

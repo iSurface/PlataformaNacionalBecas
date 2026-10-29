@@ -8,7 +8,8 @@ from app.core.database import get_db
 from app.schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse, 
     ForgotPasswordRequest, ResetPasswordRequest, GenericResponse,
-    GoogleLoginResponse, GoogleCallbackResponse, GoogleCompleteRegistrationRequest
+    GoogleLoginResponse, GoogleCallbackResponse, GoogleCompleteRegistrationRequest,
+    DirectVerifyRequest
 )
 from app.schemas.user import UserDetailResponse
 from app.services.auth_service import AuthService
@@ -52,6 +53,12 @@ def activate_account(
 def resend_activation(email: str = Query(..., description="Correo electrónico de la cuenta registrada"), db: Session = Depends(get_db)):
     """Genera y retorna un nuevo token de activación para cuentas registradas pendientes de activación."""
     res = AuthService.resend_activation_token(db, email)
+    return GenericResponse(success=True, message=res["message"], data=res)
+
+@router.post("/verify-direct", response_model=GenericResponse, summary="HU-001: Verificación Directa de Cuenta en Pantalla")
+def verify_account_direct(req: DirectVerifyRequest, db: Session = Depends(get_db)):
+    """Permite verificar y activar la cuenta directamente en la plataforma sin requerir enlaces por correo electrónico."""
+    res = AuthService.activate_account_direct(db, req.identifier)
     return GenericResponse(success=True, message=res["message"], data=res)
 
 @router.post("/login", response_model=TokenResponse, summary="HU-002: Inicio de Sesión y Emisión JWT")
