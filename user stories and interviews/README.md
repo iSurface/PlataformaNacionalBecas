@@ -17,6 +17,7 @@
 ```
 user stories and interviews/
 ├── README.md                                  # Catálogo maestro de artefactos
+├── Documento_de_Vision_Proyecto_Becas.pdf     # Documento de Visión, Alcance y Objetivos (2 Páginas)
 ├── Entrevistas/                               # 4 Minutas de Entrevista Oficiales en PDF (IT SOLUTIONS v1.0)
 │   ├── Minuta_Entrevista_001_Direccion_Becas.pdf
 │   ├── Minuta_Entrevista_002_Comite_Evaluador.pdf
@@ -49,16 +50,15 @@ user stories and interviews/
 │   ├── HU-004_Declaracion_No_Conflicto_Interes.pdf
 │   ├── HU-005_Evaluacion_Individual_Rubrica_Digital.pdf
 │   └── HU-006_Consolidacion_Calculo_Ponderado_Comite.pdf
-└── Sprint 5/                                  # 9 Historias de Usuario en PDF (Épicas EP-01 a EP-05)
-    ├── HU-001_Emision_Dictamen_Acta_Recomendacion.pdf
-    ├── HU-002_Aprobacion_Final_Resolucion_Adjudicacion.pdf
-    ├── HU-003_Consulta_Estado_Tiempo_Real_Estudiante.pdf
-    ├── HU-004_Registro_Cronologico_Trazabilidad_Eventos.pdf
-    ├── HU-005_Bandeja_Interna_Alertas_Notificaciones.pdf
-    ├── HU-006_Generacion_Reporte_Consolidado_Postulantes.pdf
-    ├── HU-007_Tablero_Grafico_Dashboard_Gerencial.pdf
-    ├── HU-008_Bitacora_Inmutable_Auditoria.pdf
-    └── HU-009_Portal_Transparencia_Padron_Becarios.pdf
+├── Sprint 5/                                  # 9 Historias de Usuario en PDF (Épicas EP-01 a EP-05)
+└── Sprint 6/                                  # 7 Historias de Usuario en PDF (Épicas EP-01 a EP-04)
+    ├── HU-001_Segunda_Aprobacion_Montos_Mayores_10000.pdf
+    ├── HU-002_Notificaciones_Eventos_Cambio_Estado_Estudiante.pdf
+    ├── HU-003_Bitacora_Auditoria_Detallada_Operaciones_Criticas.pdf
+    ├── HU-004_Reinicio_Recuperacion_Contrasena_GUI.pdf
+    ├── HU-005_Disclaimer_Institucional_Terminos_Educativos.pdf
+    ├── HU-006_Correccion_Interfaz_Control_Permisos_RBAC.pdf
+    └── HU-007_Responsividad_Optimizacion_Dispositivos_Moviles.pdf
 ```
 
 ---
@@ -124,6 +124,17 @@ user stories and interviews/
 | `HU-007` | `EP-04: Reportes y Estadísticas de Gestión` | Tablero gráfico de control (Dashboard) | **Should** | 5 | [Sprint 5 / HU-007.pdf](Sprint%205/HU-007_Tablero_Grafico_Dashboard_Gerencial.pdf) |
 | `HU-008` | `EP-05: Auditoría, Registro y Transparencia` | Bitácora inmutable de auditoría | **Must** | 3 | [Sprint 5 / HU-008.pdf](Sprint%205/HU-008_Bitacora_Inmutable_Auditoria.pdf) |
 | `HU-009` | `EP-05: Auditoría, Registro y Transparencia` | Portal de transparencia y padrón de becarios | **Should** | 3 | [Sprint 5 / HU-009.pdf](Sprint%205/HU-009_Portal_Transparencia_Padron_Becarios.pdf) |
+
+### 🔹 SPRINT 6: Reglas Financieras, Notificaciones, Auditoría y Mejoras de Interfaz (24 SP)
+| ID Historia | Épica del Sprint | Título Resumido | Prioridad | SP | Documento PDF Oficial |
+| :---: | :--- | :--- | :---: | :---: | :--- |
+| `HU-001` | `EP-01: Control Financiero y Aprobaciones Jerárquicas` | Segunda aprobación obligatoria montos > Q10,000 | **Must** | 5 | [Sprint 6 / HU-001.pdf](Sprint%206/HU-001_Segunda_Aprobacion_Montos_Mayores_10000.pdf) |
+| `HU-002` | `EP-02: Comunicación y Trazabilidad en Tiempo Real` | Notificaciones automáticas al estudiante por cambio de estado | **Must** | 3 | [Sprint 6 / HU-002.pdf](Sprint%206/HU-002_Notificaciones_Eventos_Cambio_Estado_Estudiante.pdf) |
+| `HU-003` | `EP-02: Comunicación y Trazabilidad en Tiempo Real` | Bitácora inmutable de auditoría detallada (quién, cuándo, operación y resultado) | **Must** | 5 | [Sprint 6 / HU-003.pdf](Sprint%206/HU-003_Bitacora_Auditoria_Detallada_Operaciones_Criticas.pdf) |
+| `HU-004` | `EP-03: Seguridad de Acceso y Gestión de Identidad` | Restablecimiento y reinicio seguro de contraseña (GUI) | **Must** | 3 | [Sprint 6 / HU-004.pdf](Sprint%206/HU-004_Reinicio_Recuperacion_Contrasena_GUI.pdf) |
+| `HU-005` | `EP-03: Seguridad de Acceso y Gestión de Identidad` | Disclaimer institucional y aceptación de términos educativos UMG/MINEDUC | **Should** | 2 | [Sprint 6 / HU-005.pdf](Sprint%206/HU-005_Disclaimer_Institucional_Terminos_Educativos.pdf) |
+| `HU-006` | `EP-04: Experiencia de Usuario y Control de Interfaz` | Corrección y control de interfaz según permisos (RBAC UI Guard) | **Must** | 3 | [Sprint 6 / HU-006.pdf](Sprint%206/HU-006_Correccion_Interfaz_Control_Permisos_RBAC.pdf) |
+| `HU-007` | `EP-04: Experiencia de Usuario y Control de Interfaz` | Responsividad y adaptabilidad total en dispositivos móviles y tablets | **Must** | 3 | [Sprint 6 / HU-007.pdf](Sprint%206/HU-007_Responsividad_Optimizacion_Dispositivos_Moviles.pdf) |
 
 ---
 *Todos los archivos PDF han sido compilados y validados formalmente con la participación y firmas digitales de los 5 integrantes del equipo.*

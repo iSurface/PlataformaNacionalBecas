@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: letter portrait;
+    margin: 13mm 14mm 13mm 14mm;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 9.2pt;
+    line-height: 1.32;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  .page {
+    page-break-after: always;
+    position: relative;
+    height: 100%;
+  }
+  .page:last-child {
+    page-break-after: avoid;
+  }
+  .header-scrum {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .header-scrum .title-line1 {
+    color: #2E75B6;
+    font-weight: bold;
+    font-size: 8.8pt;
+    letter-spacing: 0.2px;
+  }
+  .header-scrum .title-line2 {
+    color: #2E75B6;
+    font-weight: bold;
+    font-size: 8pt;
+    margin-top: 1px;
+  }
+  .green-banner-main {
+    background-color: #70AD47;
+    color: white;
+    font-weight: bold;
+    font-size: 14pt;
+    text-align: center;
+    padding: 5px;
+    border-radius: 2px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .sub-title-center {
+    color: #002060;
+    font-weight: bold;
+    text-align: center;
+    font-size: 10.5pt;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .green-banner-sec {
+    background-color: #70AD47;
+    color: white;
+    font-weight: bold;
+    font-size: 10pt;
+    text-align: center;
+    padding: 3.5px;
+    border-radius: 2px;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  table.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+  }
+  table.form-table td, table.form-table th {
+    border: 1px solid #BFBFBF;
+    padding: 4.5px 7px;
+    font-size: 8.8pt;
+    vertical-align: middle;
+  }
+  table.form-table th.table-header-dark {
+    background-color: #002060;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    font-size: 8.8pt;
+  }
+  .label-bold {
+    font-weight: bold;
+    width: 150px;
+  }
+  .label-blue {
+    font-weight: bold;
+    color: #0070C0;
+    width: 150px;
+  }
+  .box-content {
+    border: 1px solid #BFBFBF;
+    padding: 8px 10px;
+    min-height: 65px;
+    font-size: 8.8pt;
+    line-height: 1.38;
+    background-color: #FFFFFF;
+  }
+</style>
+</head>
+<body>
+
+<!-- PÁGINA 1 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <div class="green-banner-main">HISTORIA DE USUARIO SCRUM</div>
+
+  <div class="sub-title-center">INFORMACIÓN GENERAL</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Proyecto:</td>
+      <td>Plataforma Nacional para la Gestión Integral de Becas</td>
+      <td class="label-bold">Área:</td>
+      <td>Dirección Financiera y Despacho Superior</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Epic:</td>
+      <td><b>EP-01: Control Financiero y Aprobaciones Jerárquicas</b></td>
+      <td class="label-bold">Sprint:</td>
+      <td><b>Sprint 6</b></td>
+    </tr>
+    <tr>
+      <td class="label-bold">ID Historia:</td>
+      <td><b>HU-001</b></td>
+      <td class="label-bold">Versión:</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Responsable Funcional:</td>
+      <td>Erick Chuquiej (Product Owner)</td>
+      <td class="label-bold">Responsable Técnico:</td>
+      <td>Walter Celada (Arquitecto de Software / Backend Lead)</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Estado:</td>
+      <td>Aprobada para Desarrollo</td>
+      <td class="label-bold">Prioridad:</td>
+      <td><b>Must</b></td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">CONTROL DE REVISIONES</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 85px;">Fecha</th>
+      <th class="table-header-dark" style="width: 65px;">Versión</th>
+      <th class="table-header-dark" style="width: 170px;">Responsable</th>
+      <th class="table-header-dark">Descripción del Cambio</th>
+    </tr>
+    <tr>
+      <td>22.05.2026</td>
+      <td>1.0</td>
+      <td>Erick Chuquiej</td>
+      <td>versión inicial aprobada para refinamiento y backlog</td>
+    </tr>
+    <tr>
+      <td>24.05.2026</td>
+      <td>1.1</td>
+      <td>Walter Celada / Raúl Álvarez</td>
+      <td>revisión técnica de arquitectura y modelo de datos</td>
+    </tr>
+    <tr>
+      <td>25.05.2026</td>
+      <td>1.2</td>
+      <td>Daniel Ericastilla / Javier Alvizures</td>
+      <td>validación de criterios de aceptación UX y pruebas QA</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">RESUMEN DEL REQUERIMIENTO</div>
+
+  <div class="box-content">
+    Implementar la regla de negocio y flujo de trabajo que exige una segunda aprobación obligatoria por parte de la Dirección Superior / Autoridad Financiera para toda solicitud de beca cuyo monto asignado supere los Q10,000.00 antes de que pase al estado final de 'Adjudicada' o 'Autorizada'.
+  </div>
+</div>
+
+<!-- PÁGINA 2 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <div class="green-banner-sec" style="margin-top: 2px;">HISTORIA DE USUARIO</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">COMO:</td>
+      <td>Autoridad Nominadora y Director Superior del MINEDUC,</td>
+    </tr>
+    <tr>
+      <td class="label-bold">YO QUIERO:</td>
+      <td>Que las solicitudes de beca cuyo monto supere los Q10,000.00 requieran una segunda aprobación jerárquica obligatoria tras el dictamen favorable inicial,</td>
+    </tr>
+    <tr>
+      <td class="label-bold">DE MANERA QUE:</td>
+      <td>Se garantice el estricto control presupuestario, la probidad y la debida autorización de desembolsos mayores en cumplimiento con la normativa de auditoría gubernamental.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">BENEFICIO ESPERADO:</td>
+      <td>Mitigación de riesgos de fraude y sobregiro presupuestario en montos mayores, trazabilidad legal y cumplimiento de las directrices de la Contraloría General de Cuentas.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">COMENTARIOS:</td>
+      <td>Las solicitudes con montos menores o iguales a Q10,000.00 continúan con el flujo de aprobación simple de una sola firma autorizada.</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">CRITERIOS DE ACEPTACIÓN</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-blue">DADO:</td>
+      <td>Que un expediente de beca cuenta con primera aprobación favorable y el monto de financiamiento asignado es estrictamente mayor a Q10,000.00,</td>
+    </tr>
+    <tr>
+      <td class="label-blue">CUANDO:</td>
+      <td>La Autoridad Evaluadora emite la aprobación de primera instancia,</td>
+    </tr>
+    <tr>
+      <td class="label-blue">ENTONCES:.</td>
+      <td>El sistema coloca la solicitud en estado 'Pendiente de Segunda Aprobación', bloquea la emisión del acuerdo final de adjudicación y despacha una alerta a la bandeja del Director Superior; únicamente tras la firma y confirmación digital del segundo aprobador la solicitud pasa a estado 'Adjudicada'.</td>
+    </tr>
+    <tr>
+      <td class="label-blue">VALIDACIÓN QA:</td>
+      <td>1. Verificar que una solicitud de Q10,000.00 exacta o menor complete el flujo con una sola aprobación.<br>2. Probar que una solicitud de Q10,000.01 o mayor pase a 'Pendiente de Segunda Aprobación'.<br>3. Verificar que un usuario sin rol de 'Director Superior' no pueda emitir la segunda aprobación.<br>4. Comprobar que si la segunda aprobación es rechazada, se registre la justificación y cambie a 'Rechazada en Segunda Instancia'.</td>
+    </tr>
+    <tr>
+      <td class="label-blue">RESULTADO ESPERADO:</td>
+      <td>Flujo jerárquico automatizado y condicional por monto, con estados 'Pendiente de Segunda Aprobación' y 'Adjudicada' plenamente validados.</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">RIESGOS, SUPUESTOS Y LIMITACIONES</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Riesgos</td>
+      <td>Cuello de botella en la bandeja de la Autoridad Superior si no se cuenta con alertas o delegación temporal.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Supuestos</td>
+      <td>Los montos de las becas están parametrizados en el catálogo de convocatorias y calculados con precisión decimal.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Limitaciones</td>
+      <td>Aplica únicamente a montos adjudicados que excedan el umbral estricto de Q10,000.00.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- PÁGINA 3 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <table class="form-table" style="margin-top: 4px;">
+    <tr>
+      <td class="label-bold">Dependencias</td>
+      <td>Módulo de Adjudicaciones y Resoluciones (Sprint 5).</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">IMPACTO GERENCIAL</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Objetivo Estratégico</td>
+      <td>Fortalecimiento de la transparencia, control fiscal y gobernanza de los fondos públicos educativos.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">KPI Impactado</td>
+      <td>100% de expedientes de alto monto auditados con doble firma digital antes de ejecución de pago.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Área Impactada</td>
+      <td>Dirección Financiera, Despacho Superior y Auditoría Interna.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Complejidad</td>
+      <td>5 Story Points</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Valor al Negocio</td>
+      <td>Muy Alto (Control y Cumplimiento Normativo)</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">DOCUMENTOS RELACIONADOS</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 90px;">Fecha</th>
+      <th class="table-header-dark" style="width: 230px;">Documento / Enlace</th>
+      <th class="table-header-dark">Descripción</th>
+    </tr>
+    <tr>
+      <td>22.05.2026</td>
+      <td>Documento de Visión y Arquitectura / HU-001</td>
+      <td>Especificación técnica y criterios de aceptación para HU-001</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">APROBACIÓN Y FIRMAS</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 80px;">Fecha</th>
+      <th class="table-header-dark" style="width: 140px;">Nombre</th>
+      <th class="table-header-dark" style="width: 180px;">Cargo / Rol</th>
+      <th class="table-header-dark">Firma</th>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Erick Chuquiej</td>
+      <td>Product Owner</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Walter Celada</td>
+      <td>Arquitecto de Software</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Raúl Álvarez</td>
+      <td>Administrador de Base de Datos / Backend</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Daniel Ericastilla</td>
+      <td>Ingeniero Frontend / UI-UX</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Javier Alvizures</td>
+      <td>Ingeniero de QA y DevOps</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

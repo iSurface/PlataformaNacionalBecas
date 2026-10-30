@@ -2600,6 +2600,41 @@
     </div>
   </div>
 
+  <!-- MODAL: VISOR DE ATESTADOS PROBATORIOS (HU-016 & HU-022) -->
+  <div class="modal-overlay" id="modalDocViewer">
+    <div class="modal-card modal-card-large" style="max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-navy), #1e3a8a); color: white;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="fa-solid fa-file-pdf"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; margin: 0; color: white;" id="docViewerModalTitle">Revisión de Atestados Probatorios (HU-016)</h3>
+            <span style="font-size: 12px; color: rgba(255,255,255,0.85);" id="docViewerModalSubtitle">Expediente: - | Validación Criptográfica SHA-256</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" onclick="closeModal('modalDocViewer')" style="color: white;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div style="margin-bottom: 12px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--primary-navy);">Seleccione el atestado que desea auditar:</span>
+        </div>
+        <div id="docViewerButtonsList" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+          <!-- Chips de documentos generados dinámicamente -->
+        </div>
+        <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+          <div style="background: #f8fafc; padding: 10px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span id="docViewerCurrentTitle" style="font-weight: 700; color: var(--primary-navy); font-size: 13px;">Documento Seleccionado</span>
+            <a id="docViewerDownloadBtn" href="#" target="_blank" class="btn btn-sm btn-gold" style="font-size: 12px; padding: 4px 10px;">
+              <i class="fa-solid fa-download"></i> Descargar Documento
+            </a>
+          </div>
+          <iframe id="docViewerIframe" style="width: 100%; height: 500px; border: none; background: #f1f5f9;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -4498,9 +4533,26 @@
           </div>
         </div>
 
-        <!-- CONTENIDO TAB 2: VERIFICACION -->
+        <!-- CONTENIDO TAB 2: VERIFICACION DE ADMISIBILIDAD (HU-016 & HU-029) -->
         <div id="adminTabVerify" style="display: none;">
-          <h4 style="font-size: 16px; margin-bottom: 14px; color: var(--primary-navy);">Bandeja de Expedientes para Dictamen de Admisibilidad</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+            <div>
+              <h4 style="font-size: 16px; margin: 0; color: var(--primary-navy);">Bandeja de Expedientes para Dictamen de Admisibilidad (HU-016)</h4>
+              <span style="font-size: 12px; color: var(--text-muted);">Revisión técnica de atestados y dictamen de primera instancia (Aprobar, Observar o Rechazar de Plano).</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-outline" onclick="downloadConsolidatedPdf()" style="font-size: 12px; padding: 6px 12px;">
+                <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Exportar Consolidado (PDF)
+              </button>
+              <button class="btn btn-sm btn-outline" onclick="downloadConsolidatedCsv()" style="font-size: 12px; padding: 6px 12px;">
+                <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i> Exportar (Excel / CSV)
+              </button>
+              <button class="btn btn-sm btn-gold" onclick="loadVerifyApplications()" style="font-size: 12px; padding: 6px 12px;">
+                <i class="fa-solid fa-arrows-rotate"></i> Actualizar Bandeja
+              </button>
+            </div>
+          </div>
+
           <div class="table-responsive">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
               <thead>
@@ -4509,7 +4561,7 @@
                   <th style="padding: 10px;">Postulante</th>
                   <th style="padding: 10px;">Promedio</th>
                   <th style="padding: 10px;">Estado</th>
-                  <th style="padding: 10px; text-align: center;">Acciones</th>
+                  <th style="padding: 10px; text-align: center;">Acciones Admisibilidad</th>
                 </tr>
               </thead>
               <tbody id="verifyTableBody">
@@ -4519,19 +4571,27 @@
           </div>
         </div>
 
-        <!-- CONTENIDO TAB 3: COMITÉ Y RÚBRICA DIGITAL -->
+        <!-- CONTENIDO TAB 3: COMITÉ Y RÚBRICA DIGITAL (HU-022 & HU-024) -->
         <div id="adminTabCommittee" style="display: none;">
           <div style="background: #fefce8; border: 1px solid #fef08a; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <i class="fa-solid fa-hand-holding-heart" style="color: #b45309; font-size: 20px;"></i>
+              <i class="fa-solid fa-hand-holding-heart" style="color: #b45309; font-size: 22px;"></i>
               <div>
                 <strong style="color: #854d0e; font-size: 14px;">Declaración Ética de No Conflicto de Interés</strong>
-                <p style="margin: 0; font-size: 12px; color: #a16207;">Requisito legal obligatorio previo a registrar calificaciones (HU-004).</p>
+                <p style="margin: 0; font-size: 12px; color: #a16207;" id="conflictDeclarationStatusText">Requisito legal obligatorio previo a calificar (HU-004).</p>
               </div>
             </div>
-            <button class="btn btn-gold" onclick="submitConflictDeclaration()" style="font-size: 12px; padding: 6px 14px;">
-              <i class="fa-solid fa-check"></i> Declarar Ausencia de Conflicto
-            </button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-gold" onclick="submitConflictDeclaration()" id="btnConflictDeclaration" style="font-size: 12px; padding: 6px 14px;">
+                <i class="fa-solid fa-signature"></i> Declarar Ausencia de Conflicto
+              </button>
+              <button class="btn btn-outline" onclick="autoAssignCommitteeEvaluators()" style="font-size: 12px; padding: 6px 14px;">
+                <i class="fa-solid fa-users-gear"></i> Asignar Evaluadores Automáticamente
+              </button>
+              <button class="btn btn-outline" onclick="downloadCommitteeActaPdf()" style="font-size: 12px; padding: 6px 14px; border-color: var(--accent-gold); color: #854d0e;">
+                <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Emitir Acta Dictamen (PDF)
+              </button>
+            </div>
           </div>
 
           <h4 style="font-size: 15px; margin-bottom: 12px; color: var(--primary-navy);"><i class="fa-solid fa-gavel" style="color: var(--accent-gold);"></i> Calificación de Expediente con Rúbrica Estandarizada (0-100 pts)</h4>
@@ -4545,17 +4605,36 @@
                 <span id="rubricAppInfoText"></span>
               </div>
             </div>
+
+            <!-- VISOR PDF INTEGRADO DE ATESTADOS (HU-022) -->
+            <div id="rubricDocsSection" style="display: none; margin-bottom: 16px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 13px; font-weight: 700; color: var(--primary-navy);"><i class="fa-solid fa-folder-open" style="color: var(--accent-gold);"></i> Atestados Probatorios del Postulante:</span>
+                <span style="font-size: 11px; color: var(--text-muted);">Haz clic en un documento para revisarlo en el visor</span>
+              </div>
+              <div id="rubricDocsButtons" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                <!-- Chips de atestados -->
+              </div>
+              <div id="rubricPdfContainer" style="border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; display: none;">
+                <div style="background: var(--primary-navy); color: white; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                  <span><i class="fa-solid fa-file-pdf" style="color: var(--accent-gold);"></i> Visor PDF Integrado: <strong id="rubricPdfTitle">Documento</strong></span>
+                  <a id="rubricPdfDownloadLink" href="#" target="_blank" class="btn btn-sm btn-gold" style="font-size: 11px; padding: 2px 8px;"><i class="fa-solid fa-download"></i> Descargar PDF</a>
+                </div>
+                <iframe id="rubricPdfIframe" style="width: 100%; height: 380px; border: none; background: #e2e8f0;"></iframe>
+              </div>
+            </div>
+
             <div class="form-grid-3" style="margin-bottom: 16px;">
               <div class="form-group">
-                <label style="font-size: 13px; font-weight: 600;">1. Mérito Académico (Máx 40 pts)</label>
+                <label style="font-size: 13px; font-weight: 600;">1. Mérito Académico (0 a 40 pts)</label>
                 <input type="number" id="rubricAcademico" class="form-control" min="0" max="40" step="0.5" value="38" oninput="calcRubricTotal()">
               </div>
               <div class="form-group">
-                <label style="font-size: 13px; font-weight: 600;">2. Condición Socioeconómica (Máx 40 pts)</label>
+                <label style="font-size: 13px; font-weight: 600;">2. Condición Socioeconómica (0 a 40 pts)</label>
                 <input type="number" id="rubricSocio" class="form-control" min="0" max="40" step="0.5" value="36" oninput="calcRubricTotal()">
               </div>
               <div class="form-group">
-                <label style="font-size: 13px; font-weight: 600;">3. Ensayo y Atestados (Máx 20 pts)</label>
+                <label style="font-size: 13px; font-weight: 600;">3. Ensayo y Atestados (0 a 20 pts)</label>
                 <input type="number" id="rubricEnsayo" class="form-control" min="0" max="20" step="0.5" value="18" oninput="calcRubricTotal()">
               </div>
             </div>
@@ -4574,7 +4653,13 @@
               </select>
             </div>
 
-            <button class="btn btn-gold" onclick="submitRealRubricScore()" style="width: 100%; font-size: 14px; padding: 10px;">
+            <!-- JUSTIFICACIÓN CUALITATIVA OBLIGATORIA (HU-022) -->
+            <div class="form-group" style="margin-bottom: 18px;">
+              <label style="font-size: 13px; font-weight: 600;">Justificación Cualitativa Obligatoria de la Calificación *</label>
+              <textarea id="rubricObservaciones" class="input-control" rows="3" placeholder="Ingresa los motivos y análisis cualitativo que fundamentan los puntajes asignados (obligatorio conforme a HU-022)..." required style="width: 100%; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-family: inherit; font-size: 13px;">Calificación oficial emitida con base en verificación documental completa y cumplimiento satisfactorio de las bases oficiales.</textarea>
+            </div>
+
+            <button class="btn btn-gold" onclick="submitRealRubricScore()" style="width: 100%; font-size: 14px; padding: 12px; font-weight: 700;">
               <i class="fa-solid fa-signature"></i> Registrar Calificación Digital Oficial en Base de Datos
             </button>
           </div>
@@ -5967,9 +6052,13 @@
     }
 
     // =========================================================================
-    // COMITÉS Y RÚBRICA DIGITAL (EVALUADOR / DIRECTOR)
+    // =========================================================================
+    // COMITÉS Y RÚBRICA DIGITAL (EVALUADOR / DIRECTOR / MINEDUC)
+    // SPRINT 4 & 5: HU-016, HU-022, HU-024, HU-029
     // =========================================================================
     let allAdmittedApplicationsForRubric = [];
+    let currentRubricDocuments = [];
+    let currentAdminCommittees = [];
 
     async function loadAdmittedApplicationsForRubric() {
       const token = sessionStorage.getItem("access_token");
@@ -5977,7 +6066,7 @@
       if (!token || !select) return;
 
       try {
-        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=50`, {
+        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=100`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -5998,15 +6087,20 @@
       }
     }
 
-    function onRubricAppSelected() {
+    async function onRubricAppSelected() {
       const select = document.getElementById("rubricAppSelect");
       const infoBox = document.getElementById("rubricAppInfo");
       const infoText = document.getElementById("rubricAppInfoText");
+      const docsSection = document.getElementById("rubricDocsSection");
+      const docsButtons = document.getElementById("rubricDocsButtons");
+      const pdfContainer = document.getElementById("rubricPdfContainer");
       if (!select || !infoBox || !infoText) return;
 
       const appId = select.value;
       if (!appId) {
         infoBox.style.display = 'none';
+        if (docsSection) docsSection.style.display = 'none';
+        if (pdfContainer) pdfContainer.style.display = 'none';
         return;
       }
 
@@ -6014,6 +6108,158 @@
       if (app) {
         infoBox.style.display = 'block';
         infoText.innerHTML = `<strong>${app.postulante_nombre || 'Postulante'}</strong> | Convocatoria: <strong>${app.convocatoria_titulo || 'General'}</strong> | Monto Solicitado: <strong>Q ${(app.monto_solicitado || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong> | Estado actual: <code>${app.estado}</code>`;
+      }
+
+      // Cargar documentos en el visor PDF integrado (HU-022)
+      await loadRubricApplicationDocuments(appId);
+    }
+
+    async function loadRubricApplicationDocuments(appId) {
+      const token = sessionStorage.getItem("access_token");
+      const docsSection = document.getElementById("rubricDocsSection");
+      const docsButtons = document.getElementById("rubricDocsButtons");
+      if (!docsSection || !docsButtons) return;
+
+      docsSection.style.display = 'block';
+      docsButtons.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando atestados probatorios...</span>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/documents`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("No se pudieron cargar los atestados.");
+
+        currentRubricDocuments = await res.json();
+        if (!currentRubricDocuments || currentRubricDocuments.length === 0) {
+          docsButtons.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">No se registran documentos probatorios cargados.</span>`;
+          return;
+        }
+
+        docsButtons.innerHTML = currentRubricDocuments.map((doc, idx) => `
+          <button type="button" class="btn btn-sm btn-outline" onclick="previewRubricDocument('${doc.view_url}', '${doc.requisito_nombre}')" style="font-size: 11px; padding: 5px 10px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i>
+            <span>${doc.requisito_nombre}</span>
+            <span class="badge" style="background: #dbeafe; color: #1e40af; font-size: 9px; padding: 2px 5px;">${doc.estado_verificacion || 'OK'}</span>
+          </button>
+        `).join('');
+
+        // Cargar automáticamente el primer documento en el visor
+        if (currentRubricDocuments.length > 0) {
+          previewRubricDocument(currentRubricDocuments[0].view_url, currentRubricDocuments[0].requisito_nombre);
+        }
+      } catch (err) {
+        docsButtons.innerHTML = `<span style="font-size: 12px; color: var(--error);">${err.message}</span>`;
+      }
+    }
+
+    function previewRubricDocument(docUrl, docName) {
+      const pdfContainer = document.getElementById("rubricPdfContainer");
+      const pdfIframe = document.getElementById("rubricPdfIframe");
+      const pdfTitle = document.getElementById("rubricPdfTitle");
+      const downloadLink = document.getElementById("rubricPdfDownloadLink");
+
+      if (!pdfContainer || !pdfIframe) return;
+
+      pdfContainer.style.display = 'block';
+      if (pdfTitle) pdfTitle.innerText = docName || "Atestado Probatorio";
+      if (downloadLink) downloadLink.href = docUrl;
+      pdfIframe.src = docUrl;
+    }
+
+    function calcRubricTotal() {
+      const acadInput = document.getElementById("rubricAcademico");
+      const socioInput = document.getElementById("rubricSocio");
+      const ensayoInput = document.getElementById("rubricEnsayo");
+      const display = document.getElementById("rubricTotalDisplay");
+
+      let acad = parseFloat(acadInput?.value) || 0;
+      let socio = parseFloat(socioInput?.value) || 0;
+      let ensayo = parseFloat(ensayoInput?.value) || 0;
+
+      // Control estricto de rangos
+      if (acad > 40) { acad = 40; if (acadInput) acadInput.value = 40; }
+      if (acad < 0) { acad = 0; if (acadInput) acadInput.value = 0; }
+
+      if (socio > 40) { socio = 40; if (socioInput) socioInput.value = 40; }
+      if (socio < 0) { socio = 0; if (socioInput) socioInput.value = 0; }
+
+      if (ensayo > 20) { ensayo = 20; if (ensayoInput) ensayoInput.value = 20; }
+      if (ensayo < 0) { ensayo = 0; if (ensayoInput) ensayoInput.value = 0; }
+
+      const total = acad + socio + ensayo;
+      if (display) {
+        display.innerText = `${total.toFixed(2)} / 100 pts`;
+        display.style.color = total >= 70 ? "var(--success)" : "var(--error)";
+      }
+    }
+
+    async function submitConflictDeclaration() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const confirmSign = confirm(
+        "DECLARACIÓN JURADA ÉTICA DE NO CONFLICTO DE INTERÉS (HU-004)\n\n" +
+        "¿Declaro bajo juramento de ley no poseer parentesco dentro de los grados de ley (cuarto de consanguinidad ni segundo de afinidad), " +
+        "ni interés pecuniario directo o indirecto con ninguno de los postulantes de las convocatorias asignadas a este comité?"
+      );
+      if (!confirmSign) return;
+
+      try {
+        // Asegurar vinculación del usuario a comités activos
+        await fetch(`${API_BASE}/api/v1/evaluations/committees/auto-assign`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        // Obtener comités
+        const resCom = await fetch(`${API_BASE}/api/v1/evaluations/committees`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const coms = await resCom.json();
+        const comId = (coms && coms.length > 0) ? coms[0].id : "00000000-0000-0000-0000-000000000000";
+
+        const res = await fetch(`${API_BASE}/api/v1/evaluations/committees/${comId}/conflict-declaration`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ acepta_terminos: true })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al registrar declaración.");
+
+        showToast("✓ Declaración Ética de Ausencia de Conflicto firmada y registrada digitalmente.", "success");
+        const statusText = document.getElementById("conflictDeclarationStatusText");
+        const btn = document.getElementById("btnConflictDeclaration");
+        if (statusText) statusText.innerHTML = `<span style="color: #15803d; font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Declaración Ética Acreditada y Firmada Digitalmente</span>`;
+        if (btn) {
+          btn.innerHTML = `<i class="fa-solid fa-shield-check"></i> Declaración Acreditada`;
+          btn.className = "btn btn-outline";
+          btn.style.color = "#15803d";
+          btn.style.borderColor = "#86efac";
+        }
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function autoAssignCommitteeEvaluators() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/evaluations/committees/auto-assign`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error al auto-asignar evaluadores.");
+
+        showToast(data.message || "Asignación automática de evaluadores completada.", "success");
+        loadAdmittedApplicationsForRubric();
+      } catch (err) {
+        showToast(err.message, "error");
       }
     }
 
@@ -6033,6 +6279,14 @@
       const socio = parseFloat(document.getElementById("rubricSocio")?.value) || 0;
       const ensayo = parseFloat(document.getElementById("rubricEnsayo")?.value) || 0;
       const dictamen = document.getElementById("rubricDictamen")?.value || "FAVORABLE";
+      const obs = document.getElementById("rubricObservaciones")?.value?.trim() || "";
+
+      // Justificación cualitativa obligatoria conforme a HU-022
+      if (!obs || obs.length < 5) {
+        showToast("La justificación cualitativa de la calificación es obligatoria (mínimo 5 caracteres).", "warning");
+        document.getElementById("rubricObservaciones")?.focus();
+        return;
+      }
 
       const payload = {
         solicitud_id: appId,
@@ -6040,7 +6294,7 @@
         puntaje_socioeconomico: socio,
         puntaje_ensayo_atestados: ensayo,
         dictamen_individual: dictamen,
-        observaciones: `Calificación oficial asentada con dictamen ${dictamen}. Puntaje Total: ${(acad + socio + ensayo).toFixed(2)} pts.`
+        observaciones: obs
       };
 
       try {
@@ -6055,7 +6309,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "Error al registrar la calificación.");
 
-        showToast(`¡Calificación registrada exitosamente! Puntaje Total Oficial: ${data.puntaje_total} / 100 pts.`, "success");
+        showToast(`¡Calificación oficial registrada exitosamente! Puntaje Total Oficial: ${data.puntaje_total} / 100 pts.`, "success");
         loadAdmittedApplicationsForRubric();
         loadAdminKpis();
       } catch (err) {
@@ -6063,40 +6317,284 @@
       }
     }
 
+    async function downloadCommitteeActaPdf() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const resCom = await fetch(`${API_BASE}/api/v1/evaluations/committees`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const coms = await resCom.json();
+        if (!coms || coms.length === 0) {
+          showToast("No hay comités activos para emitir el acta.", "warning");
+          return;
+        }
+        const comId = coms[0].id;
+
+        showToast("Generando Acta Colegiada de Dictamen Técnico en PDF...", "info");
+        const resPdf = await fetch(`${API_BASE}/api/v1/evaluations/committees/${comId}/acta-dictamen-pdf`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!resPdf.ok) throw new Error("Error al generar el PDF del Acta de Dictamen.");
+
+        const blob = await resPdf.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Acta_Dictamen_Comite_${coms[0].codigo || '2026'}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast("¡Acta Oficial en PDF descargada exitosamente!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function downloadConsolidatedPdf() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        showToast("Generando Reporte Consolidado en PDF...", "info");
+        const res = await fetch(`${API_BASE}/api/v1/reports/applications/consolidated-pdf`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Error al generar el reporte en PDF.");
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Reporte_Consolidado_Postulantes_2026.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast("¡Reporte Consolidado en PDF descargado exitosamente!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function downloadConsolidatedCsv() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        showToast("Exportando Reporte Consolidado a Excel (CSV)...", "info");
+        const res = await fetch(`${API_BASE}/api/v1/reports/applications/consolidated-csv`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Error al exportar a Excel/CSV.");
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Reporte_Consolidado_Postulantes_2026.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        showToast("¡Archivo de Excel / CSV exportado exitosamente!", "success");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    // =========================================================================
+    // BANDEJA DE VERIFICACIÓN DE ADMISIBILIDAD (HU-016)
+    // =========================================================================
+    let allVerifyApplicationsList = [];
+
     async function loadVerifyApplications() {
       const token = sessionStorage.getItem("access_token");
       const tbody = document.getElementById("verifyTableBody");
       if (!token || !tbody) return;
 
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando expedientes para admisibilidad...</td></tr>`;
+
       try {
-        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=20`, {
+        const res = await fetch(`${API_BASE}/api/v1/applications/admin/list?limit=50`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
           const apps = await res.json();
-          if (apps.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">No hay expedientes en bandeja.</td></tr>`;
+          allVerifyApplicationsList = apps || [];
+          if (allVerifyApplicationsList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">No hay expedientes en bandeja para admisibilidad.</td></tr>`;
             return;
           }
-          tbody.innerHTML = apps.map(a => `
-            <tr style="border-bottom: 1px solid var(--border-color);">
-              <td style="padding: 10px;">
-                <strong>${a.numero_expediente || 'Borrador'}</strong>
-                <div style="font-size: 11px; color: var(--text-muted);">${a.convocatoria_titulo || ''}</div>
-              </td>
-              <td style="padding: 10px;">${a.postulante_nombre || 'Postulante'}</td>
-              <td style="padding: 10px; font-weight: 700;">${a.promedio_postulacion} pts</td>
-              <td style="padding: 10px;"><span class="badge" style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;">${a.estado}</span></td>
-              <td style="padding: 10px; text-align: center;">
-                <button class="btn btn-gold" onclick="executeApproveFirst('${a.id}')" style="font-size: 11px; padding: 4px 8px;">
-                  <i class="fa-solid fa-check"></i> Aprobar 1ra Fase
-                </button>
-              </td>
-            </tr>
-          `).join('');
+
+          tbody.innerHTML = allVerifyApplicationsList.map(a => {
+            let badgeBg = "#e0f2fe", badgeColor = "#0369a1";
+            if (a.estado === "ADMISIBLE" || a.estado === "ASIGNADA_COMITE") {
+              badgeBg = "#dcfce7"; badgeColor = "#15803d";
+            } else if (a.estado === "OBSERVADA") {
+              badgeBg = "#fef3c7"; badgeColor = "#b45309";
+            } else if (a.estado === "NO_ADMISIBLE" || a.estado === "RECHAZADA") {
+              badgeBg = "#fee2e2"; badgeColor = "#b91c1c";
+            }
+
+            return `
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 10px;">
+                  <strong>${a.numero_expediente || 'Borrador'}</strong>
+                  <div style="font-size: 11px; color: var(--text-muted);">${a.convocatoria_titulo || ''}</div>
+                </td>
+                <td style="padding: 10px;">
+                  <strong>${a.postulante_nombre || 'Postulante'}</strong>
+                  <div style="font-size: 11px; color: var(--text-muted);">Monto: Q ${(a.monto_solicitado || 0).toLocaleString('es-GT', {minimumFractionDigits: 2})}</div>
+                </td>
+                <td style="padding: 10px; font-weight: 700;">${a.promedio_postulacion} pts</td>
+                <td style="padding: 10px;"><span class="badge" style="background:${badgeBg}; color:${badgeColor}; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700;">${a.estado}</span></td>
+                <td style="padding: 10px; text-align: center;">
+                  <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-sm btn-outline" onclick="openApplicationDocViewer('${a.id}', '${a.numero_expediente || 'S/N'}')" style="font-size: 11px; padding: 4px 8px;" title="Ver atestados PDF">
+                      <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Atestados
+                    </button>
+                    <button class="btn btn-sm btn-gold" onclick="executeVerifyAdmissibility('${a.id}', 'ADMISIBLE')" style="font-size: 11px; padding: 4px 8px;" title="Aprobar Admisibilidad">
+                      <i class="fa-solid fa-check"></i> Admitir
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="executeVerifyAdmissibility('${a.id}', 'OBSERVADA')" style="font-size: 11px; padding: 4px 8px; color: #b45309; border-color: #f59e0b;" title="Observar para subsanación">
+                      <i class="fa-solid fa-triangle-exclamation"></i> Observar
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="executeVerifyAdmissibility('${a.id}', 'NO_ADMISIBLE')" style="font-size: 11px; padding: 4px 8px; color: #b91c1c; border-color: #f87171;" title="Rechazar de plano desde la primera revisión">
+                      <i class="fa-solid fa-ban"></i> Rechazar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
         }
       } catch (e) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--error);">${e.message}</td></tr>`;
+      }
+    }
+
+    async function executeVerifyAdmissibility(appId, estado) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      let observaciones = "";
+      if (estado === "ADMISIBLE") {
+        observaciones = "Expediente verificado administrativamente conforme. Cumple con los atestados y requisitos obligatorios para la beca.";
+      } else if (estado === "OBSERVADA") {
+        const input = prompt("HU-016: Ingrese las observaciones detalladas para que el postulante subsane sus documentos:", "Se solicita adjuntar constancia de notas legible y autenticada.");
+        if (input === null) return;
+        observaciones = input.trim();
+        if (observaciones.length < 3) {
+          showToast("Debe detallar las observaciones de subsanación.", "warning");
+          return;
+        }
+      } else if (estado === "NO_ADMISIBLE") {
+        const input = prompt("HU-016: RECHAZO DE PLANO EN PRIMERA REVISIÓN\n\nIngrese el motivo legal o técnico que sustenta el rechazo definitivo:", "No cumple con el promedio mínimo requerido en las bases oficiales.");
+        if (input === null) return;
+        observaciones = input.trim();
+        if (observaciones.length < 3) {
+          showToast("El rechazo de plano requiere justificación obligatoria.", "warning");
+          return;
+        }
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ estado: estado, observaciones: observaciones })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Error en dictamen de admisibilidad.");
+
+        if (estado === "ADMISIBLE") {
+          // Derivar automáticamente a comité evaluador
+          await fetch(`${API_BASE}/api/v1/evaluations/committees/auto-assign`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          showToast("✓ Expediente admitido y derivado al Comité Evaluador exitosamente.", "success");
+        } else if (estado === "OBSERVADA") {
+          showToast("⚠ Expediente clasificado como OBSERVADO para subsanación del estudiante.", "warning");
+        } else {
+          showToast("✕ Expediente RECHAZADO DE PLANO en primera revisión con asiento forense.", "error");
+        }
+
+        loadVerifyApplications();
+        loadAdmittedApplicationsForRubric();
+        loadAdminKpis();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    }
+
+    async function openApplicationDocViewer(appId, expNum) {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      const title = document.getElementById("docViewerModalTitle");
+      const subtitle = document.getElementById("docViewerModalSubtitle");
+      const btnList = document.getElementById("docViewerButtonsList");
+      const iframe = document.getElementById("docViewerIframe");
+      const curTitle = document.getElementById("docViewerCurrentTitle");
+      const dlBtn = document.getElementById("docViewerDownloadBtn");
+
+      if (subtitle) subtitle.innerText = `Expediente: ${expNum} | Validación Criptográfica SHA-256`;
+      if (btnList) btnList.innerHTML = `<span style="font-size: 13px; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando atestados...</span>`;
+
+      openModal("modalDocViewer");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/applications/${appId}/documents`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Error al consultar atestados.");
+
+        const docs = await res.json();
+        if (!docs || docs.length === 0) {
+          if (btnList) btnList.innerHTML = `<span style="color: var(--text-muted); font-size: 13px;">No hay documentos registrados para este expediente.</span>`;
+          return;
+        }
+
+        if (btnList) {
+          btnList.innerHTML = docs.map((d, i) => `
+            <button type="button" class="btn btn-sm ${i === 0 ? 'btn-gold' : 'btn-outline'}" onclick="viewDocInModal('${d.view_url}', '${d.requisito_nombre}', this)" style="font-size: 12px; padding: 6px 12px;">
+              <i class="fa-solid fa-file-pdf"></i> ${d.requisito_nombre}
+            </button>
+          `).join('');
+        }
+
+        if (docs.length > 0) {
+          viewDocInModal(docs[0].view_url, docs[0].requisito_nombre);
+        }
+      } catch (e) {
+        if (btnList) btnList.innerHTML = `<span style="color: var(--error); font-size: 13px;">${e.message}</span>`;
+      }
+    }
+
+    function viewDocInModal(docUrl, docName, btnElem = null) {
+      const iframe = document.getElementById("docViewerIframe");
+      const curTitle = document.getElementById("docViewerCurrentTitle");
+      const dlBtn = document.getElementById("docViewerDownloadBtn");
+
+      if (curTitle) curTitle.innerText = docName;
+      if (dlBtn) dlBtn.href = docUrl;
+      if (iframe) iframe.src = docUrl;
+
+      if (btnElem) {
+        const parent = btnElem.parentElement;
+        if (parent) {
+          Array.from(parent.children).forEach(c => {
+            c.className = "btn btn-sm btn-outline";
+          });
+        }
+        btnElem.className = "btn btn-sm btn-gold";
       }
     }
 

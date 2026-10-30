@@ -3,9 +3,9 @@
 Endpoints de la API: Comités Colegiados, Asignación de Expedientes y Rúbrica Digital (0-100 pts)
 Sprint 4 - HU-001 a HU-006
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException, Response
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.middlewares.auth_guard import get_current_user, require_roles
@@ -18,6 +18,7 @@ from app.schemas.evaluation import (
     EvaluationScoreResponse, CommitteeConsolidationResponse
 )
 from app.services.evaluation_service import EvaluationService
+from app.services.pdf_report_service import PdfReportService
 
 router = APIRouter()
 
@@ -155,3 +156,58 @@ def list_committee_applications(
             "dictamen_comite": s.dictamen_comite
         })
     return results
+
+@router.post("/committees/auto-assign", summary="HU-002: Asignación Automática de Evaluadores y Expedientes a Comités")
+def auto_assign_all_committees(
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN", "ADMIN_BECAS", "EVALUADOR"])),
+    db: Session = Depends(get_db)
+):
+    """Asigna automáticamente evaluadores disponibles y expedientes admisibles a todos los comités activos."""
+    res = EvaluationService.auto_assign_evaluators_to_committees(db)
+    return {
+        "success": True,
+        "message": f"Se procesaron {res['comites_procesados']} comités: {res['miembros_asignados']} miembros y {res['solicitudes_asignadas']} expedientes vinculados exitosamente.",
+        "detalles": res
+    }
+
+@router.post("/committees/{comite_id}/auto-assign", summary="Asignación Automática para un Comité Específico")
+def auto_assign_single_committee(
+    comite_id: UUID,
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN", "ADMIN_BECAS", "EVALUADOR"])),
+    db: Session = Depends(get_db)
+):
+    res = EvaluationService.auto_assign_evaluators_to_committees(db, comite_id=comite_id)
+    return {
+        "success": True,
+        "message": f"Comité configurado exitosamente: {res['miembros_asignados']} evaluadores y {res['solicitudes_asignadas']} expedientes enlazados.",
+        "detalles": res
+    }
+
+@router.get("/committees/{comite_id}/acta-dictamen-pdf", summary="HU-024: Emitir y Descargar Acta Colegiada de Dictamen Técnico en PDF")
+def download_acta_dictamen_pdf(
+    comite_id: UUID,
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "ADMIN_BECAS", "AUDITOR", "SYSADMIN"])),
+    db: Session = Depends(get_db)
+):
+    """
+    HU-024: Permite al Coordinador o miembros del Comité cerrar la fase de evaluación,
+    generar el cuadro de mérito oficial y emitir el acta de dictamen técnico de recomendación en formato PDF.
+    """
+    acta_data = EvaluationService.get_committee_acta_data(db, comite_id)
+    pdf_bytes = PdfReportService.generate_acta_dictamen_pdf(
+        comite=acta_data["comite"],
+        convocatoria=acta_data["convocatoria"],
+        miembros=acta_data["miembros"],
+        ranking_data=acta_data["ranking_data"]
+    )
+    codigo_comite = acta_data["comite"].codigo.replace(" ", "_")
+    filename = f"Acta_Dictamen_{codigo_comite}_2026.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "X-Report-Type": "ActaDictamenTecnico-HU024"
+        }
+    )

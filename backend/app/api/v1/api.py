@@ -2,7 +2,7 @@
 from fastapi import APIRouter
 from app.api.v1.endpoints import (
     auth, catalogs, admin, students, scholarships,
-    applications, evaluations, resolutions, dashboard
+    applications, evaluations, resolutions, dashboard, reports
 )
 
 api_router = APIRouter()
@@ -16,4 +16,5 @@ api_router.include_router(applications.router, prefix="/applications", tags=["So
 api_router.include_router(evaluations.router, prefix="/evaluations", tags=["Comités y Evaluaciones (Sprint 4)"])
 api_router.include_router(resolutions.router, prefix="/resolutions", tags=["Resoluciones y Trazabilidad (Sprint 5)"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Tablero Gerencial y Transparencia (Sprint 5)"])
+api_router.include_router(reports.router, prefix="/reports", tags=["Reportes Consolidados (Sprint 5 - HU29)"])
 

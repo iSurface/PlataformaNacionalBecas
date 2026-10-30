@@ -303,27 +303,28 @@ class ApplicationService:
 
     @staticmethod
     def verify_admissibility(db: Session, solicitud_id: UUID, reviewer_id: UUID, estado_nuevo: str, observaciones: Optional[str]) -> Application:
-        if estado_nuevo not in ["ADMISIBLE", "OBSERVADA", "NO_ADMISIBLE"]:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Estado de admisibilidad no válido")
+        norm_estado = "NO_ADMISIBLE" if estado_nuevo == "RECHAZADA" else estado_nuevo
+        if norm_estado not in ["ADMISIBLE", "OBSERVADA", "NO_ADMISIBLE"]:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Estado de admisibilidad no válido (Use ADMISIBLE, OBSERVADA o NO_ADMISIBLE / RECHAZADA)")
 
         solicitud = db.query(Application).filter(Application.id == solicitud_id).first()
         if not solicitud:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solicitud no encontrada")
 
-        if solicitud.estado not in ["ENVIADA", "SUBSANADA", "EN_VERIFICACION"]:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"No se puede verificar una solicitud en estado {solicitud.estado}")
+        if norm_estado == "NO_ADMISIBLE" and (not observaciones or len(observaciones.strip()) < 3):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El rechazo de plano requiere justificar obligatoriamente el motivo.")
 
         estado_anterior = solicitud.estado
-        solicitud.estado = estado_nuevo
+        solicitud.estado = norm_estado
         solicitud.observaciones_verificacion = observaciones
         solicitud.verificado_por_id = reviewer_id
 
         history = ApplicationStatusHistory(
             solicitud_id=solicitud.id,
             estado_anterior=estado_anterior,
-            estado_nuevo=estado_nuevo,
+            estado_nuevo=norm_estado,
             cambiado_por_id=reviewer_id,
-            comentario=observaciones or f"Dictamen de admisibilidad administrativa: {estado_nuevo}"
+            comentario=observaciones or f"Dictamen de admisibilidad administrativa: {norm_estado}"
         )
         db.add(history)
 
@@ -331,22 +332,35 @@ class ApplicationService:
         event = ApplicationEvent(
             solicitud_id=solicitud.id,
             tipo_evento="VERIFICACION",
-            titulo=f"Filtro Administrativo: {estado_nuevo}",
-            descripcion=observaciones or f"El expediente fue calificado como {estado_nuevo}.",
+            titulo=f"Filtro Administrativo: {norm_estado}",
+            descripcion=observaciones or f"El expediente fue calificado como {norm_estado}.",
             actor_id=reviewer_id,
             visible_estudiante=True
         )
         db.add(event)
 
         # Notificación al estudiante
-        notif_tipo = "SUCCESS" if estado_nuevo == "ADMISIBLE" else ("WARNING" if estado_nuevo == "OBSERVADA" else "INFO")
+        notif_tipo = "SUCCESS" if norm_estado == "ADMISIBLE" else ("WARNING" if norm_estado == "OBSERVADA" else "INFO")
         notif = InternalNotification(
             usuario_id=solicitud.postulante_id,
-            titulo=f"Expediente {estado_nuevo}",
-            mensaje=f"Tu expediente {solicitud.numero_expediente} fue calificado como {estado_nuevo}. {observaciones or ''}",
+            titulo=f"Expediente {norm_estado}",
+            mensaje=f"Tu expediente {solicitud.numero_expediente} fue calificado como {norm_estado}. {observaciones or ''}",
             tipo=notif_tipo
         )
         db.add(notif)
+
+        # Auditoría Forense (HU-016 y HU-008)
+        db.add(AuditLog(
+            usuario_id=reviewer_id,
+            modulo="ADMISIBILIDAD",
+            accion="DICTAMEN_ADMISIBILIDAD",
+            operacion="RECHAZAR_PLANO" if norm_estado == "NO_ADMISIBLE" else ("APROBAR_ADMISIBILIDAD" if norm_estado == "ADMISIBLE" else "OBSERVAR_SUBSANACION"),
+            resultado="EXITOSO",
+            detalles=f"Expediente {solicitud.numero_expediente or solicitud.id} transicionado de {estado_anterior} a {norm_estado}. Justificación: {observaciones or 'N/A'}",
+            entidad="Application",
+            entidad_id=str(solicitud.id),
+            datos_nuevos={"estado_anterior": estado_anterior, "estado_nuevo": norm_estado, "observaciones": observaciones}
+        ))
 
         db.commit()
         db.refresh(solicitud)

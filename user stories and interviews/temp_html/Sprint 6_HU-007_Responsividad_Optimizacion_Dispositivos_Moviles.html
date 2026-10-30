@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: letter portrait;
+    margin: 13mm 14mm 13mm 14mm;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 9.2pt;
+    line-height: 1.32;
+    color: #000;
+    margin: 0;
+    padding: 0;
+  }
+  .page {
+    page-break-after: always;
+    position: relative;
+    height: 100%;
+  }
+  .page:last-child {
+    page-break-after: avoid;
+  }
+  .header-scrum {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .header-scrum .title-line1 {
+    color: #2E75B6;
+    font-weight: bold;
+    font-size: 8.8pt;
+    letter-spacing: 0.2px;
+  }
+  .header-scrum .title-line2 {
+    color: #2E75B6;
+    font-weight: bold;
+    font-size: 8pt;
+    margin-top: 1px;
+  }
+  .green-banner-main {
+    background-color: #70AD47;
+    color: white;
+    font-weight: bold;
+    font-size: 14pt;
+    text-align: center;
+    padding: 5px;
+    border-radius: 2px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .sub-title-center {
+    color: #002060;
+    font-weight: bold;
+    text-align: center;
+    font-size: 10.5pt;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .green-banner-sec {
+    background-color: #70AD47;
+    color: white;
+    font-weight: bold;
+    font-size: 10pt;
+    text-align: center;
+    padding: 3.5px;
+    border-radius: 2px;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  table.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+  }
+  table.form-table td, table.form-table th {
+    border: 1px solid #BFBFBF;
+    padding: 4.5px 7px;
+    font-size: 8.8pt;
+    vertical-align: middle;
+  }
+  table.form-table th.table-header-dark {
+    background-color: #002060;
+    color: white;
+    font-weight: bold;
+    text-align: left;
+    font-size: 8.8pt;
+  }
+  .label-bold {
+    font-weight: bold;
+    width: 150px;
+  }
+  .label-blue {
+    font-weight: bold;
+    color: #0070C0;
+    width: 150px;
+  }
+  .box-content {
+    border: 1px solid #BFBFBF;
+    padding: 8px 10px;
+    min-height: 65px;
+    font-size: 8.8pt;
+    line-height: 1.38;
+    background-color: #FFFFFF;
+  }
+</style>
+</head>
+<body>
+
+<!-- PÁGINA 1 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <div class="green-banner-main">HISTORIA DE USUARIO SCRUM</div>
+
+  <div class="sub-title-center">INFORMACIÓN GENERAL</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Proyecto:</td>
+      <td>Plataforma Nacional para la Gestión Integral de Becas</td>
+      <td class="label-bold">Área:</td>
+      <td>Experiencia de Usuario (UI/UX) y Accesibilidad Ciudadana</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Epic:</td>
+      <td><b>EP-04: Experiencia de Usuario y Control de Interfaz</b></td>
+      <td class="label-bold">Sprint:</td>
+      <td><b>Sprint 6</b></td>
+    </tr>
+    <tr>
+      <td class="label-bold">ID Historia:</td>
+      <td><b>HU-007</b></td>
+      <td class="label-bold">Versión:</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Responsable Funcional:</td>
+      <td>Erick Chuquiej (Product Owner)</td>
+      <td class="label-bold">Responsable Técnico:</td>
+      <td>Daniel Ericastilla (Ingeniero Frontend / UI-UX Lead)</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Estado:</td>
+      <td>Aprobada para Desarrollo</td>
+      <td class="label-bold">Prioridad:</td>
+      <td><b>Must</b></td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">CONTROL DE REVISIONES</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 85px;">Fecha</th>
+      <th class="table-header-dark" style="width: 65px;">Versión</th>
+      <th class="table-header-dark" style="width: 170px;">Responsable</th>
+      <th class="table-header-dark">Descripción del Cambio</th>
+    </tr>
+    <tr>
+      <td>22.05.2026</td>
+      <td>1.0</td>
+      <td>Erick Chuquiej</td>
+      <td>versión inicial aprobada para refinamiento y backlog</td>
+    </tr>
+    <tr>
+      <td>24.05.2026</td>
+      <td>1.1</td>
+      <td>Walter Celada / Raúl Álvarez</td>
+      <td>revisión técnica de arquitectura y modelo de datos</td>
+    </tr>
+    <tr>
+      <td>25.05.2026</td>
+      <td>1.2</td>
+      <td>Daniel Ericastilla / Javier Alvizures</td>
+      <td>validación de criterios de aceptación UX y pruebas QA</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">RESUMEN DEL REQUERIMIENTO</div>
+
+  <div class="box-content">
+    Corregir y optimizar de forma integral el diseño adaptativo (responsive design) de la plataforma web en pantallas móviles (smartphones de 360px a 480px) y tablets (768px a 1024px), garantizando que las tablas de convocatorias, formularios de postulación, carga de documentos y modales se visualicen fluidamente sin desbordamientos horizontales.
+  </div>
+</div>
+
+<!-- PÁGINA 2 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <div class="green-banner-sec" style="margin-top: 2px;">HISTORIA DE USUARIO</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">COMO:</td>
+      <td>Estudiante de escasos recursos o de áreas departamentales que accede a la plataforma desde un teléfono celular inteligente,</td>
+    </tr>
+    <tr>
+      <td class="label-bold">YO QUIERO:</td>
+      <td>Que todos los formularios, tablas, botones y pasos de mi postulación se adapten fluidamente a la pantalla vertical de mi dispositivo móvil,</td>
+    </tr>
+    <tr>
+      <td class="label-bold">DE MANERA QUE:</td>
+      <td>Pueda postularme a las becas, cargar mis requisitos en PDF y consultar el estado de mi trámite sin distorsiones visuales ni cortes de información.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">BENEFICIO ESPERADO:</td>
+      <td>Verdadera equidad e inclusión territorial, permitiendo el acceso a jóvenes de departamentos que carecen de computadora portátil o de escritorio.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">COMENTARIOS:</td>
+      <td>Las tablas densas de datos deben transformarse dinámicamente en tarjetas apiladas verticales en pantallas con ancho menor a 768 píxeles.</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">CRITERIOS DE ACEPTACIÓN</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-blue">DADO:</td>
+      <td>Que un postulante accede a la plataforma desde un navegador móvil (Android / iOS) con resolución reducida,</td>
+    </tr>
+    <tr>
+      <td class="label-blue">CUANDO:</td>
+      <td>Navega por el catálogo de becas, llena formularios y consulta su expediente,</td>
+    </tr>
+    <tr>
+      <td class="label-blue">ENTONCES:.</td>
+      <td>Los menús se condensan en un menú hamburguesa desplegable accesible, los campos de texto se organizan a una columna, los botones táctiles tienen área de toque óptima (mínimo 44x44 px) y no existe desplazamiento horizontal involuntario.</td>
+    </tr>
+    <tr>
+      <td class="label-blue">VALIDACIÓN QA:</td>
+      <td>1. Validar en emulador y dispositivos físicos en anchos de 360px, 375px, 412px y 768px.<br>2. Comprobar que ningún modal o diálogo sobrepase el ancho del viewport móvil.<br>3. Verificar facilidad de carga de archivos PDF desde la galería o gestor de archivos del móvil.<br>4. Realizar auditoría de accesibilidad Lighthouse mobile superando puntuación de 90.</td>
+    </tr>
+    <tr>
+      <td class="label-blue">RESULTADO ESPERADO:</td>
+      <td>Plataforma 100% usable, fluida y ergonómica en móviles sin pérdidas de funcionalidad ni desbordamientos de pantalla.</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">RIESGOS, SUPUESTOS Y LIMITACIONES</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Riesgos</td>
+      <td>Rendimiento en teléfonos con recursos limitados o navegadores antiguos si no se optimiza el CSS y los scripts.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Supuestos</td>
+      <td>Más del 70% de los postulantes de áreas rurales interactúan principalmente a través de dispositivos móviles.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Limitaciones</td>
+      <td>Se requiere conexión a Internet estándar (3G/4G/WiFi) y navegador web moderno (Chrome, Safari, Firefox).</td>
+    </tr>
+  </table>
+</div>
+
+<!-- PÁGINA 3 -->
+<div class="page">
+  <div class="header-scrum">
+    <div class="title-line1">METODOLOGÍA SCRUM &nbsp;|&nbsp; FASE: LEVANTAMIENTO DE REQUERIMIENTOS / DESCUBRIMIENTO</div>
+    <div class="title-line2">✦ RTEFACTO DEL MARCO DE TRABAJO SCRUM ✦</div>
+  </div>
+
+  <table class="form-table" style="margin-top: 4px;">
+    <tr>
+      <td class="label-bold">Dependencias</td>
+      <td>Hojas de estilo CSS y maquetación de componentes del Frontend.</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">IMPACTO GERENCIAL</div>
+
+  <table class="form-table">
+    <tr>
+      <td class="label-bold">Objetivo Estratégico</td>
+      <td>Inclusión digital, equidad en el acceso a la educación superior y descentralización administrativa.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">KPI Impactado</td>
+      <td>Tasa de finalización de solicitudes en dispositivos móviles incrementada en un 45%.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Área Impactada</td>
+      <td>Postulantes a Nivel Nacional, Departamentos del Interior y Mesa de Ayuda.</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Complejidad</td>
+      <td>3 Story Points</td>
+    </tr>
+    <tr>
+      <td class="label-bold">Valor al Negocio</td>
+      <td>Alto (Inclusión Digital y Accesibilidad en Territorio)</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">DOCUMENTOS RELACIONADOS</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 90px;">Fecha</th>
+      <th class="table-header-dark" style="width: 230px;">Documento / Enlace</th>
+      <th class="table-header-dark">Descripción</th>
+    </tr>
+    <tr>
+      <td>22.05.2026</td>
+      <td>Documento de Visión y Arquitectura / HU-007</td>
+      <td>Especificación técnica y criterios de aceptación para HU-007</td>
+    </tr>
+  </table>
+
+  <div class="green-banner-sec">APROBACIÓN Y FIRMAS</div>
+
+  <table class="form-table">
+    <tr>
+      <th class="table-header-dark" style="width: 80px;">Fecha</th>
+      <th class="table-header-dark" style="width: 140px;">Nombre</th>
+      <th class="table-header-dark" style="width: 180px;">Cargo / Rol</th>
+      <th class="table-header-dark">Firma</th>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Erick Chuquiej</td>
+      <td>Product Owner</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Walter Celada</td>
+      <td>Arquitecto de Software</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Raúl Álvarez</td>
+      <td>Administrador de Base de Datos / Backend</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Daniel Ericastilla</td>
+      <td>Ingeniero Frontend / UI-UX</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+    <tr>
+      <td>22/05/2026</td>
+      <td>Javier Alvizures</td>
+      <td>Ingeniero de QA y DevOps</td>
+      <td><i>Aprobado digitalmente</i></td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
