@@ -43,7 +43,7 @@ class TokenResponse(BaseModel):
     roles: List[str]
 
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr = Field(..., description="Correo electrónico asociado a la cuenta")
+    email: str = Field(..., min_length=3, max_length=100, description="Correo electrónico o CUI asociado a la cuenta")
 
 class ResetPasswordRequest(BaseModel):
     token: str = Field(..., description="Token seguro recibido por correo")

@@ -1572,6 +1572,7 @@
       <li><a href="#testimonios" onclick="closeMobileMenu()"><i class="fa-solid fa-comments"></i> Testimonios Ciudadanos</a></li>
       <li><a href="#transparencia" onclick="closeMobileMenu()"><i class="fa-solid fa-scale-balanced"></i> Portal de Transparencia</a></li>
       <li><a href="#contacto" onclick="closeMobileMenu()"><i class="fa-solid fa-phone"></i> Contacto y Soporte</a></li>
+      <li><a href="javascript:void(0)" onclick="closeMobileMenu(); openEducationalDisclaimer();" style="color: #4f46e5; font-weight: 700;"><i class="fa-solid fa-graduation-cap"></i> Proyecto Académico UMG</a></li>
     </ul>
 
     <div class="mobile-drawer-footer">
@@ -1623,6 +1624,7 @@
         <li class="nav-item" id="navMyExpediente" style="display:none;"><a href="javascript:void(0)" onclick="openMyExpediente()"><i class="fa-solid fa-folder-open"></i> Mi Expediente</a></li>
         <li class="nav-item" id="navAdminDashboard" style="display:none;"><a href="javascript:void(0)" onclick="openAdminPanel()"><i class="fa-solid fa-landmark"></i> Panel MINEDUC</a></li>
         <li class="nav-item"><a href="#contacto">Contacto</a></li>
+        <li class="nav-item"><a href="javascript:void(0)" onclick="openEducationalDisclaimer()" style="color: #4f46e5; font-weight: 700;"><i class="fa-solid fa-graduation-cap"></i> Proyecto UMG</a></li>
       </ul>
 
       <div class="header-actions" id="headerAuthActions">
@@ -2068,7 +2070,7 @@
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
               <label style="margin-bottom: 0;">Contraseña *</label>
-              <a href="javascript:void(0)" onclick="showToast('Usa /api/v1/auth/forgot-password para recuperación', 'info')" style="color: var(--guate-cyan); font-size: 12px; font-weight: 600;">¿Olvidaste tu contraseña?</a>
+              <a href="javascript:void(0)" onclick="closeModal('modalLogin'); openForgotPasswordModal();" style="color: var(--guate-cyan); font-size: 12px; font-weight: 600;">¿Olvidaste tu contraseña?</a>
             </div>
             <input type="password" id="loginPassword" class="input-control" placeholder="••••••••" required>
           </div>
@@ -2087,6 +2089,194 @@
           <a href="javascript:void(0)" onclick="closeModal('modalLogin'); openDirectVerifyModal();" style="color: #0284c7; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-circle-check"></i> ¿Cuenta pendiente de activación? Verificar aquí
           </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 0. EDUCATIONAL DISCLAIMER MODAL UMG -->
+  <div class="modal-overlay" id="modalEducationalDisclaimer" style="z-index: 10000;">
+    <div class="modal-card" style="max-width: 650px; border-radius: 14px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding: 18px 24px; background: linear-gradient(135deg, #0b1f3a 0%, #1e3a8a 100%); border-radius: 14px 14px 0 0; color: white;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent-gold);">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-size: 18px; color: white; font-weight: 700;">Universidad Mariano Gálvez de Guatemala</h3>
+            <span style="font-size: 12px; color: #93c5fd; font-weight: 500;">Facultad de Ingeniería en Sistemas | Proyecto Académico</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closeEducationalDisclaimer()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #cbd5e1;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 22px 24px;">
+        <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 13px; color: #166534;">
+          <strong style="font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <i class="fa-solid fa-circle-info"></i> Disclaimer de Fines Educativos
+          </strong>
+          <span>Esta plataforma es un prototipo desarrollado exclusivamente con <strong>fines académicos y de aprendizaje</strong> como proyecto final para la clase de <strong>Análisis de Sistemas II</strong> del <strong>Octavo Semestre</strong>. No corresponde a un sistema institucional o gubernamental oficial en producción.</span>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 12px; font-size: 14px; color: var(--primary-navy); display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-users" style="color: var(--accent-gold);"></i> Integrantes del Grupo de Trabajo:
+          </h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">EC</div>
+              <div>
+                <strong style="font-size: 13px; color: var(--text-heading); display: block;">Erick Chuquiej</strong>
+                <span style="font-size: 11px; color: var(--text-muted);">Estudiante de Ingeniería en Sistemas</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">WC</div>
+              <div>
+                <strong style="font-size: 13px; color: var(--text-heading); display: block;">Walter Celada</strong>
+                <span style="font-size: 11px; color: var(--text-muted);">Estudiante de Ingeniería en Sistemas</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">RA</div>
+              <div>
+                <strong style="font-size: 13px; color: var(--text-heading); display: block;">Raúl Álvarez</strong>
+                <span style="font-size: 11px; color: var(--text-muted);">Estudiante de Ingeniería en Sistemas</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">DE</div>
+              <div>
+                <strong style="font-size: 13px; color: var(--text-heading); display: block;">Daniel Ericastilla</strong>
+                <span style="font-size: 11px; color: var(--text-muted);">Estudiante de Ingeniería en Sistemas</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary-navy); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">JA</div>
+              <div>
+                <strong style="font-size: 13px; color: var(--text-heading); display: block;">Javier Alvizures</strong>
+                <span style="font-size: 11px; color: var(--text-muted);">Estudiante de Ingeniería en Sistemas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-gold" onclick="closeEducationalDisclaimer()" style="width: 100%; padding: 13px; font-weight: 700; font-size: 15px; border-radius: 8px;">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Comprendido, Ingresar a la Plataforma
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 0.5 INACTIVITY WARNING MODAL -->
+  <div class="modal-overlay" id="modalInactivityWarning" style="z-index: 10001;">
+    <div class="modal-card" style="max-width: 440px; text-align: center; border-radius: 14px;">
+      <div class="modal-body" style="padding: 28px 24px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px;">
+          <i class="fa-solid fa-hourglass-half fa-bounce"></i>
+        </div>
+        <h3 style="margin: 0 0 8px; font-size: 20px; color: var(--text-heading);">¿Sigues ahí?</h3>
+        <p style="margin: 0 0 16px; font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          Hemos detectado inactividad en tu sesión. Por seguridad de tu cuenta, tu sesión se cerrará automáticamente en:
+        </p>
+
+        <div id="inactivityTimerCount" style="font-size: 42px; font-weight: 800; color: #dc2626; font-family: monospace; letter-spacing: 2px; margin: 12px 0 24px;">
+          03:00
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" class="btn btn-gold" onclick="keepSessionAlive()" style="width: 100%; padding: 12px; font-weight: 700; font-size: 14px;">
+            <i class="fa-solid fa-circle-check"></i> Mantener Sesión Activa
+          </button>
+          <button type="button" class="btn btn-outline" onclick="logoutFromInactivity()" style="width: 100%; padding: 10px; font-size: 13px; color: var(--text-muted); border-color: var(--border-color);">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión Ahora
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.6 FORGOT / RESET PASSWORD MODAL -->
+  <div class="modal-overlay" id="modalForgotPassword">
+    <div class="modal-card">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0;"><i class="fa-solid fa-key" style="color: var(--accent-gold);"></i> Recuperación de Contraseña</h3>
+        <button type="button" class="btn-close-modal" onclick="closeModal('modalForgotPassword')" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- PASO 1: Identificación -->
+        <div id="forgotStep1">
+          <div style="background-color: #eff6ff; border-left: 4px solid #0284c7; padding: 14px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; color: #1e3a8a;">
+            <strong style="font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i class="fa-solid fa-shield-halved"></i> Restablecimiento de Acceso
+            </strong>
+            <span>Ingresa tu CUI o correo registrado. Validaremos tu cuenta para que puedas definir una nueva contraseña directamente.</span>
+          </div>
+
+          <form onsubmit="handleForgotStep1Submit(event)">
+            <div class="form-group">
+              <label>CUI o Correo Electrónico *</label>
+              <input type="text" id="forgotIdentifier" class="input-control" placeholder="Ej. 1000000010101 o usuario@mineduc.gob.gt" required>
+              <p class="form-hint">Ingresa los datos con los que registraste tu cuenta.</p>
+            </div>
+
+            <button type="submit" id="btnForgotStep1Submit" class="btn btn-primary" style="width: 100%; padding: 13px; font-weight: 700; font-size: 14px; margin-top: 10px;">
+              <i class="fa-solid fa-arrow-right"></i> Validar Cuenta y Continuar
+            </button>
+          </form>
+
+          <p style="text-align: center; font-size: 13px; margin-top: 18px; color: var(--text-muted);">
+            ¿Recordaste tu contraseña? 
+            <a href="javascript:void(0)" onclick="closeModal('modalForgotPassword'); openModal('modalLogin');" style="color: var(--primary-navy); font-weight: 700;">Iniciar Sesión</a>
+          </p>
+        </div>
+
+        <!-- PASO 2: Nueva Contraseña -->
+        <div id="forgotStep2" style="display: none;">
+          <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 13px; color: #166534;">
+            <strong style="font-size: 14px; display: block; margin-bottom: 4px;"><i class="fa-solid fa-circle-check"></i> Cuenta Identificada</strong>
+            <span id="forgotAccountInfo">-</span>
+          </div>
+
+          <form onsubmit="handleResetPasswordSubmit(event)">
+            <input type="hidden" id="resetToken">
+
+            <div class="form-group">
+              <label>Nueva Contraseña *</label>
+              <div style="position: relative;">
+                <input type="password" id="resetNewPassword" class="input-control" placeholder="••••••••" style="padding-right: 40px;" required>
+                <button type="button" onclick="togglePasswordVisibility('resetNewPassword', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Confirmar Nueva Contraseña *</label>
+              <div style="position: relative;">
+                <input type="password" id="resetConfirmPassword" class="input-control" placeholder="••••••••" style="padding-right: 40px;" required>
+                <button type="button" onclick="togglePasswordVisibility('resetConfirmPassword', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px; color: var(--text-muted);">
+              <span style="font-weight: 600; display: block; margin-bottom: 4px; color: var(--text-heading);">Requisitos de seguridad:</span>
+              <ul style="margin: 0; padding-left: 18px; line-height: 1.4;">
+                <li>Mínimo 8 caracteres</li>
+                <li>Al menos una mayúscula y una minúscula</li>
+                <li>Al menos un número y un símbolo (@$!%*?&#._-+)</li>
+              </ul>
+            </div>
+
+            <button type="submit" id="btnResetPasswordSubmit" class="btn btn-gold" style="width: 100%; padding: 13px; font-weight: 700; font-size: 14px;">
+              <i class="fa-solid fa-shield-check"></i> Actualizar y Guardar Contraseña
+            </button>
+          </form>
+
+          <p style="text-align: center; font-size: 13px; margin-top: 14px;">
+            <a href="javascript:void(0)" onclick="resetForgotPasswordFlow()" style="color: var(--text-muted); font-size: 12px;"><i class="fa-solid fa-arrow-left"></i> Cambiar cuenta o identificación</a>
+          </p>
         </div>
       </div>
     </div>
@@ -2849,6 +3039,264 @@
       window.location.href = `${API_BASE}/api/v1/auth/google/login`;
     }
 
+    // ==========================================================
+    // 0. DISCLAIMER ACADÉMICO UMG (Análisis de Sistemas II)
+    // ==========================================================
+    function openEducationalDisclaimer() {
+      openModal('modalEducationalDisclaimer');
+    }
+
+    function closeEducationalDisclaimer() {
+      closeModal('modalEducationalDisclaimer');
+      sessionStorage.setItem("umg_disclaimer_viewed", "true");
+    }
+
+    function checkEducationalDisclaimer() {
+      if (!sessionStorage.getItem("umg_disclaimer_viewed")) {
+        setTimeout(() => {
+          openEducationalDisclaimer();
+        }, 400);
+      }
+    }
+
+    // ==========================================================
+    // 0.5 MONITOR DE INACTIVIDAD (30s idle -> 3m warning -> logout)
+    // ==========================================================
+    let inactivityIdleTimer = null;
+    let inactivityCountdownInterval = null;
+    let inactivityRemainingSeconds = 180; // 3 minutos de advertencia
+    const INACTIVITY_IDLE_TIMEOUT_MS = 30 * 1000; // 30 segundos sin movimiento de mouse/teclado
+
+    function startInactivityIdleTimer() {
+      clearTimeout(inactivityIdleTimer);
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      inactivityIdleTimer = setTimeout(() => {
+        showInactivityWarningModal();
+      }, INACTIVITY_IDLE_TIMEOUT_MS);
+    }
+
+    function resetInactivityIdleOnActivity() {
+      const modalWarning = document.getElementById("modalInactivityWarning");
+      // Si la alerta ya está visible en pantalla, no reiniciar con simple movimiento;
+      // el usuario debe interactuar con el botón "Mantener Sesión Activa".
+      if (modalWarning && modalWarning.classList.contains("active")) {
+        return;
+      }
+      startInactivityIdleTimer();
+    }
+
+    function showInactivityWarningModal() {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+
+      inactivityRemainingSeconds = 180; // 3:00 minutos
+      updateInactivityCountdownDisplay();
+      openModal('modalInactivityWarning');
+
+      clearInterval(inactivityCountdownInterval);
+      inactivityCountdownInterval = setInterval(() => {
+        inactivityRemainingSeconds--;
+        updateInactivityCountdownDisplay();
+
+        if (inactivityRemainingSeconds <= 0) {
+          clearInterval(inactivityCountdownInterval);
+          closeModal('modalInactivityWarning');
+          logoutSession();
+          showToast("Tu sesión ha sido cerrada por inactividad.", "warning");
+          setTimeout(() => openModal('modalLogin'), 600);
+        }
+      }, 1000);
+    }
+
+    function updateInactivityCountdownDisplay() {
+      const countEl = document.getElementById("inactivityTimerCount");
+      if (!countEl) return;
+      const mins = Math.floor(Math.max(0, inactivityRemainingSeconds) / 60);
+      const secs = Math.max(0, inactivityRemainingSeconds) % 60;
+      countEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function keepSessionAlive() {
+      clearInterval(inactivityCountdownInterval);
+      closeModal('modalInactivityWarning');
+      showToast("Sesión mantenida activa exitosamente.", "info");
+      startInactivityIdleTimer();
+    }
+
+    function logoutFromInactivity() {
+      clearInterval(inactivityCountdownInterval);
+      clearTimeout(inactivityIdleTimer);
+      closeModal('modalInactivityWarning');
+      logoutSession();
+    }
+
+    function initInactivityMonitor() {
+      const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+      activityEvents.forEach(evt => {
+        window.addEventListener(evt, resetInactivityIdleOnActivity, { passive: true });
+      });
+      startInactivityIdleTimer();
+    }
+
+    // ==========================================================
+    // 1.6 RECUPERACIÓN DE CONTRASEÑA EN INTERFAZ GRÁFICA
+    // ==========================================================
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === "password") {
+        input.type = "text";
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+      } else {
+        input.type = "password";
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      }
+    }
+
+    function openForgotPasswordModal(prefillVal = "") {
+      resetForgotPasswordFlow();
+      if (prefillVal) {
+        const el = document.getElementById("forgotIdentifier");
+        if (el) el.value = prefillVal;
+      }
+      openModal('modalForgotPassword');
+      setTimeout(() => {
+        const el = document.getElementById("forgotIdentifier");
+        if (el) el.focus();
+      }, 250);
+    }
+
+    function resetForgotPasswordFlow() {
+      const step1 = document.getElementById("forgotStep1");
+      const step2 = document.getElementById("forgotStep2");
+      if (step1) step1.style.display = 'block';
+      if (step2) step2.style.display = 'none';
+      const pw1 = document.getElementById("resetNewPassword");
+      const pw2 = document.getElementById("resetConfirmPassword");
+      const tokenEl = document.getElementById("resetToken");
+      if (pw1) pw1.value = "";
+      if (pw2) pw2.value = "";
+      if (tokenEl) tokenEl.value = "";
+    }
+
+    async function handleForgotStep1Submit(e) {
+      e.preventDefault();
+      const identEl = document.getElementById("forgotIdentifier");
+      const val = identEl ? identEl.value.trim() : "";
+      if (!val) {
+        showToast("Ingresa tu CUI o correo electrónico registrado.", "warning");
+        return;
+      }
+
+      const btn = document.getElementById("btnForgotStep1Submit");
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Validando cuenta...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/forgot-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: val })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(formatApiError(data, "Error al solicitar recuperación."));
+
+        const token = data.data && data.data.reset_token;
+        if (!token) {
+          showToast("No se encontró ninguna cuenta activa con los datos proporcionados.", "error");
+          return;
+        }
+
+        // Avanzar a Paso 2
+        document.getElementById("forgotStep1").style.display = 'none';
+        document.getElementById("forgotStep2").style.display = 'block';
+        document.getElementById("resetToken").value = token;
+        
+        const infoEl = document.getElementById("forgotAccountInfo");
+        if (infoEl) {
+          const name = (data.data && data.data.nombre) ? data.data.nombre : "Usuario";
+          const cui = (data.data && data.data.cui) ? `CUI: ${data.data.cui}` : "";
+          const email = (data.data && data.data.email) ? `Correo: ${data.data.email}` : "";
+          infoEl.innerText = `${name} (${[cui, email].filter(Boolean).join(" • ")})`;
+        }
+
+        showToast("Cuenta validada. Ingresa tu nueva contraseña para actualizarla.", "success");
+        setTimeout(() => {
+          const npw = document.getElementById("resetNewPassword");
+          if (npw) npw.focus();
+        }, 300);
+      } catch (err) {
+        showToast(err.message || formatApiError(err), "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+
+    async function handleResetPasswordSubmit(e) {
+      e.preventDefault();
+      const token = document.getElementById("resetToken").value.trim();
+      const newPw = document.getElementById("resetNewPassword").value;
+      const confirmPw = document.getElementById("resetConfirmPassword").value;
+
+      if (!token) {
+        showToast("Clave de restablecimiento no encontrada. Por favor solicita una nueva.", "error");
+        resetForgotPasswordFlow();
+        return;
+      }
+
+      if (newPw !== confirmPw) {
+        showToast("Las contraseñas no coinciden. Por favor verifica.", "error");
+        return;
+      }
+
+      if (newPw.length < 8 || !/[A-Z]/.test(newPw) || !/[a-z]/.test(newPw) || !/\d/.test(newPw) || !/[@$!%*?&#._\-+]/.test(newPw)) {
+        showToast("La contraseña debe tener al menos 8 caracteres, e incluir mayúsculas, minúsculas, números y un símbolo (@$!%*?&#._-+).", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btnResetPasswordSubmit");
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Actualizando contraseña...`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/auth/reset-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: token, new_password: newPw })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(formatApiError(data, "Error al restablecer contraseña."));
+
+        closeModal('modalForgotPassword');
+        showToast("¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión con tu nueva contraseña.", "success");
+
+        const identVal = document.getElementById("forgotIdentifier") ? document.getElementById("forgotIdentifier").value.trim() : "";
+        if (identVal) {
+          const loginUser = document.getElementById("loginUsername");
+          if (loginUser) loginUser.value = identVal;
+        }
+
+        setTimeout(() => {
+          openModal('modalLogin');
+          const loginPw = document.getElementById("loginPassword");
+          if (loginPw) {
+            loginPw.value = "";
+            loginPw.focus();
+          }
+        }, 500);
+      } catch (err) {
+        showToast(err.message || formatApiError(err), "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+
     function openDirectVerifyModal(userData = null) {
       const summaryBox = document.getElementById("directVerifySummaryBox");
       const nameDisp = document.getElementById("directVerifyNameDisplay");
@@ -3077,6 +3525,7 @@
       sessionStorage.setItem("user_roles", JSON.stringify(data.roles || []));
 
       renderUserNavBar();
+      startInactivityIdleTimer();
     }
 
     function renderUserNavBar() {
@@ -3211,6 +3660,12 @@
     }
 
     function logoutSession() {
+      clearTimeout(inactivityIdleTimer);
+      clearInterval(inactivityCountdownInterval);
+      const modalInactivity = document.getElementById("modalInactivityWarning");
+      if (modalInactivity && modalInactivity.classList.contains("active")) {
+        closeModal("modalInactivityWarning");
+      }
       sessionStorage.clear();
       renderUserNavBar();
       showToast("Has cerrado sesión exitosamente.", "info");
@@ -3846,6 +4301,8 @@
       try { loadCatalogs(); } catch (e) { console.error("loadCatalogs:", e); }
       try { loadScholarshipCalls(); } catch (e) { console.error("loadScholarshipCalls:", e); }
       try { loadTransparencyRegistry(); } catch (e) { console.error("loadTransparencyRegistry:", e); }
+      try { checkEducationalDisclaimer(); } catch (e) { console.error("checkEducationalDisclaimer:", e); }
+      try { initInactivityMonitor(); } catch (e) { console.error("initInactivityMonitor:", e); }
 
       const params = new URLSearchParams(window.location.search);
       if (params.get("access_token")) {
@@ -3870,6 +4327,19 @@
 
         openModal('modalGoogleComplete');
         showToast("¡Autenticación con Google exitosa! Por favor ingresa tu CUI para completar tu registro.", "info");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (params.get("reset_token")) {
+        const rToken = params.get("reset_token");
+        openForgotPasswordModal();
+        const step1 = document.getElementById("forgotStep1");
+        const step2 = document.getElementById("forgotStep2");
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+        const tEl = document.getElementById("resetToken");
+        if (tEl) tEl.value = rToken;
+        const infoEl = document.getElementById("forgotAccountInfo");
+        if (infoEl) infoEl.innerText = "Token de recuperación recibido por enlace. Ingresa tu nueva contraseña.";
+        showToast("Enlace de restablecimiento detectado. Ingresa tu nueva contraseña.", "info");
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (params.get("activated") === "true") {
         showToast("¡Tu cuenta ha sido activada exitosamente! Ya puedes iniciar sesión con tu CUI o correo.", "success");

@@ -279,11 +279,12 @@ class AuthService:
 
     @staticmethod
     def forgot_password(db: Session, email: str) -> dict:
-        """HU-003: Solicitud de restablecimiento seguro de contraseña"""
-        user = db.query(User).filter(User.email == email).first()
+        """HU-003: Solicitud de restablecimiento seguro de contraseña por CUI o Email"""
+        clean_id = email.strip()
+        user = db.query(User).filter((User.email == clean_id) | (User.cui == clean_id)).first()
         
-        # Prevención de enumeración de usuarios: responder siempre 200 OK
-        if user and user.estado == "ACTIVO":
+        token_str = None
+        if user and user.estado in ["ACTIVO", "BLOQUEADO"]:
             token_str = generate_random_token(32)
             reset_token = SecurityToken(
                 usuario_id=user.id,
@@ -295,13 +296,20 @@ class AuthService:
             db.commit()
             
             nombre = user.persona.primer_nombre if user.persona else "Usuario"
-            EmailService.send_password_reset_email(user.email, nombre, token_str)
+            if settings.USE_SES:
+                try:
+                    EmailService.send_password_reset_email(user.email, nombre, token_str)
+                except Exception:
+                    pass
 
         return {
             "success": True,
-            "message": "Si la cuenta está registrada, recibirás un enlace de restablecimiento en tu correo en breve.",
-            "reset_token": token_str if user and user.estado == "ACTIVO" else None,
-            "reset_url": f"/api/v1/auth/reset-password?token={token_str}" if user and user.estado == "ACTIVO" else None
+            "message": "Solicitud procesada exitosamente. Se ha generado la clave de recuperación.",
+            "reset_token": token_str,
+            "email": user.email if user else None,
+            "cui": user.cui if user else None,
+            "nombre": user.persona.nombre_completo if (user and user.persona) else (user.email if user else None),
+            "reset_url": f"/api/v1/auth/reset-password?token={token_str}" if token_str else None
         }
 
     @staticmethod
