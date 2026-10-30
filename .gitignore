@@ -52,3 +52,15 @@ user stories and interviews/Sprint 2/
 user stories and interviews/Sprint 3/
 user stories and interviews/Sprint 4/
 user stories and interviews/Sprint 5/
+
+# Office documents and external presentations
+*.docx
+*.pptx
+*linkedin*
+*intelaf*
+
+# PDF and documentation generation scripts & temp artifacts
+generate_*.py
+*vision*
+**/temp_html/
+

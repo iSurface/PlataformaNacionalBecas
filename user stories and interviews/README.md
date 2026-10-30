@@ -17,7 +17,6 @@
 ```
 user stories and interviews/
 ├── README.md                                  # Catálogo maestro de artefactos
-├── Documento_de_Vision_Proyecto_Becas.pdf     # Documento de Visión, Alcance y Objetivos (2 Páginas)
 ├── Entrevistas/                               # 4 Minutas de Entrevista Oficiales en PDF (IT SOLUTIONS v1.0)
 │   ├── Minuta_Entrevista_001_Direccion_Becas.pdf
 │   ├── Minuta_Entrevista_002_Comite_Evaluador.pdf

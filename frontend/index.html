@@ -1578,7 +1578,7 @@
     <div class="mobile-drawer-footer">
       <div style="font-size: 11px; color: var(--text-muted); text-align: center; line-height: 1.5;">
         <strong>Ministerio de Educación de Guatemala</strong><br>
-        PBX: (+502) 2411-9595 • becas@mineduc.gob.gt
+        Tel: (+502) 1111-1111 • becas@mineduc.gob.gt
       </div>
     </div>
   </aside>
@@ -1591,7 +1591,7 @@
         <span>Gobierno de Guatemala • Ministerio de Educación (MINEDUC)</span>
       </div>
       <div class="top-contact-info">
-        <a href="tel:24119595"><i class="fa-solid fa-phone"></i> PBX: (+502) 2411-9595</a>
+        <a href="tel:11111111"><i class="fa-solid fa-phone"></i> Tel: (+502) 1111-1111</a>
         <a href="mailto:becas@mineduc.gob.gt"><i class="fa-solid fa-envelope"></i> becas@mineduc.gob.gt</a>
         <span><i class="fa-regular fa-clock"></i> Lunes a Viernes 08:00 - 16:30</span>
         <a href="/docs" target="_blank" style="color: var(--accent-gold); font-weight: 700;">
@@ -1788,7 +1788,7 @@
       <div class="calls-grid" id="callsGridContainer">
         <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
           <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--primary-navy); margin-bottom: 12px;"></i>
-          <p>Cargando convocatorias oficiales desde el servidor de AWS...</p>
+          <p>Cargando convocatorias</p>
         </div>
       </div>
     </div>
@@ -1999,7 +1999,7 @@
           Sistema Oficial de la Dirección de Becas Nacionales del Ministerio de Educación, encargado de la administración, postulación y adjudicación de becas del Estado.
         </p>
         <p style="font-size: 12px; color: #cbd5e1;">
-          <i class="fa-solid fa-location-dot"></i> 6a. Calle 1-36, Zona 10, Ciudad de Guatemala.
+          <i class="fa-solid fa-location-dot"></i> Universidad Mariano Galvez de Guatemala, Sede Antigua
         </p>
       </div>
 
@@ -2028,7 +2028,7 @@
         <h4>Canales de Atención</h4>
         <p>¿Tienes dudas con tu registro o postulación?</p>
         <p style="color: white; font-weight: 700; font-size: 16px;">
-          <i class="fa-solid fa-phone" style="color: var(--accent-gold);"></i> 1503 / 2411-9595
+          <i class="fa-solid fa-phone" style="color: var(--accent-gold);"></i> +502 1111-1111
         </p>
         <p>Lunes a viernes de 8:00 a 16:30 horas.</p>
         <div style="display: flex; gap: 10px; margin-top: 14px;">
@@ -2040,8 +2040,8 @@
     </div>
 
     <div class="container footer-bottom">
-      <div>© 2026 Ministerio de Educación de Guatemala. Todos los derechos reservados.</div>
-      <div>Plataforma Segura • Cifrado AES-256 • Conexión Nube AWS</div>
+      <div>© 2026 Proyecto para Universidad Mariano Galvez de Guatemala, Sede Antigua</div>
+      <div>Analisis de Sistemas II • Sistema Desplegado en AWS</div>
     </div>
   </footer>
 
@@ -2467,7 +2467,7 @@
       </div>
       <div class="modal-body">
         <div style="background-color: var(--guate-cyan-light); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; color: var(--primary-navy);">
-          <i class="fa-solid fa-circle-info"></i> Esta información es confidencial y requerida para postular a convocatorias oficiales (Sprint 2 - HU-001).
+          <i class="fa-solid fa-circle-info"></i> Esta información es confidencial y requerida para postular a convocatorias oficiales
         </div>
 
         <form id="formStudentProfile" onsubmit="handleSaveProfile(event)">
@@ -4656,7 +4656,7 @@
             <!-- JUSTIFICACIÓN CUALITATIVA OBLIGATORIA (HU-022) -->
             <div class="form-group" style="margin-bottom: 18px;">
               <label style="font-size: 13px; font-weight: 600;">Justificación Cualitativa Obligatoria de la Calificación *</label>
-              <textarea id="rubricObservaciones" class="input-control" rows="3" placeholder="Ingresa los motivos y análisis cualitativo que fundamentan los puntajes asignados (obligatorio conforme a HU-022)..." required style="width: 100%; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-family: inherit; font-size: 13px;">Calificación oficial emitida con base en verificación documental completa y cumplimiento satisfactorio de las bases oficiales.</textarea>
+              <textarea id="rubricObservaciones" class="input-control" rows="3" placeholder="Ingresa los motivos y análisis cualitativo que fundamentan los puntajes asignados" required style="width: 100%; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-family: inherit; font-size: 13px;">Calificación oficial emitida con base en verificación documental completa y cumplimiento satisfactorio de las bases oficiales.</textarea>
             </div>
 
             <button class="btn btn-gold" onclick="submitRealRubricScore()" style="width: 100%; font-size: 14px; padding: 12px; font-weight: 700;">
@@ -6198,7 +6198,7 @@
       if (!token) return;
 
       const confirmSign = confirm(
-        "DECLARACIÓN JURADA ÉTICA DE NO CONFLICTO DE INTERÉS (HU-004)\n\n" +
+        "DECLARACIÓN JURADA ÉTICA DE NO CONFLICTO DE INTERÉS \n\n" +
         "¿Declaro bajo juramento de ley no poseer parentesco dentro de los grados de ley (cuarto de consanguinidad ni segundo de afinidad), " +
         "ni interés pecuniario directo o indirecto con ninguno de los postulantes de las convocatorias asignadas a este comité?"
       );
@@ -6484,7 +6484,7 @@
       if (estado === "ADMISIBLE") {
         observaciones = "Expediente verificado administrativamente conforme. Cumple con los atestados y requisitos obligatorios para la beca.";
       } else if (estado === "OBSERVADA") {
-        const input = prompt("HU-016: Ingrese las observaciones detalladas para que el postulante subsane sus documentos:", "Se solicita adjuntar constancia de notas legible y autenticada.");
+        const input = prompt("Ingrese las observaciones detalladas para que el postulante subsane sus documentos:", "Se solicita adjuntar constancia de notas legible y autenticada.");
         if (input === null) return;
         observaciones = input.trim();
         if (observaciones.length < 3) {
@@ -6492,7 +6492,7 @@
           return;
         }
       } else if (estado === "NO_ADMISIBLE") {
-        const input = prompt("HU-016: RECHAZO DE PLANO EN PRIMERA REVISIÓN\n\nIngrese el motivo legal o técnico que sustenta el rechazo definitivo:", "No cumple con el promedio mínimo requerido en las bases oficiales.");
+        const input = prompt("RECHAZO DE PLANO EN PRIMERA REVISIÓN\n\nIngrese el motivo legal o técnico que sustenta el rechazo definitivo:", "No cumple con el promedio mínimo requerido en las bases oficiales.");
         if (input === null) return;
         observaciones = input.trim();
         if (observaciones.length < 3) {
@@ -6679,7 +6679,7 @@
             highAlert.style.display = 'block';
             if (highText) {
               if (app.estado === 'PENDIENTE_SEGUNDA_APROBACION') {
-                highText.innerHTML = `Monto de la Beca: <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>. Cuenta con primera aprobación por <strong>${app.primera_aprobacion_por_nombre || 'Coordinación'}</strong>. Actualmente en espera de segunda firma de Dirección Ministerial (HU-001).`;
+                highText.innerHTML = `Monto de la Beca: <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>. Cuenta con primera aprobación por <strong>${app.primera_aprobacion_por_nombre || 'Coordinación'}</strong>. Actualmente en espera de segunda firma de Dirección Ministerial.`;
               } else {
                 highText.innerHTML = `Monto de la Beca: <strong>Q ${monto.toLocaleString('es-GT', {minimumFractionDigits: 2})}</strong>. De conformidad con la regla de gobernanza financiera, supera el umbral de Q 10,000.00 y requiere doble aprobación.`;
               }
