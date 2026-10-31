@@ -102,27 +102,13 @@ def seed_initial_data():
             db.add(eval_person)
             print(f" -> Creado Usuario Evaluador: {eval_email}")
 
-        # 3.2 Usuario Director Ministerial (Sprint 6 - HU-001 Doble Aprobación)
-        director_email = "director@becas.mineduc.gob.gt"
-        director_user = db.query(User).filter(User.email == director_email).first()
-        if not director_user:
-            director_user = User(
-                cui="4000000010101",
-                email=director_email,
-                password_hash=get_password_hash("Director2026!#Seguro"),
-                estado="ACTIVO",
-                roles=[roles_map["DIRECTOR"]]
-            )
-            db.add(director_user)
-            db.flush()
-            director_person = Person(
-                usuario_id=director_user.id,
-                primer_nombre="Elena",
-                primer_apellido="Sandoval",
-                telefono="24119597"
-            )
-            db.add(director_person)
-            print(f" -> Creado Usuario Director Ministerial: {director_email}")
+        # Depuración: Eliminación definitiva de Elena Sandoval (director@becas.mineduc.gob.gt)
+        elena = db.query(User).filter(User.email == "director@becas.mineduc.gob.gt").first()
+        if elena:
+            db.query(Person).filter(Person.usuario_id == elena.id).delete()
+            db.delete(elena)
+            db.commit()
+            print(" -> Usuario de Elena Sandoval eliminado de la base de datos.")
 
         # 3.2 Usuario Estudiante Demo
         student_email = "estudiante.demo@becas.mineduc.gob.gt"

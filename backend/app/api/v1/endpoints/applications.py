@@ -318,11 +318,11 @@ def verify_application(
     app = ApplicationService.verify_admissibility(db, application_id, current_user.id, req.estado, req.observaciones)
     return _map_app(app)
 
-@router.post("/{application_id}/approve-first", response_model=ApplicationResponse, summary="HU-001: Primera Aprobación (Evaluador / Coordinador)")
+@router.post("/{application_id}/approve-first", response_model=ApplicationResponse, summary="Primera Aprobación (Evaluador / Coordinador)")
 def approve_first(
     application_id: UUID,
     req: FirstApprovalRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """
@@ -339,16 +339,15 @@ def approve_first(
     )
     return _map_app(app)
 
-@router.post("/{application_id}/approve-second", response_model=ApplicationResponse, summary="HU-001: Segunda Aprobación Ministerial Obligatoria (> Q10,000)")
+@router.post("/{application_id}/approve-second", response_model=ApplicationResponse, summary="Segunda Aprobación Ministerial Obligatoria (> Q10,000)")
 def approve_second(
     application_id: UUID,
     req: SecondApprovalRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     """
     Segunda aprobación obligatoria emitida por Dirección Ministerial.
-    Aplica RB-014: Se deniega si el usuario es el mismo que realizó la primera aprobación.
     """
     app = ApplicationService.approve_second_phase(
         db=db,

@@ -66,17 +66,17 @@ def create_committee(
     c = EvaluationService.create_committee(db, req.codigo, req.nombre, req.convocatoria_id)
     return {"id": c.id, "codigo": c.codigo, "nombre": c.nombre, "estado": c.estado}
 
-@router.post("/committees/{comite_id}/members", summary="HU-002: Incorporar Miembro al Comité")
+@router.post("/committees/{comite_id}/members", summary="Incorporar Miembro al Comité")
 def add_member(
     comite_id: UUID,
     req: CommitteeMemberAdd,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     m = EvaluationService.add_committee_member(db, comite_id, req.usuario_id, req.rol_comite)
     return {"id": m.id, "comite_id": m.comite_id, "usuario_id": m.usuario_id, "rol_comite": m.rol_comite}
 
-@router.post("/committees/{comite_id}/conflict-declaration", summary="HU-004: Declaración Jurada de No Conflicto de Interés")
+@router.post("/committees/{comite_id}/conflict-declaration", summary="Declaración Jurada de No Conflicto de Interés")
 def declare_conflict(
     comite_id: UUID,
     req: ConflictDeclarationRequest,
@@ -86,20 +86,20 @@ def declare_conflict(
     m = EvaluationService.declare_conflict(db, comite_id, current_user.id, req.acepta_terminos)
     return {"message": "Declaración jurada de ausencia de conflicto aceptada y registrada digitalmente.", "fecha": m.fecha_declaracion}
 
-@router.post("/committees/{comite_id}/assign", summary="HU-003: Asignar Expedientes Admitidos a Comité")
+@router.post("/committees/{comite_id}/assign", summary="Asignar Expedientes Admitidos a Comité")
 def assign_applications(
     comite_id: UUID,
     req: AssignApplicationsRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     total = EvaluationService.assign_applications_to_committee(db, comite_id, req.solicitud_ids)
     return {"message": f"Se asignaron exitosamente {total} expedientes admisibles al comité."}
 
-@router.post("/scores", response_model=EvaluationScoreResponse, summary="HU-005: Registrar Calificación de Rúbrica Digital (0-100 pts)")
+@router.post("/scores", response_model=EvaluationScoreResponse, summary="Registrar Calificación de Rúbrica Digital (0-100 pts)")
 def submit_score(
     req: EvaluationRubricScoreRequest,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "EVALUADOR", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     score = EvaluationService.submit_rubric_score(
@@ -125,11 +125,11 @@ def submit_score(
         fecha_evaluacion=score.fecha_evaluacion
     )
 
-@router.post("/committees/{comite_id}/consolidate/{solicitud_id}", response_model=CommitteeConsolidationResponse, summary="HU-006: Consolidación Colegiada y Dictamen")
+@router.post("/committees/{comite_id}/consolidate/{solicitud_id}", response_model=CommitteeConsolidationResponse, summary="Consolidación Colegiada y Dictamen")
 def consolidate_scores(
     comite_id: UUID,
     solicitud_id: UUID,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     res = EvaluationService.consolidate_committee_scores(db, solicitud_id)

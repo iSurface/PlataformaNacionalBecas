@@ -409,7 +409,7 @@ class PdfReportService:
 
         # Escudo / Título
         elements.append(Paragraph("MINISTERIO DE EDUCACIÓN DE GUATEMALA", styles["GovHeader"]))
-        elements.append(Paragraph("ATESTADO PROBATORIO OFICIAL DIGITALIZADO (HU-022)", styles["ActaTitle"]))
+        elements.append(Paragraph("ATESTADO PROBATORIO OFICIAL DIGITALIZADO", styles["ActaTitle"]))
         elements.append(Spacer(1, 12))
         elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#0e2b4c"), spaceAfter=14))
 

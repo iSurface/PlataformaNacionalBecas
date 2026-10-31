@@ -58,8 +58,13 @@ def startup_db_init():
             conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS resultado VARCHAR(30) DEFAULT 'EXITOSO';"))
             conn.execute(text("ALTER TABLE bitacora_auditoria ADD COLUMN IF NOT EXISTS detalles TEXT;"))
 
-            # Sprint 6 - Flexibilización CUI y Documentos Extranjeros
+            # Flexibilización CUI y Documentos Extranjeros
             conn.execute(text("ALTER TABLE usuarios ALTER COLUMN cui TYPE VARCHAR(50);"))
+
+            # Eliminación definitiva de Elena Sandoval
+            conn.execute(text("DELETE FROM personas WHERE usuario_id IN (SELECT id FROM usuarios WHERE email = 'director@becas.mineduc.gob.gt');"))
+            conn.execute(text("DELETE FROM bitacora_auditoria WHERE usuario_id IN (SELECT id FROM usuarios WHERE email = 'director@becas.mineduc.gob.gt');"))
+            conn.execute(text("DELETE FROM usuarios WHERE email = 'director@becas.mineduc.gob.gt';"))
     except Exception as ex:
         print(f"[STARTUP DDL MIGRATION] {ex}")
 

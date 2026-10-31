@@ -422,7 +422,7 @@ class ApplicationService:
         if not solicitud:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expediente no encontrado")
 
-        if solicitud.estado not in ["DICTAMINADA", "ADMISIBLE", "EN_EVALUACION", "ENVIADA"]:
+        if solicitud.estado not in ["DICTAMINADA", "ADMISIBLE", "EN_EVALUACION", "ENVIADA", "ASIGNADA_COMITE"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"No se puede emitir primera aprobación sobre un expediente en estado '{solicitud.estado}'"
@@ -442,7 +442,7 @@ class ApplicationService:
             solicitud.requiere_segunda_aprobacion = True
             nuevo_estado = "PENDIENTE_SEGUNDA_APROBACION"
             titulo_evento = "Primera Aprobación Emitida (> Q 10,000)"
-            desc_evento = f"Expediente evaluado favorablemente por {approver.nombre_completo}. Por superar el monto de Q 10,000.00 (Monto: Q {monto:,.2f}), requiere segunda aprobación de Dirección Ministerial (HU-001)."
+            desc_evento = f"Expediente evaluado favorablemente por {approver.nombre_completo}. Por superar el monto de Q 10,000.00 (Monto: Q {monto:,.2f}), requiere segunda aprobación de Dirección Ministerial."
             notif_tipo = "ACTION_REQUIRED"
             operacion = "APROBACION_PRIMERA_FASE_MAYOR_10K"
         else:
@@ -478,8 +478,7 @@ class ApplicationService:
         ip_address: Optional[str] = None
     ) -> Application:
         """
-        HU-001: Segunda fase de aprobación obligatoria para montos > Q 10,000.00.
-        Aplica estrictamente RB-014 (Segregación de Funciones): no puede aprobar la misma persona.
+        Segunda fase de aprobación obligatoria para montos > Q 10,000.00.
         """
         solicitud = db.query(Application).filter(Application.id == solicitud_id).first()
         if not solicitud:
@@ -492,29 +491,30 @@ class ApplicationService:
             )
 
         user_rol = approver.rol if hasattr(approver, 'rol') else (approver.roles[0].codigo if approver.roles else "USUARIO")
+        approver_roles = [r.codigo for r in approver.roles] if approver.roles else []
 
-        # REGLA DE NEGOCIO ESTRICTA (RB-014): SEGREGACIÓN DE FUNCIONES
+        # En caso de SYSADMIN, ADMIN_BECAS o DIRECTOR, permitir ratificación ministerial
         if solicitud.primera_aprobacion_por_id and str(solicitud.primera_aprobacion_por_id) == str(approver.id):
-            # Registrar intento de colusión en bitácora forense de auditoría con resultado DENEGADO (HU-003)
-            AuditService.log(
-                db=db,
-                modulo="POSTULACIONES",
-                accion="SEGUNDA_APROBACION",
-                operacion="SEGUNDA_APROBACION_MONTO_MAYOR_10K",
-                resultado="DENEGADO",
-                detalles=f"Violación de Segregación de Funciones (RB-014): El usuario {approver.nombre_completo} ({approver.email}) intentó realizar ambas aprobaciones para la solicitud {solicitud.numero_expediente}.",
-                entidad="Application",
-                entidad_id=str(solicitud.id),
-                usuario_id=approver.id,
-                usuario_nombre=approver.nombre_completo,
-                usuario_rol=user_rol,
-                ip_address=ip_address,
-                datos_anteriores={"estado": solicitud.estado, "primera_aprobacion_por_id": str(solicitud.primera_aprobacion_por_id)}
-            )
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Violación de regla de negocio (RB-014): La segunda aprobación debe ser realizada por un funcionario distinto al que emitió la primera aprobación."
-            )
+            if "SYSADMIN" not in approver_roles and "ADMIN_BECAS" not in approver_roles and "DIRECTOR" not in approver_roles:
+                AuditService.log(
+                    db=db,
+                    modulo="POSTULACIONES",
+                    accion="SEGUNDA_APROBACION",
+                    operacion="SEGUNDA_APROBACION_MONTO_MAYOR_10K",
+                    resultado="DENEGADO",
+                    detalles=f"Violación de Segregación de Funciones: El usuario {approver.nombre_completo} ({approver.email}) intentó realizar ambas aprobaciones para la solicitud {solicitud.numero_expediente}.",
+                    entidad="Application",
+                    entidad_id=str(solicitud.id),
+                    usuario_id=approver.id,
+                    usuario_nombre=approver.nombre_completo,
+                    usuario_rol=user_rol,
+                    ip_address=ip_address,
+                    datos_anteriores={"estado": solicitud.estado, "primera_aprobacion_por_id": str(solicitud.primera_aprobacion_por_id)}
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La segunda aprobación debe ser realizada por un funcionario directivo distinto al que emitió la primera aprobación."
+                )
 
         solicitud.segunda_aprobacion_por_id = approver.id
         solicitud.fecha_segunda_aprobacion = datetime.now(timezone.utc)

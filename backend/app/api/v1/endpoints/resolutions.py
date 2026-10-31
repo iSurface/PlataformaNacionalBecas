@@ -19,10 +19,10 @@ from app.services.resolution_service import ResolutionService
 
 router = APIRouter()
 
-@router.post("/acts", summary="HU-001: Emitir Acta Colegiada de Dictamen")
+@router.post("/acts", summary="Emitir Acta Colegiada de Dictamen")
 def create_committee_act(
     req: CommitteeActCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "EVALUADOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     act = ResolutionService.create_committee_act(
@@ -36,10 +36,10 @@ def create_committee_act(
     )
     return {"id": act.id, "numero_acta": act.numero_acta, "fecha_emision": act.fecha_emision}
 
-@router.post("/awards", response_model=AwardResolutionResponse, summary="HU-002: Emitir Resolución Ministerial de Adjudicación")
+@router.post("/awards", response_model=AwardResolutionResponse, summary="Emitir Resolución Ministerial de Adjudicación")
 def issue_award_resolution(
     req: AwardResolutionCreate,
-    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "SYSADMIN"])),
+    current_user: User = Depends(require_roles(["ADMIN_MINEDUC", "DIRECTOR", "ADMIN_BECAS", "SYSADMIN"])),
     db: Session = Depends(get_db)
 ):
     res = ResolutionService.issue_award_resolution(

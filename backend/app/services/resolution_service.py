@@ -77,14 +77,15 @@ class ResolutionService:
         )
         db.add(resolution)
 
-        # Actualizar expedientes dictaminados de la convocatoria
+        # Actualizar expedientes dictaminados y evaluados de la convocatoria
         solicitudes = db.query(Application).filter(
             Application.convocatoria_id == convocatoria_id,
-            Application.estado == "DICTAMINADA"
+            Application.estado.in_(["DICTAMINADA", "EN_EVALUACION", "ASIGNADA_COMITE", "PENDIENTE_SEGUNDA_APROBACION"])
         ).all()
 
         for s in solicitudes:
-            if s.dictamen_comite == "RECOMENDADO":
+            es_favorable = (s.dictamen_comite == "RECOMENDADO") or (s.puntaje_ponderado_comite and s.puntaje_ponderado_comite >= 60.0) or (s.estado in ["DICTAMINADA", "PENDIENTE_SEGUNDA_APROBACION"])
+            if es_favorable:
                 s.estado = "ADJUDICADA"
                 event = ApplicationEvent(
                     solicitud_id=s.id,
